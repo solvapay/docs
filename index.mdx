@@ -1,26 +1,57 @@
 ---
-title: "SolvaPay documentation"
+title: "SolvaPay Documentation"
+sidebarTitle: "Introduction"
 description: "Learn how to launch SolvaPay for MCP Pay, wallet features, MCP Server, and the TypeScript SDK."
+mode: "wide"
 ---
 
-Welcome to SolvaPay docs.
+<div id="welcome-home" style={{ margin: '3rem auto 2.5rem auto', maxWidth: '980px', textAlign: 'center' }}>
+  <div
+    style={{
+      margin: '0 auto',
+      padding: '4.5rem 2rem 3.5rem',
+      borderRadius: '1.25rem',
+      background:
+        'radial-gradient(circle at top center, color-mix(in srgb, var(--color-primary) 10%, transparent) 0%, transparent 65%)',
+    }}
+  >
+    <h1
+      style={{
+        fontSize: '3.35rem',
+        lineHeight: 1.05,
+        margin: '0 auto 1rem',
+        letterSpacing: '-0.02em',
+        textAlign: 'center',
+        maxWidth: '18ch',
+      }}
+    >
+      SolvaPay documentation
+    </h1>
+    <p style={{ fontSize: '1.32rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem' }}>
+      Monetize AI agents, MCP tools, and APIs from a single platform.
+    </p>
+    <p style={{ fontSize: '1.05rem', color: 'var(--color-text-secondary)' }}>
+      Choose hosted MCP Pay for a fast launch, or use the TypeScript SDK for full control across MCP servers and agents.
+    </p>
+  </div>
+</div>
 
-Use these guides to set up monetization for your AI agents and APIs.
-
-<Columns cols={2}>
-  <Card title="Getting started" icon="rocket" href="/getting-started">
-    Create your account, choose your integration path, and go live.
-  </Card>
-  <Card title="MCP Pay" icon="plug" href="/mcp-pay/overview">
-    Set up hosted monetization flows with authentication and billing.
-  </Card>
-  <Card title="Wallet" icon="wallet" href="/wallet/overview">
-    Integrate wallet features, vouchers, and provider workflows.
-  </Card>
-  <Card title="MCP Server" icon="server" href="/mcp-server/getting-started">
-    Connect SolvaPay tools to your AI assistant through MCP.
-  </Card>
-  <Card title="TypeScript SDK" icon="code" href="/sdks/typescript/intro">
-    Protect endpoints and tools with paywall-aware SDK helpers.
-  </Card>
-</Columns>
+<div style={{ margin: '0 auto 3rem', maxWidth: '1240px' }}>
+  <Columns cols={2}>
+    <Card title="Get started" icon="rocket" href="/get-started/create-account">
+      Create your account, choose your integration path, and go live.
+    </Card>
+    <Card title="MCP Pay" icon="plug" href="/mcp-pay/overview">
+      Set up hosted monetization flows with authentication and billing.
+    </Card>
+    <Card title="Wallet" icon="wallet" href="/wallet/overview">
+      Integrate wallet features, vouchers, and provider workflows.
+    </Card>
+    <Card title="MCP Server" icon="server" href="/mcp-server/getting-started">
+      Connect SolvaPay tools to your AI assistant through MCP.
+    </Card>
+    <Card title="TypeScript SDK" icon="code" href="/sdks/typescript/intro">
+      Protect endpoints and tools with paywall-aware SDK helpers.
+    </Card>
+  </Columns>
+</div>

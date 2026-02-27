@@ -4,7 +4,7 @@ This repository hosts the Mintlify documentation site for SolvaPay.
 
 ## Ownership model
 
-- Product docs (`getting-started`, `mcp-pay`, `wallet`, `mcp-server`) are maintained in this repository.
+- Product docs (`get-started`, `mcp-pay`, `wallet`, `mcp-server`) are maintained in this repository.
 - TypeScript SDK docs (`sdks/typescript`) are upstream-owned and synced into this repository.
 - API reference (`api-reference/openapi.json`) is generated from backend OpenAPI and synced manually.
 - Do not manually edit `sdks/typescript/**`. Use the sync script.

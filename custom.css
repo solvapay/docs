@@ -3,8 +3,29 @@ footer a[href*='mintlify.com'] {
   display: none !important;
 }
 
+/* Hide X social icon in footer */
+footer a[href*='x.com'],
+footer a[href*='twitter.com'] {
+  display: none !important;
+}
+
 /* Hide the attribution wrapper when the credit link is present */
 footer div:has(> a[href*='mintlify.com']),
 footer p:has(> a[href*='mintlify.com']) {
+  display: none !important;
+}
+
+/* Home page: keep left nav but hide the default Mintlify page header */
+#content-container:has(#welcome-home) #content-area > #header {
+  display: none !important;
+}
+
+/* Home page: use wider content area for welcome layout */
+#content-container:has(#welcome-home) #content-area {
+  max-width: 76rem !important;
+}
+
+/* Home page: remove prev/next pager */
+#content-container:has(#welcome-home) #pagination {
   display: none !important;
 }

@@ -1,0 +1,190 @@
+---
+title: "Express.js Integration Guide"
+description: "This guide shows you how to integrate SolvaPay SDK with Express.js to protect your API endpoints with paywall protection and purchase management."
+---
+
+## Table of Contents[​](#table-of-contents "Direct link to Table of Contents")
+
+* [Installation](#installation)
+* [Basic Setup](#basic-setup)
+* [Protecting Endpoints](#protecting-endpoints)
+* [Authentication Integration](#authentication-integration)
+* [Error Handling](#error-handling)
+* [Advanced Usage](#advanced-usage)
+* [Complete Example](#complete-example)
+
+## Installation[​](#installation "Direct link to Installation")
+
+Install the required packages:
+
+```
+npm install @solvapay/server express# orpnpm add @solvapay/server express# oryarn add @solvapay/server express
+```
+
+## Basic Setup[​](#basic-setup "Direct link to Basic Setup")
+
+### 1. Initialize SolvaPay[​](#1-initialize-solvapay "Direct link to 1. Initialize SolvaPay")
+
+Create a SolvaPay instance in your Express app:
+
+```
+import express from 'express'import { createSolvaPay } from '@solvapay/server'const app = express()app.use(express.json())// Initialize SolvaPayconst solvaPay = createSolvaPay({  apiKey: process.env.SOLVAPAY_SECRET_KEY, // Optional: defaults to env var})// Create payable handler for your agentconst payable = solvaPay.payable({  agent: 'agt_YOUR_AGENT_ID',  plan: 'pln_YOUR_PLAN_ID', // Optional: can be set per endpoint})
+```
+
+### 2. Protect Your First Endpoint[​](#2-protect-your-first-endpoint "Direct link to 2. Protect Your First Endpoint")
+
+Wrap your business logic with the `payable.http()` adapter:
+
+```
+// Your business logic functionasync function createTask(req: express.Request) {  const { title, description } = req.body  // Your business logic here  const task = {    id: Date.now().toString(),    title,    description,    createdAt: new Date().toISOString(),  }  return { success: true, task }}// Protect the endpointapp.post('/api/tasks', payable.http(createTask))
+```
+
+That's it! The endpoint is now protected. The paywall will:
+
+* Check if the customer has a valid purchase
+* Track usage and enforce limits
+* Return a paywall error with checkout URL if needed
+
+## Protecting Endpoints[​](#protecting-endpoints "Direct link to Protecting Endpoints")
+
+### Multiple Endpoints with Same Plan[​](#multiple-endpoints-with-same-plan "Direct link to Multiple Endpoints with Same Plan")
+
+If all your endpoints use the same plan, create one `payable` handler:
+
+```
+const payable = solvaPay.payable({  agent: 'agt_myapi',  plan: 'pln_premium',})app.post('/api/tasks', payable.http(createTask))app.get('/api/tasks/:id', payable.http(getTask))app.delete('/api/tasks/:id', payable.http(deleteTask))
+```
+
+### Different Plans per Endpoint[​](#different-plans-per-endpoint "Direct link to Different Plans per Endpoint")
+
+Create multiple `payable` handlers for different plans:
+
+```
+const freeTier = solvaPay.payable({  agent: 'agt_myapi',  plan: 'pln_free',})const premiumTier = solvaPay.payable({  agent: 'agt_myapi',  plan: 'pln_premium',})// Free tier endpointapp.get('/api/tasks', freeTier.http(listTasks))// Premium tier endpointapp.post('/api/tasks', premiumTier.http(createTask))
+```
+
+### Accessing Request Data[​](#accessing-request-data "Direct link to Accessing Request Data")
+
+The HTTP adapter passes the Express request object to your business logic:
+
+```
+async function createTask(req: express.Request) {  // Access request body  const { title } = req.body  // Access route parameters  const { id } = req.params  // Access query parameters  const { limit } = req.query  // Access headers  const authToken = req.headers.authorization  // Your business logic  return { success: true, task: { title } }}app.post('/api/tasks', payable.http(createTask))
+```
+
+## Authentication Integration[​](#authentication-integration "Direct link to Authentication Integration")
+
+SolvaPay needs to identify customers. You can pass customer references in several ways:
+
+### Option 1: Custom Header (Recommended)[​](#option-1-custom-header-recommended "Direct link to Option 1: Custom Header (Recommended)")
+
+Extract customer reference from a custom header:
+
+```
+import { getUserIdFromRequest } from '@solvapay/auth'// Custom middleware to extract customer referencefunction extractCustomerRef(  req: express.Request,  res: express.Response,  next: express.NextFunction,) {  // Extract from header, JWT token, session, etc.  const customerRef = req.headers['x-customer-ref'] as string  if (!customerRef) {    return res.status(401).json({ error: 'Missing customer reference' })  }  // Attach to request for SolvaPay to use  req.customerRef = customerRef  next()}app.use(extractCustomerRef)// SolvaPay will automatically use req.customerRefapp.post('/api/tasks', payable.http(createTask))
+```
+
+### Option 2: JWT Token[​](#option-2-jwt-token "Direct link to Option 2: JWT Token")
+
+Extract customer ID from a JWT token:
+
+```
+import jwt from 'jsonwebtoken'import { getUserIdFromRequest } from '@solvapay/auth'function authMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {  const token = req.headers.authorization?.replace('Bearer ', '')  if (!token) {    return res.status(401).json({ error: 'Missing token' })  }  try {    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string }    req.customerRef = decoded.userId    next()  } catch (error) {    return res.status(401).json({ error: 'Invalid token' })  }}app.use(authMiddleware)app.post('/api/tasks', payable.http(createTask))
+```
+
+### Option 3: Custom Customer Reference Extraction[​](#option-3-custom-customer-reference-extraction "Direct link to Option 3: Custom Customer Reference Extraction")
+
+Use the `getCustomerRef` option for more complex scenarios:
+
+```
+import jwt from 'jsonwebtoken'// Extract customer reference from JWT tokenapp.post(  '/api/tasks',  payable.http(createTask, {    getCustomerRef: (req: express.Request) => {      const token = req.headers.authorization?.replace('Bearer ', '')      if (!token) return null      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string }      return decoded.userId    },  }),)
+```
+
+## Error Handling[​](#error-handling "Direct link to Error Handling")
+
+### Basic Error Handling[​](#basic-error-handling "Direct link to Basic Error Handling")
+
+The HTTP adapter automatically handles `PaywallError` and converts it to an HTTP response:
+
+```
+import { PaywallError } from '@solvapay/server'async function createTask(req: express.Request) {  // Your business logic  return { success: true, task: {} }}// PaywallError is automatically handledapp.post('/api/tasks', payable.http(createTask))
+```
+
+### Custom Error Handling[​](#custom-error-handling "Direct link to Custom Error Handling")
+
+Wrap the handler to customize error responses:
+
+```
+async function handlePaywall(  req: express.Request,  res: express.Response,  next: express.NextFunction,) {  try {    const handler = payable.http(createTask)    await handler(req, res)  } catch (error) {    if (error instanceof PaywallError) {      // Custom paywall response      return res.status(402).json({        error: 'Payment required',        message: error.message,        checkoutUrl: error.structuredContent.checkoutUrl,        agent: error.structuredContent.agent,      })    }    // Handle other errors    next(error)  }}app.post('/api/tasks', handlePaywall)
+```
+
+### Global Error Handler[​](#global-error-handler "Direct link to Global Error Handler")
+
+Use Express error middleware for consistent error handling:
+
+```
+import { PaywallError } from '@solvapay/server'// Error handling middlewareapp.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {  if (error instanceof PaywallError) {    return res.status(402).json({      error: 'Payment required',      checkoutUrl: error.structuredContent.checkoutUrl,      // Include all structured content      ...error.structuredContent,    })  }  // Handle other errors  console.error('Unhandled error:', error)  res.status(500).json({ error: 'Internal server error' })})
+```
+
+## Advanced Usage[​](#advanced-usage "Direct link to Advanced Usage")
+
+### Custom Customer Reference Extraction[​](#custom-customer-reference-extraction "Direct link to Custom Customer Reference Extraction")
+
+Override customer reference extraction per endpoint:
+
+```
+app.post(  '/api/tasks',  payable.http(createTask, {    getCustomerRef: (req: express.Request) => {      // Custom logic to extract customer reference      return req.headers['x-customer-ref'] as string    },  }),)
+```
+
+### Response Transformation[​](#response-transformation "Direct link to Response Transformation")
+
+Transform responses before sending:
+
+```
+app.post(  '/api/tasks',  payable.http(createTask, {    transformResponse: (result, reply) => {      // Custom response formatting      reply.status(201).json({ data: result, timestamp: new Date().toISOString() })    },  }),)
+```
+
+### Response Formatting[​](#response-formatting "Direct link to Response Formatting")
+
+The HTTP adapter automatically formats responses. Your business logic should return:
+
+* **Object**: Sent as JSON with 200 status
+* **Error**: Thrown as exception (PaywallError handled automatically)
+
+```
+async function createTask(req: express.Request) {  // Return object - automatically sent as JSON  return { success: true, task: {} }  // Or throw error - automatically handled  if (!req.body.title) {    throw new Error('Title is required')  }}
+```
+
+## Complete Example[​](#complete-example "Direct link to Complete Example")
+
+Here's a complete Express.js application with SolvaPay integration:
+
+```
+import express, { type Express, type Request, type Response } from 'express'import { createSolvaPay, PaywallError } from '@solvapay/server'const app: Express = express()const port = process.env.PORT || 3000// Middlewareapp.use(express.json())// Initialize SolvaPayconst solvaPay = createSolvaPay({  apiKey: process.env.SOLVAPAY_SECRET_KEY,})// Create payable handlersconst payable = solvaPay.payable({  agent: 'agt_myapi',  plan: 'pln_premium',})// Authentication middlewarefunction authMiddleware(req: Request, res: Response, next: express.NextFunction) {  const customerRef = req.headers['x-customer-ref'] as string  if (!customerRef) {    return res.status(401).json({ error: 'Missing x-customer-ref header' })  }  req.customerRef = customerRef  next()}app.use(authMiddleware)// Business logic functionsasync function createTask(req: Request) {  const { title, description } = req.body  if (!title) {    throw new Error('Title is required')  }  const task = {    id: Date.now().toString(),    title,    description,    createdAt: new Date().toISOString(),  }  return { success: true, task }}async function getTask(req: Request) {  const { id } = req.params  // Simulate fetching from database  const task = {    id,    title: 'Sample Task',    description: 'Task description',  }  return { success: true, task }}async function listTasks(req: Request) {  const tasks = [    { id: '1', title: 'Task 1' },    { id: '2', title: 'Task 2' },  ]  return { success: true, tasks, total: tasks.length }}// Protected routesapp.post('/api/tasks', payable.http(createTask))app.get('/api/tasks/:id', payable.http(getTask))app.get('/api/tasks', payable.http(listTasks))// Health check (unprotected)app.get('/health', (req: Request, res: Response) => {  res.json({ status: 'ok' })})// Error handling middlewareapp.use((error: Error, req: Request, res: Response, next: express.NextFunction) => {  if (error instanceof PaywallError) {    return res.status(402).json({      error: 'Payment required',      message: error.message,      checkoutUrl: error.structuredContent.checkoutUrl,      agent: error.structuredContent.agent,    })  }  console.error('Error:', error)  res.status(500).json({ error: 'Internal server error' })})// Start serverapp.listen(port, () => {  console.log(`Server running on http://localhost:${port}`)})
+```
+
+### Testing the Example[​](#testing-the-example "Direct link to Testing the Example")
+
+```
+# Start the servernpm start# Test with customer referencecurl -X POST http://localhost:3000/api/tasks \  -H "Content-Type: application/json" \  -H "x-customer-ref: user_123" \  -d '{"title": "My Task", "description": "Task description"}'
+```
+
+## Best Practices[​](#best-practices "Direct link to Best Practices")
+
+1. **Extract Customer Reference Early**: Use middleware to extract and validate customer references before they reach protected endpoints.
+
+2. **Handle Paywall Errors Gracefully**: Provide clear error messages and checkout URLs to users.
+
+3. **Use Environment Variables**: Store API keys and configuration in environment variables.
+
+4. **Separate Business Logic**: Keep your business logic functions separate from route handlers for better testability.
+
+5. **Type Safety**: Use TypeScript for better type safety and developer experience.
+
+6. **Error Logging**: Log errors appropriately for debugging while keeping sensitive information secure.
+
+## Next Steps[​](#next-steps "Direct link to Next Steps")
+
+* [Next.js Integration Guide](/sdks/typescript/guides/nextjs) - Learn how to integrate with Next.js
+* [Error Handling Strategies](/sdks/typescript/guides/error-handling) - Advanced error handling patterns
+* [Custom Authentication Adapters](/sdks/typescript/guides/custom-auth) - Build custom auth adapters
+* [API Reference](/sdks/typescript/api/server/src/) - Full API documentation

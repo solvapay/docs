@@ -1,0 +1,252 @@
+---
+title: "Best Practices"
+description: "This guide covers recommended patterns for configuring your MCP Pay servers, structuring plans, and handling common scenarios."
+---
+
+## Plan Configuration[​](#plan-configuration "Direct link to Plan Configuration")
+
+### Free Tier Strategy[​](#free-tier-strategy "Direct link to Free Tier Strategy")
+
+Always configure a free/default plan that provides:
+
+* **Basic tools for discovery** - Let users try your service
+* **Limited quota** - Prevent abuse while allowing evaluation
+* **Clear upgrade path** - Make it obvious how to get more
+
+A well-designed free tier converts trial users to paid customers.
+
+### Tool Tiering[​](#tool-tiering "Direct link to Tool Tiering")
+
+Structure your plans by tool access to create clear value differentiation:
+
+| Plan           | Tools                                  | Quota              | Price     |
+| -------------- | -------------------------------------- | ------------------ | --------- |
+| **Free**       | `basic_search`, `list_items`           | 100 calls/month    | $0        |
+| **Pro**        | All Free + `advanced_search`, `export` | 10,000 calls/month | $19/month |
+| **Enterprise** | All tools + `admin_*`                  | Unlimited          | Custom    |
+
+### Tiering Strategies[​](#tiering-strategies "Direct link to Tiering Strategies")
+
+**By Feature Complexity:**
+
+* Free: Read-only operations
+* Pro: Write operations, exports
+* Enterprise: Admin, bulk operations
+
+**By Use Case:**
+
+* Free: Personal/hobby use
+* Pro: Professional use
+* Enterprise: Team/organization use
+
+**By Volume:**
+
+* All tiers get same tools
+* Differentiate by quota limits
+
+## Quota Management[​](#quota-management "Direct link to Quota Management")
+
+Configure appropriate quotas per plan to balance user experience with cost control.
+
+### Quota Settings[​](#quota-settings "Direct link to Quota Settings")
+
+| Setting              | Description                                      |
+| -------------------- | ------------------------------------------------ |
+| **Units**            | Number of tool calls included per billing period |
+| **Free Units**       | Bonus units (e.g., for trials or promotions)     |
+| **Overage Behavior** | What happens when quota is exceeded              |
+
+### Overage Options[​](#overage-options "Direct link to Overage Options")
+
+1. **Hard limit** - Block requests when quota exhausted
+2. **Soft limit** - Allow continued use, charge overage fees
+3. **Notify only** - Allow use but alert the user
+
+### Quota Recommendations[​](#quota-recommendations "Direct link to Quota Recommendations")
+
+* **Free tier:** Hard limit to prevent abuse
+* **Paid tiers:** Soft limit with overage, or generous quotas
+* **Enterprise:** Unlimited or very high limits
+
+## Tool Assignment Patterns[​](#tool-assignment-patterns "Direct link to Tool Assignment Patterns")
+
+### Default Plan Inclusion[​](#default-plan-inclusion "Direct link to Default Plan Inclusion")
+
+The default plan is automatically included for all protected tools unless you explicitly select "No plan."
+
+**When to keep default plan:**
+
+* Tools that demonstrate value
+* Basic functionality users expect
+* Onboarding-essential tools
+
+**When to remove default plan:**
+
+* Premium-only features
+* High-cost operations
+* Advanced functionality
+
+### Unprotected Tools[​](#unprotected-tools "Direct link to Unprotected Tools")
+
+Mark tools as "No plan" when they should be:
+
+* Freely accessible without authentication
+* Not tracked for usage
+* Utility tools that support other operations
+
+Examples of good candidates for "No plan":
+
+* `get_version` - Returns API version
+* `list_capabilities` - Shows available features
+* `ping` - Health check
+
+## User Flow Optimization[​](#user-flow-optimization "Direct link to User Flow Optimization")
+
+### Onboarding Flow[​](#onboarding-flow "Direct link to Onboarding Flow")
+
+Design your tool access to create a smooth onboarding experience:
+
+1. **Discovery** - Free tools let users explore
+2. **Value demonstration** - Users see what's possible
+3. **Limitation encounter** - User hits paywall on premium feature
+4. **Easy upgrade** - Virtual tools provide checkout path
+5. **Activation** - Immediate access after payment
+
+### Paywall Messaging[​](#paywall-messaging "Direct link to Paywall Messaging")
+
+When users hit a paywall, the response should:
+
+* Clearly explain what they're trying to access
+* Identify which plan(s) provide access
+* Include direct checkout links
+
+AI agents can use this information to guide users naturally.
+
+## Security Best Practices[​](#security-best-practices "Direct link to Security Best Practices")
+
+### API Key Protection[​](#api-key-protection "Direct link to API Key Protection")
+
+If your origin server requires authentication:
+
+* Store the API key in MCP Pay settings (encrypted at rest)
+* Never include it in client-facing URLs or responses
+* Rotate keys periodically
+* Use separate keys for MCP Pay vs direct access
+
+### Origin Server Access[​](#origin-server-access "Direct link to Origin Server Access")
+
+Consider restricting your origin server to only accept requests from SolvaPay:
+
+* Whitelist SolvaPay IP ranges
+* Require the API key for all requests
+* Monitor for direct access attempts
+
+## Monitoring and Analytics[​](#monitoring-and-analytics "Direct link to Monitoring and Analytics")
+
+### Key Metrics to Track[​](#key-metrics-to-track "Direct link to Key Metrics to Track")
+
+| Metric                      | What It Tells You               |
+| --------------------------- | ------------------------------- |
+| **Tool usage by plan**      | Which features drive upgrades   |
+| **Conversion rate**         | Free-to-paid effectiveness      |
+| **Quota utilization**       | If limits are appropriately set |
+| **Error rates**             | Origin server health            |
+| **Authentication failures** | User experience issues          |
+
+### Dashboard Usage[​](#dashboard-usage "Direct link to Dashboard Usage")
+
+Regularly review the MCP Pay dashboard to:
+
+* Monitor active users and usage patterns
+* Identify popular and underused tools
+* Track revenue and purchase metrics
+* Spot anomalies or abuse patterns
+
+## FAQ[​](#faq "Direct link to FAQ")
+
+### Can I use MCP Pay with any MCP server?[​](#can-i-use-mcp-pay-with-any-mcp-server "Direct link to Can I use MCP Pay with any MCP server?")
+
+Yes, as long as your MCP server is accessible via HTTPS. SolvaPay connects to your origin URL to discover tools and proxies requests at runtime.
+
+### How do users authenticate?[​](#how-do-users-authenticate "Direct link to How do users authenticate?")
+
+Users authenticate via OAuth 2.0 using their Google or GitHub account. When they add your MCP server to their client (like Cursor), a browser window opens for sign-in. No passwords or API keys to manage.
+
+### What MCP clients are supported?[​](#what-mcp-clients-are-supported "Direct link to What MCP clients are supported?")
+
+Any MCP client that supports OAuth 2.0 with PKCE can connect to MCP Pay servers. This includes Cursor, Claude Desktop, and other MCP-compatible tools. DCR support means clients can auto-configure themselves.
+
+### How are origin server API keys handled?[​](#how-are-origin-server-api-keys-handled "Direct link to How are origin server API keys handled?")
+
+If your origin MCP server requires authentication, you can configure an API key in the MCP server settings. This key is encrypted at rest and never exposed—SolvaPay uses it internally when forwarding requests to your origin server.
+
+### What happens if my origin server is down?[​](#what-happens-if-my-origin-server-is-down "Direct link to What happens if my origin server is down?")
+
+The proxy will return an error to the client. SolvaPay does not cache responses or provide fallback behavior. Monitor your origin server availability.
+
+### Can I change tool plan assignments after creation?[​](#can-i-change-tool-plan-assignments-after-creation "Direct link to Can I change tool plan assignments after creation?")
+
+Yes, you can edit the MCP server configuration at any time. Changes take effect immediately for new tool invocations. Existing active sessions are not disrupted.
+
+### How do I track usage and revenue?[​](#how-do-i-track-usage-and-revenue "Direct link to How do I track usage and revenue?")
+
+The MCP Pay dashboard shows transaction history, usage statistics, and revenue metrics. You can also view per-server stats from the server detail drawer.
+
+### Can I customize the hosted pages?[​](#can-i-customize-the-hosted-pages "Direct link to Can I customize the hosted pages?")
+
+All hosted pages (login, checkout, account portal) automatically display your provider branding including logo, colors, and fonts. Configure these in **Settings > Pages**. For advanced customization beyond branding, consider the SDK integration approach.
+
+### Do I need to build payment or account pages?[​](#do-i-need-to-build-payment-or-account-pages "Direct link to Do I need to build payment or account pages?")
+
+No. MCP Pay provides fully hosted checkout and account management pages. Customers can purchase plans, manage their purchases, and view billing history without you building any UI. All pages are white-labeled with your branding.
+
+### Can I migrate from MCP Pay to SDK integration later?[​](#can-i-migrate-from-mcp-pay-to-sdk-integration-later "Direct link to Can I migrate from MCP Pay to SDK integration later?")
+
+Yes. You can start with MCP Pay for quick setup and migrate to SDK integration if you need more control. Your plans, customers, and purchases remain intact—only the integration method changes.
+
+### How do I handle refunds?[​](#how-do-i-handle-refunds "Direct link to How do I handle refunds?")
+
+Refunds are processed through your Stripe dashboard. When you refund a payment:
+
+1. The purchase may be cancelled depending on your refund settings
+2. Tool access is adjusted based on new purchase status
+3. Customer receives notification
+
+### What if a customer disputes a charge?[​](#what-if-a-customer-disputes-a-charge "Direct link to What if a customer disputes a charge?")
+
+Stripe handles disputes through their standard process. You'll receive notification and can provide evidence through the Stripe dashboard. During dispute resolution, the purchase typically remains active.
+
+## Troubleshooting[​](#troubleshooting "Direct link to Troubleshooting")
+
+### Tools Not Discovered[​](#tools-not-discovered "Direct link to Tools Not Discovered")
+
+If tool discovery fails:
+
+1. Verify origin URL is correct and accessible
+2. Check API key if required
+3. Ensure origin server responds to MCP protocol
+4. Try accessing origin URL directly to verify it's online
+
+### Users Can't Authenticate[​](#users-cant-authenticate "Direct link to Users Can't Authenticate")
+
+If authentication fails:
+
+1. Verify MCP server is active (not disabled)
+2. Check proxy URL is correct
+3. Ensure browser allows popups for OAuth
+4. Try a different browser
+
+### Tool Calls Failing[​](#tool-calls-failing "Direct link to Tool Calls Failing")
+
+If authenticated tool calls fail:
+
+1. Check user's purchase status
+2. Verify tool is assigned to user's plan
+3. Check if quota is exhausted
+4. Review origin server logs for errors
+
+## Next Steps[​](#next-steps "Direct link to Next Steps")
+
+* [MCP Pay Overview](/mcp-pay/overview) - Review core concepts
+* [Quick Start](/mcp-pay/quick-start) - Set up your first server
+* [Authentication](/mcp-pay/authentication) - Deep dive into OAuth

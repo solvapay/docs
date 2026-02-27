@@ -1,0 +1,49 @@
+---
+title: "MCP Pay Overview"
+description: "MCP Pay is SolvaPay's monetization layer for MCP (Model Context Protocol) servers. SolvaPay now uses a : you always start by creating a product, then choose how far you want SolvaPay to manage integration."
+---
+
+## Product-First Model[​](#product-first-model "Direct link to Product-First Model")
+
+Every monetized offering starts as a **Product**. By default, new products are immediately:
+
+* Available for **SDK Integration**
+* Active in **SolvaPay MCP Distribution**
+
+You can optionally enable **Hosted MCP Pay** when you want SolvaPay to run managed auth, identity, billing, and payment for your MCP server.
+
+## When to Use MCP Pay[​](#when-to-use-mcp-pay "Direct link to When to Use MCP Pay")
+
+### Hosted MCP Pay Product (No-Code Managed MCP)[​](#hosted-mcp-pay-product-no-code-managed-mcp "Direct link to Hosted MCP Pay Product (No-Code Managed MCP)")
+
+Use this when you want to connect an origin MCP server URL and let SolvaPay host authentication, authorization, billing pages, and paywall enforcement via a managed proxy endpoint.
+
+## How MCP Pay Works[​](#how-mcp-pay-works "Direct link to How MCP Pay Works")
+
+When Hosted MCP Pay is enabled, SolvaPay acts as a reverse proxy between MCP clients and your origin MCP server.
+
+* **Authentication** - OAuth 2.0 with Google and GitHub sign-in
+* **Authorization** - Purchase-plan checks per tool
+* **Usage Tracking** - Invocation tracking and quota enforcement
+* **Billing** - Hosted checkout and billing flows
+* **Dynamic Client Registration** - MCP clients can auto-register OAuth clients
+
+```
+┌─────────────┐     ┌─────────────────┐     ┌──────────────────┐│  MCP Client │────▶│  SolvaPay Proxy │────▶│  Origin MCP      ││  (AI Agent) │     │  (mcpServerUrl) │     │  Server          │└─────────────┘     └─────────────────┘     └──────────────────┘                           │                    ┌──────┴──────┐                    │ • Auth      │                    │ • Plan Check│                    │ • Quotas    │                    │ • Tracking  │                    └─────────────┘
+```
+
+## Terminology[​](#terminology "Direct link to Terminology")
+
+| Term                      | Meaning                                                                   |
+| ------------------------- | ------------------------------------------------------------------------- |
+| **Product**               | The core entity in SolvaPay used for monetization and plan assignment     |
+| **Origin MCP server URL** | Your actual MCP endpoint that SolvaPay proxies to                         |
+| **Signup default plan**   | The plan automatically assigned to new users                              |
+| **Server default plan**   | The default plan used for tool access in Hosted MCP Pay unless overridden |
+| **Hosted MCP Pay**        | Optional managed mode for auth, identity, billing, and payment            |
+
+## Next Steps[​](#next-steps "Direct link to Next Steps")
+
+* [Quick Start](/mcp-pay/quick-start) - Set up hosted MCP monetization
+* [Create a Hosted MCP Pay Product](/mcp-pay/create-hosted-mcp-pay-product) - Product flow for no-code managed MCP
+* [Authentication](/mcp-pay/authentication) - OAuth and client connection details

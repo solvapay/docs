@@ -1,0 +1,83 @@
+---
+title: "Test in Sandbox"
+description: "When you create a SolvaPay account, it starts in  automatically. This lets you test your entire integration with test data before accepting real payments."
+---
+
+## What Is Sandbox Mode?[​](#what-is-sandbox-mode "Direct link to What Is Sandbox Mode?")
+
+In sandbox mode:
+
+* No real charges are processed
+* Stripe test mode is used for all payment flows
+* You can create test customers and purchases freely
+* All data is separate from production
+
+You can see your current mode in the console header. New accounts always start in sandbox.
+
+## Testing Your Integration[​](#testing-your-integration "Direct link to Testing Your Integration")
+
+### For MCP Pay[​](#for-mcp-pay "Direct link to For MCP Pay")
+
+1. **Add your proxy URL to an MCP client**
+
+   Copy the proxy URL from the MCP Pay section and add it to your MCP client (e.g., Cursor, Claude Desktop).
+
+2. **Complete the OAuth flow**
+
+   When you first use a tool, you'll be prompted to sign in. Use your Google or GitHub account.
+
+3. **Test tool access**
+
+   Call a protected tool and verify it succeeds. Check the dashboard to see the usage recorded.
+
+4. **Test plan restrictions**
+
+   Try calling a tool that requires a paid plan. You should receive an access denied response with upgrade information.
+
+### For SDK Integration[​](#for-sdk-integration "Direct link to For SDK Integration")
+
+1. **Use your sandbox API key**
+
+   Your sandbox API key is available in Settings > API Keys. Use this in your development environment.
+
+2. **Create a test customer**
+
+   Use the SDK or console to create a customer for testing.
+
+3. **Test paywall protection**
+
+   Call a protected endpoint and verify the paywall check runs correctly.
+
+4. **Test the checkout flow**
+
+   Trigger a checkout and use Stripe test card numbers to complete the payment.
+
+## Stripe Test Cards[​](#stripe-test-cards "Direct link to Stripe Test Cards")
+
+Use these card numbers for testing payments:
+
+| Card Number           | Result                   |
+| --------------------- | ------------------------ |
+| `4242 4242 4242 4242` | Successful payment       |
+| `4000 0000 0000 0002` | Card declined            |
+| `4000 0000 0000 3220` | 3D Secure authentication |
+
+Use any future expiration date and any 3-digit CVC.
+
+## Testing Checklist[​](#testing-checklist "Direct link to Testing Checklist")
+
+Before going live, verify:
+
+* [ ] Users can authenticate (OAuth for MCP Pay, your auth for SDK)
+* [ ] Free plan users can access free tools/endpoints
+* [ ] Paid tools are blocked for free users
+* [ ] Checkout flow completes successfully
+* [ ] After payment, users gain access to paid features
+* [ ] Usage is tracked correctly in the dashboard
+* [ ] Quota limits are enforced when exceeded
+
+## Next Steps[​](#next-steps "Direct link to Next Steps")
+
+Once you've verified your integration works correctly:
+
+* [Go Live](/getting-started/go-live) - Complete onboarding and switch to production

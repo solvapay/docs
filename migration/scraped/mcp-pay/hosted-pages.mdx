@@ -1,0 +1,185 @@
+---
+title: "Hosted Pages"
+description: "MCP Pay provides fully hosted pages for the complete customer journey—sign-up, checkout, and account management. All pages are white-labeled with your provider branding, so you don't need to build any customer-facing UI."
+---
+
+## Hosted Checkout[​](#hosted-checkout "Direct link to Hosted Checkout")
+
+When customers need to upgrade or subscribe to a paid plan, they're directed to a hosted checkout page.
+
+### Supported Payment Providers[​](#supported-payment-providers "Direct link to Supported Payment Providers")
+
+* **Stripe** - Currently supported
+* More payment providers coming soon
+
+### Features[​](#features "Direct link to Features")
+
+| Feature                       | Description                     |
+| ----------------------------- | ------------------------------- |
+| **Secure payment processing** | PCI-compliant payment handling  |
+| **Plan selection**            | Display multiple plan options   |
+| **Purchase types**            | One-time and recurring payments |
+| **Mobile-responsive**         | Works on all devices            |
+| **Branded experience**        | Your logo, colors, and fonts    |
+
+### How Checkout Works[​](#how-checkout-works "Direct link to How Checkout Works")
+
+1. Customer clicks an upgrade link or uses the `upgrade_plan` virtual tool
+2. SolvaPay generates a checkout session with available plans
+3. Customer selects a plan and enters payment details
+4. Payment is processed through your connected Stripe account
+5. Purchase is activated immediately
+6. Customer is redirected back to their MCP client
+
+### Upgrade via Virtual Tools[​](#upgrade-via-virtual-tools "Direct link to Upgrade via Virtual Tools")
+
+AI agents can help users upgrade using the built-in virtual tools:
+
+```
+User: "I need access to the advanced search feature"Agent: [calls upgrade_plan tool]Response: "To access advanced search, you'll need the Pro plan. Here's your upgrade link: https://..."
+```
+
+The `upgrade_plan` tool returns:
+
+* Available plans that include the requested feature
+* Checkout URLs for each plan
+* Plan details (price, features, quotas)
+
+## Customer Account Portal[​](#customer-account-portal "Direct link to Customer Account Portal")
+
+Customers can manage their purchases through a self-service portal without contacting support.
+
+### Portal Capabilities[​](#portal-capabilities "Direct link to Portal Capabilities")
+
+| Action                  | Description                                |
+| ----------------------- | ------------------------------------------ |
+| **View purchases**      | See active plans and details               |
+| **Billing information** | View cycle and next payment date           |
+| **Cancel renewal**      | Access continues until billing period ends |
+| **Reactivate**          | Resume cancelled purchases                 |
+| **Transaction history** | View past payments                         |
+
+### Accessing the Portal[​](#accessing-the-portal "Direct link to Accessing the Portal")
+
+Customers can access the portal via:
+
+1. **Direct link** - Generate a secure session link programmatically
+2. **Virtual tool** - The `manage_subscription` tool returns a portal URL
+3. **Email links** - Include in billing emails
+
+### Portal Session Security[​](#portal-session-security "Direct link to Portal Session Security")
+
+Portal sessions are:
+
+* Time-limited for security
+* Tied to the authenticated user
+* Accessible without re-entering payment details
+
+## Provider Branding[​](#provider-branding "Direct link to Provider Branding")
+
+All customer-facing pages display your brand identity. No SolvaPay branding appears on these pages.
+
+### Customizable Elements[​](#customizable-elements "Direct link to Customizable Elements")
+
+Configure these in **Settings > Pages**:
+
+| Element               | Description                          |
+| --------------------- | ------------------------------------ |
+| **Brand name**        | Displayed in headers and page titles |
+| **Logo**              | Shown on checkout and login pages    |
+| **Accent color**      | Used for buttons and highlights      |
+| **Font family**       | Choose from multiple web fonts       |
+| **Light mode colors** | Color palette for light theme        |
+| **Dark mode colors**  | Color palette for dark theme         |
+
+### Theme Adaptation[​](#theme-adaptation "Direct link to Theme Adaptation")
+
+Pages automatically adapt to the user's system preference:
+
+* **Light mode** - Uses your light color palette
+* **Dark mode** - Uses your dark color palette
+
+Users see a consistent experience that matches their system settings.
+
+### Logo Requirements[​](#logo-requirements "Direct link to Logo Requirements")
+
+For best results, upload a logo that:
+
+* Has a transparent background (PNG recommended)
+* Is at least 200px wide
+* Works on both light and dark backgrounds
+
+If your logo doesn't work on both backgrounds, consider uploading separate versions for light and dark modes.
+
+## Virtual Tools Reference[​](#virtual-tools-reference "Direct link to Virtual Tools Reference")
+
+MCP Pay injects these tools into every server for purchase management:
+
+### `get_user_info`[​](#get_user_info "Direct link to get_user_info")
+
+Returns the current user's purchase information.
+
+**Response includes:**
+
+* User ID and email
+* Current plan name and ID
+* Purchase status (active, cancelled, past\_due)
+* Quota usage and limits
+
+**Use case:** Let AI agents check user status before attempting protected operations.
+
+### `upgrade_plan`[​](#upgrade_plan "Direct link to upgrade_plan")
+
+Returns available upgrade options for the user.
+
+**Response includes:**
+
+* List of available plans
+* Plan details (name, price, features)
+* Checkout URLs for each plan
+
+**Use case:** Help users discover and upgrade to plans that include features they need.
+
+### `manage_subscription`[​](#manage_subscription "Direct link to manage_subscription")
+
+Returns a URL to the customer billing portal.
+
+**Response includes:**
+
+* Secure portal session URL
+* Session expiration time
+
+**Use case:** Let users manage billing, cancel, or reactivate without leaving their workflow.
+
+## Integration Examples[​](#integration-examples "Direct link to Integration Examples")
+
+### Handling Paywall Responses[​](#handling-paywall-responses "Direct link to Handling Paywall Responses")
+
+When a user lacks access to a tool, the proxy returns a paywall response. AI agents can use virtual tools to help:
+
+```
+User: "Export my data to CSV"Agent: [calls export_to_csv tool]Proxy: "Access denied - requires Pro plan"Agent: [calls upgrade_plan tool]Agent: "The CSV export feature requires a Pro plan ($19/month). Would you like to upgrade? Here's the link: [checkout URL]"
+```
+
+### Proactive Quota Warnings[​](#proactive-quota-warnings "Direct link to Proactive Quota Warnings")
+
+Agents can check usage before it becomes a problem:
+
+```
+Agent: [calls get_user_info tool]Response: { quota_used: 95, quota_limit: 100 }Agent: "You've used 95 of your 100 monthly API calls. Consider upgrading to Pro for 10,000 calls/month."
+```
+
+## Customization Limits[​](#customization-limits "Direct link to Customization Limits")
+
+While branding is fully customizable, the page layouts and flows are managed by SolvaPay for:
+
+* Security compliance
+* Consistent user experience
+* Automatic updates and improvements
+
+For advanced customization needs beyond branding, consider the SDK integration approach which gives you full control over the user interface.
+
+## Next Steps[​](#next-steps "Direct link to Next Steps")
+
+* [Best Practices](/mcp-pay/best-practices) - Plan configuration and quota strategies
+* [Authentication](/mcp-pay/authentication) - Learn about OAuth and user sessions

@@ -1,0 +1,69 @@
+---
+title: "FAQ"
+description: "Frequently asked questions about the SolvaPay MCP Server."
+---
+
+## General[​](#general "Direct link to General")
+
+**How many tools are available?**
+
+38 tools across 8 domains: Customer, Agent, Plan, Purchase, Payment, Wallet, Usage, and Transaction.
+
+**What AI assistants are supported?**
+
+Any assistant that supports the Model Context Protocol with Streamable HTTP transport. This includes Cursor, Claude Desktop, Windsurf, and others. See [Installation](/mcp-server/installation) for setup instructions.
+
+**Is my data isolated?**
+
+Yes. Every tool call is scoped to the provider account associated with your API key. You cannot access another provider's data.
+
+## Authentication[​](#authentication "Direct link to Authentication")
+
+**What authentication methods are supported?**
+
+The MCP server accepts an API key via the `X-API-Key` header, or a Bearer token via the `Authorization` header. API keys are the recommended approach.
+
+**Can I use both sandbox and production keys?**
+
+Yes. Configure separate MCP server entries in your client — one with a sandbox key for testing and another with a production key. See [Installation](/mcp-server/installation#using-multiple-environments) for details.
+
+**What happens if my API key is compromised?**
+
+Revoke the key immediately in your SolvaPay dashboard under **Settings > API Keys**, then generate a new one and update your MCP configuration.
+
+## Technical[​](#technical "Direct link to Technical")
+
+**What transport does the MCP server use?**
+
+Streamable HTTP. The server operates in stateless mode — every request is independently authenticated. No sessions or cookies are required.
+
+**Is there a rate limit?**
+
+Rate limits depend on your plan. If a customer's usage limits are exceeded, the `check_limits` tool will indicate this and can provide a checkout URL for the customer to upgrade.
+
+**What happens if the server is down?**
+
+Tool calls will fail with a connection error. The SolvaPay MCP Server runs on Google Cloud with multiple replicas for high availability. Check [status.solvapay.com](https://status.solvapay.com) for service status.
+
+**Are requests encrypted?**
+
+Yes. All communication between your MCP client and the SolvaPay server uses HTTPS (TLS 1.2+).
+
+## Error Handling[​](#error-handling "Direct link to Error Handling")
+
+**What does a tool error look like?**
+
+Failed tool calls return a JSON error:
+
+```
+{  "success": false,  "error": {    "code": "NOT_FOUND",    "message": "Customer with reference cus_INVALID not found"  }}
+```
+
+**What are the common error codes?**
+
+| Code               | Description                                  |
+| ------------------ | -------------------------------------------- |
+| `NOT_FOUND`        | The requested resource does not exist        |
+| `VALIDATION_ERROR` | Invalid or missing parameters                |
+| `UNAUTHORIZED`     | Invalid or expired API key                   |
+| `INTERNAL_ERROR`   | Server-side error — retry or contact support |

@@ -1,0 +1,180 @@
+---
+title: "Installation"
+description: "This guide covers installing and setting up SolvaPay SDK packages in your project."
+---
+
+## Table of Contents[​](#table-of-contents "Direct link to Table of Contents")
+
+* [Prerequisites](#prerequisites)
+* [Package Installation](#package-installation)
+* [Environment Setup](#environment-setup)
+* [Verification Steps](#verification-steps)
+* [Framework-Specific Setup](#framework-specific-setup)
+* [Next Steps](#next-steps)
+
+## Prerequisites[​](#prerequisites "Direct link to Prerequisites")
+
+* **Node.js**: Version 18.17 or higher
+* **Package Manager**: npm, yarn, or pnpm
+* **TypeScript**: Version 5.0.0 or higher (recommended)
+
+## Package Installation[​](#package-installation "Direct link to Package Installation")
+
+SolvaPay SDK consists of 6 published packages. Install only the packages you need for your use case.
+
+### Server-Side Protection[​](#server-side-protection "Direct link to Server-Side Protection")
+
+For protecting API endpoints, functions, or MCP servers:
+
+```
+npm install @solvapay/server# oryarn add @solvapay/server# orpnpm add @solvapay/server
+```
+
+### React Components[​](#react-components "Direct link to React Components")
+
+For client-side payment flows and purchase management:
+
+```
+npm install @solvapay/react# oryarn add @solvapay/react# orpnpm add @solvapay/react
+```
+
+### Next.js Integration[​](#nextjs-integration "Direct link to Next.js Integration")
+
+For Next.js-specific helpers and optimizations:
+
+```
+npm install @solvapay/next# oryarn add @solvapay/next# orpnpm add @solvapay/next
+```
+
+### Authentication Adapters[​](#authentication-adapters "Direct link to Authentication Adapters")
+
+For extracting user IDs from requests:
+
+```
+npm install @solvapay/auth# oryarn add @solvapay/auth# orpnpm add @solvapay/auth
+```
+
+### Supabase Integration[​](#supabase-integration "Direct link to Supabase Integration")
+
+For Supabase authentication with React:
+
+```
+npm install @solvapay/react-supabase @supabase/supabase-js# oryarn add @solvapay/react-supabase @supabase/supabase-js# orpnpm add @solvapay/react-supabase @supabase/supabase-js
+```
+
+### Core Types (Optional)[​](#core-types-optional "Direct link to Core Types (Optional)")
+
+If you only need types and schemas:
+
+```
+npm install @solvapay/core# oryarn add @solvapay/core# orpnpm add @solvapay/core
+```
+
+## Environment Setup[​](#environment-setup "Direct link to Environment Setup")
+
+### Required Environment Variables[​](#required-environment-variables "Direct link to Required Environment Variables")
+
+For production use, you'll need a SolvaPay API key:
+
+```
+# .env (server-side only, never expose to browser)SOLVAPAY_SECRET_KEY=sk_live_...
+```
+
+### Optional Environment Variables[​](#optional-environment-variables "Direct link to Optional Environment Variables")
+
+```
+# Custom API base URL (for testing or self-hosted)SOLVAPAY_API_BASE_URL=https://api.solvapay.com
+```
+
+### Stub Mode (Testing Without API Key)[​](#stub-mode-testing-without-api-key "Direct link to Stub Mode (Testing Without API Key)")
+
+SolvaPay SDK works in **stub mode** when no API key is provided. This is perfect for:
+
+* Local development
+* Testing
+* CI/CD pipelines
+* Prototyping
+
+In stub mode:
+
+* All purchase checks return "free tier" (no purchase)
+* Payment flows are simulated
+* No actual API calls are made
+
+To use stub mode, simply don't set `SOLVAPAY_SECRET_KEY`:
+
+```
+import { createSolvaPay } from '@solvapay/server'// Works without API key (stub mode)const solvaPay = createSolvaPay()
+```
+
+## Verification Steps[​](#verification-steps "Direct link to Verification Steps")
+
+### 1. Verify Installation[​](#1-verify-installation "Direct link to 1. Verify Installation")
+
+Create a test file to verify the installation:
+
+```
+// test-installation.tsimport { createSolvaPay } from '@solvapay/server'const solvaPay = createSolvaPay()console.log('SolvaPay SDK installed successfully!')
+```
+
+Run it:
+
+```
+npx tsx test-installation.ts
+```
+
+### 2. Verify TypeScript Types[​](#2-verify-typescript-types "Direct link to 2. Verify TypeScript Types")
+
+If using TypeScript, verify types are available:
+
+```
+import type { SolvaPay, PayableFunction } from '@solvapay/server'const solvaPay: SolvaPay = createSolvaPay()// Type checking should work without errors
+```
+
+### 3. Test Stub Mode[​](#3-test-stub-mode "Direct link to 3. Test Stub Mode")
+
+Test that stub mode works without an API key:
+
+```
+import { createSolvaPay } from '@solvapay/server'const solvaPay = createSolvaPay() // No API key neededconst payable = solvaPay.payable({  agent: 'agt_test',  plan: 'pln_test',})// This should work in stub modeconst handler = payable.http(async () => {  return { message: 'Hello from stub mode!' }})
+```
+
+## Framework-Specific Setup[​](#framework-specific-setup "Direct link to Framework-Specific Setup")
+
+### Express.js[​](#expressjs "Direct link to Express.js")
+
+```
+npm install @solvapay/server express
+```
+
+See [Express.js Integration Guide](/sdks/typescript/guides/express) for detailed setup.
+
+### Next.js[​](#nextjs "Direct link to Next.js")
+
+```
+npm install @solvapay/server @solvapay/next @solvapay/react
+```
+
+See [Next.js Integration Guide](/sdks/typescript/guides/nextjs) for detailed setup.
+
+### React (Standalone)[​](#react-standalone "Direct link to React (Standalone)")
+
+```
+npm install @solvapay/react
+```
+
+See [React Integration Guide](/sdks/typescript/guides/react) for detailed setup.
+
+### MCP Server[​](#mcp-server "Direct link to MCP Server")
+
+```
+npm install @solvapay/server
+```
+
+See [MCP Server Integration Guide](/sdks/typescript/guides/mcp) for detailed setup.
+
+## Next Steps[​](#next-steps "Direct link to Next Steps")
+
+* [Quick Start Guide](/sdks/typescript/getting-started/quick-start) - Get up and running in 5 minutes
+* [Core Concepts](/sdks/typescript/getting-started/core-concepts) - Understand the key concepts
+* [Framework Guides](/sdks/typescript/guides/express) - Framework-specific integration guides

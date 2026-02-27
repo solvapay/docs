@@ -1,0 +1,157 @@
+---
+title: "Provider Integration"
+description: "This guide covers how providers accept token payments, track earnings, and receive fiat payouts through Stripe Connect."
+---
+
+## How Providers Earn[​](#how-providers-earn "Direct link to How Providers Earn")
+
+Providers never hold tokens. When a consumer's tokens are captured (settled), the system:
+
+1. Deducts a **platform fee** (default 10%) from the captured amount
+2. Credits the net amount to the provider's **payable balance**
+3. Periodically settles the payable balance via **Stripe Connect** in fiat
+
+```
+Consumer pays 1,000 tokens ($0.10)├── Platform fee: 100 tokens ($0.01)└── Provider earns: 900 tokens ($0.09)
+```
+
+## Accepting Token Payments[​](#accepting-token-payments "Direct link to Accepting Token Payments")
+
+### Using `payable()` with `upto` Scheme[​](#using-payable-with-upto-scheme "Direct link to using-payable-with-upto-scheme")
+
+The simplest integration — the SDK handles the full verify/settle/release lifecycle:
+
+```
+import { createSolvaPay } from '@solvapay/server'const solvaPay = createSolvaPay()const payable = solvaPay.payable({  scheme: 'upto',  product: 'prd_myapi',  providerId: 'prv_xxx',    // your provider ID  maxPrice: 500,             // max tokens per request})// MCP tool exampleserver.tool('analyze', payable.mcp(async (args) => {  const result = await runAnalysis(args)  // Charge the actual cost (must be <= maxPrice)  await args.settle(result.tokenCost, 'Analysis completed')  return result}))
+```
+
+### Using `payable()` with `voucher` Scheme[​](#using-payable-with-voucher-scheme "Direct link to using-payable-with-voucher-scheme")
+
+Accept voucher tokens as payment — consumers present a prepaid voucher:
+
+```
+const payable = solvaPay.payable({  scheme: 'voucher',  product: 'prd_myapi',  providerId: 'prv_xxx',  maxPrice: 500,})server.tool('analyze', payable.mcp(async (args) => {  // args._voucherId, args._accountRef, args._identity are available  const result = await runAnalysis(args)  await args.settle(result.tokenCost)  return result}))
+```
+
+The consumer passes the voucher token via `auth.voucher_token` in their request.
+
+## Pricing Strategies[​](#pricing-strategies "Direct link to Pricing Strategies")
+
+### Fixed Per-Request[​](#fixed-per-request "Direct link to Fixed Per-Request")
+
+Charge the same amount for every request:
+
+```
+const payable = solvaPay.payable({  scheme: 'upto',  product: 'prd_myapi',  providerId: 'prv_xxx',  maxPrice: 100, // always 100 tokens})server.tool('lookup', payable.mcp(async (args) => {  const result = await lookup(args)  await args.settle(100) // fixed price  return result}))
+```
+
+### Metered (Variable Cost)[​](#metered-variable-cost "Direct link to Metered (Variable Cost)")
+
+Reserve a maximum, charge the actual:
+
+```
+const payable = solvaPay.payable({  scheme: 'upto',  product: 'prd_myapi',  providerId: 'prv_xxx',  maxPrice: 5000, // reserve up to 5,000 tokens})server.tool('generate', payable.mcp(async (args) => {  const result = await generateContent(args)  // Charge based on output size  const tokensUsed = result.outputTokens * 2  await args.settle(tokensUsed, `Generated ${result.outputTokens} tokens`)  return result}))
+```
+
+### Tiered Pricing[​](#tiered-pricing "Direct link to Tiered Pricing")
+
+Different prices for different tools:
+
+```
+const cheapTool = solvaPay.payable({  scheme: 'upto',  product: 'prd_myapi',  providerId: 'prv_xxx',  maxPrice: 50,})const expensiveTool = solvaPay.payable({  scheme: 'upto',  product: 'prd_myapi',  providerId: 'prv_xxx',  maxPrice: 2000,})server.tool('quick-lookup', cheapTool.mcp(async (args) => {  const result = await quickLookup(args)  await args.settle(50)  return result}))server.tool('deep-analysis', expensiveTool.mcp(async (args) => {  const result = await deepAnalysis(args)  await args.settle(result.cost)  return result}))
+```
+
+## Provider Earnings Ledger[​](#provider-earnings-ledger "Direct link to Provider Earnings Ledger")
+
+Every earning event is recorded in an immutable provider ledger:
+
+| Entry Type         | Description                                                   |
+| ------------------ | ------------------------------------------------------------- |
+| `payable_increase` | Tokens credited from a consumer capture (net of platform fee) |
+| `payout`           | Fiat payout via Stripe Connect                                |
+| `adjustment`       | Admin correction                                              |
+
+Each `payable_increase` entry records:
+
+* Net token amount (after platform fee)
+* Platform fee amount
+* USD equivalent
+* Source lock ID
+* Consumer account ID
+* Product reference
+
+## Settlement & Payouts[​](#settlement--payouts "Direct link to Settlement & Payouts")
+
+### How Settlement Works[​](#how-settlement-works "Direct link to How Settlement Works")
+
+1. A daily settlement job runs automatically
+2. It checks each provider's unpaid balance
+3. If the balance exceeds the minimum threshold (default: 100,000 tokens = $10), a payout is triggered
+4. The payout is issued via Stripe Connect as a fiat transfer
+5. A `payout` entry is recorded in the provider ledger
+
+### Settlement Configuration[​](#settlement-configuration "Direct link to Settlement Configuration")
+
+| Property          | Default              | Description                                   |
+| ----------------- | -------------------- | --------------------------------------------- |
+| Platform fee rate | 10%                  | Percentage deducted from each capture         |
+| Payout frequency  | Daily                | How often settlement runs                     |
+| Minimum payout    | 100,000 tokens ($10) | Minimum balance to trigger a payout           |
+| Payout method     | Stripe Connect       | Fiat transfer to provider's connected account |
+
+### Stripe Connect Setup[​](#stripe-connect-setup "Direct link to Stripe Connect Setup")
+
+To receive payouts, providers must have a connected Stripe account. This is configured during provider onboarding in the SolvaPay console under **Settings > Payments**.
+
+## Inspecting Vouchers[​](#inspecting-vouchers "Direct link to Inspecting Vouchers")
+
+Providers can inspect a voucher without locking tokens using the read-only resolve endpoint:
+
+```
+const info = await solvaPay.apiClient.resolveVoucher({  token: 'spay_abc123...',  productRef: 'prd_myapi',})if (info.allowed) {  console.log('Voucher balance:', info.balance)  console.log('Account:', info.accountRef)  console.log('Spend limit:', info.spendLimit)}
+```
+
+This is useful for pre-flight checks or displaying balance information to users before executing a paid operation.
+
+## Dashboard[​](#dashboard "Direct link to Dashboard")
+
+The provider dashboard shows:
+
+* **Earnings** — Total tokens earned, broken down by product
+* **Pending balance** — Tokens earned but not yet paid out
+* **Payout history** — Past Stripe Connect transfers with amounts and dates
+* **Recent transactions** — Individual capture events with consumer and product details
+
+## Best Practices[​](#best-practices "Direct link to Best Practices")
+
+### Set Accurate `maxPrice`[​](#set-accurate-maxprice "Direct link to set-accurate-maxprice")
+
+The `maxPrice` determines how many tokens are reserved from the consumer's wallet. Setting it too high means consumers need a larger balance than necessary. Setting it too low risks the actual cost exceeding the reservation.
+
+**Recommendation:** Set `maxPrice` to the maximum realistic cost for a single request, with a small buffer.
+
+### Always Settle[​](#always-settle "Direct link to Always Settle")
+
+If your handler completes without calling `settle`, the lock is released (no charge). This is safe, but means the consumer received service for free. Always call `settle` on the success path.
+
+### Handle Partial Failures[​](#handle-partial-failures "Direct link to Handle Partial Failures")
+
+If your business logic partially completes, you can still settle for the work done:
+
+```
+server.tool('batch-process', payable.mcp(async (args) => {  let processed = 0  try {    for (const item of args.items) {      await processItem(item)      processed++    }  } finally {    if (processed > 0) {      await args.settle(processed * COST_PER_ITEM)    }  }  return { processed }}))
+```
+
+### Communicate Costs[​](#communicate-costs "Direct link to Communicate Costs")
+
+When possible, include the token cost in your response so consumers can track their spending:
+
+```
+server.tool('analyze', payable.mcp(async (args) => {  const result = await analyze(args)  const cost = result.complexity * 100  await args.settle(cost)  return { ...result, tokenCost: cost }}))
+```
+
+## Next Steps[​](#next-steps "Direct link to Next Steps")
+
+* [SDK Integration](/wallet/sdk-integration) — Full SDK reference for all payment schemes
+* [Vouchers](/wallet/vouchers) — How vouchers work for prepaid access
+* [Security & Compliance](/wallet/security) — Audit trails and fraud protection

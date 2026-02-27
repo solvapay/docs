@@ -1,0 +1,53 @@
+---
+title: "Create a Hosted MCP Pay Product"
+description: "Use this flow when you want the no-code setup: SolvaPay hosts authentication, identity, billing,."
+---
+
+This is the recommended path for teams that already have an MCP server and want fast monetization
+without building billing/auth infrastructure.
+
+## Prerequisites
+
+- SolvaPay provider account
+- Origin MCP server URL available over HTTPS
+- At least one plan to assign during product setup
+
+## Step 1: Create Product and Select Plans
+
+Start in **Products**, complete product details, then select at least one plan in the Plans step.
+
+_Screenshot placeholder: plans step with selected plans in new product flow._
+
+## Step 2: Enable Hosted MCP Pay Configuration
+
+In the Integration step, enable and configure Hosted MCP Pay:
+
+- MCP URL slug (public endpoint slug)
+- Origin MCP server URL (your upstream MCP endpoint)
+- Optional auth settings, if required
+
+_Screenshot placeholder: integration step with Hosted MCP Pay URL fields._
+
+## Step 3: Create Product and Verify MCP Server URL
+
+After creating the product, open the product details page and confirm:
+
+- Product is active
+- Hosted MCP integration is enabled
+- Generated MCP server URL is present and copyable
+
+_Screenshot placeholder: Hosted MCP product details page with MCP server URL._
+
+## User Onboarding Behavior
+
+When users connect to the hosted MCP server URL:
+
+1. They authenticate via SolvaPay-hosted OAuth
+2. SolvaPay evaluates plan access for requested tools
+3. Usage and billing are handled through your configured plans
+
+## What to Do Next
+
+- Test the MCP URL with a sandbox account in your MCP client
+- Review [Authentication](/mcp-pay/authentication) for OAuth behavior
+- Configure [Hosted Pages](/mcp-pay/hosted-pages) for branded customer flows

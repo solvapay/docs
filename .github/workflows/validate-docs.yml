@@ -1,0 +1,28 @@
+name: Validate docs
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  mintlify-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Mint CLI
+        run: npm install -g mint@latest
+
+      - name: Validate docs build
+        run: mint validate
+
+      - name: Check broken links
+        run: mint broken-links

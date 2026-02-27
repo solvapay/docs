@@ -1,0 +1,168 @@
+---
+title: "Webhook Handling"
+description: "This guide shows you how to handle SolvaPay webhooks to keep your application in sync with purchase and payment events."
+---
+
+## Table of Contents[​](#table-of-contents "Direct link to Table of Contents")
+
+* [Overview](#overview)
+* [Webhook Setup](#webhook-setup)
+* [Webhook Verification](#webhook-verification)
+* [Event Handling](#event-handling)
+* [Complete Examples](#complete-examples)
+
+## Overview[​](#overview "Direct link to Overview")
+
+SolvaPay sends webhooks to notify your application about important events:
+
+* **Purchase Created** - New purchase activated
+* **Purchase Updated** - Purchase plan or status changed
+* **Purchase Cancelled** - Purchase cancelled
+* **Payment Succeeded** - Payment processed successfully
+* **Payment Failed** - Payment processing failed
+
+### Webhook Flow[​](#webhook-flow "Direct link to Webhook Flow")
+
+```
+SolvaPay Backend    ↓Webhook Event    ↓Your Webhook Endpoint    ↓Verify Signature    ↓Process Event    ↓Update Your Database
+```
+
+## Webhook Setup[​](#webhook-setup "Direct link to Webhook Setup")
+
+### 1. Configure Webhook Endpoint[​](#1-configure-webhook-endpoint "Direct link to 1. Configure Webhook Endpoint")
+
+Set your webhook endpoint in the SolvaPay dashboard:
+
+```
+https://your-app.com/api/webhooks/solvapay
+```
+
+### 2. Create Webhook Endpoint[​](#2-create-webhook-endpoint "Direct link to 2. Create Webhook Endpoint")
+
+Create an endpoint to receive webhooks:
+
+```
+// app/api/webhooks/solvapay/route.ts (Next.js)import { NextRequest, NextResponse } from 'next/server'import { verifyWebhook } from '@solvapay/server'export async function POST(request: NextRequest) {  try {    // Verify webhook signature    const payload = await request.text()    const signature = request.headers.get('x-solvapay-signature')    if (!signature) {      return NextResponse.json({ error: 'Missing signature' }, { status: 401 })    }    const verified = verifyWebhook(payload, signature, {      secret: process.env.SOLVAPAY_WEBHOOK_SECRET!,    })    if (!verified) {      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })    }    // Parse event    const event = JSON.parse(payload)    // Handle event    await handleWebhookEvent(event)    return NextResponse.json({ received: true })  } catch (error) {    console.error('Webhook error:', error)    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 })  }}
+```
+
+### Express.js Webhook Endpoint[​](#expressjs-webhook-endpoint "Direct link to Express.js Webhook Endpoint")
+
+```
+// routes/webhooks.tsimport express from 'express'import { verifyWebhook } from '@solvapay/server'const router = express.Router()router.post('/solvapay', express.raw({ type: 'application/json' }), async (req, res) => {  try {    const signature = req.headers['x-solvapay-signature'] as string    if (!signature) {      return res.status(401).json({ error: 'Missing signature' })    }    const payload = req.body.toString()    const verified = verifyWebhook(payload, signature, {      secret: process.env.SOLVAPAY_WEBHOOK_SECRET!,    })    if (!verified) {      return res.status(401).json({ error: 'Invalid signature' })    }    const event = JSON.parse(payload)    await handleWebhookEvent(event)    res.json({ received: true })  } catch (error) {    console.error('Webhook error:', error)    res.status(500).json({ error: 'Webhook processing failed' })  }})export default router
+```
+
+## Webhook Verification[​](#webhook-verification "Direct link to Webhook Verification")
+
+### Verify Webhook Signature[​](#verify-webhook-signature "Direct link to Verify Webhook Signature")
+
+Always verify webhook signatures to ensure requests are from SolvaPay:
+
+```
+import { verifyWebhook } from '@solvapay/server'const verified = verifyWebhook(payload, signature, {  secret: process.env.SOLVAPAY_WEBHOOK_SECRET!,})if (!verified) {  // Reject webhook  return res.status(401).json({ error: 'Invalid signature' })}
+```
+
+### Environment Variables[​](#environment-variables "Direct link to Environment Variables")
+
+Set your webhook secret:
+
+```
+SOLVAPAY_WEBHOOK_SECRET=whsec_...
+```
+
+Get your webhook secret from the SolvaPay dashboard.
+
+## Event Handling[​](#event-handling "Direct link to Event Handling")
+
+### Event Types[​](#event-types "Direct link to Event Types")
+
+Handle different event types:
+
+```
+interface WebhookEvent {  type: string  data: {    customerRef: string    purchaseId?: string    planRef?: string    status?: string    // ... other event data  }  timestamp: string}
+```
+
+### Handle Purchase Events[​](#handle-purchase-events "Direct link to Handle Purchase Events")
+
+```
+async function handleWebhookEvent(event: WebhookEvent) {  switch (event.type) {    case 'purchase.created':      await handlePurchaseCreated(event.data)      break    case 'purchase.updated':      await handlePurchaseUpdated(event.data)      break    case 'purchase.cancelled':      await handlePurchaseCancelled(event.data)      break    case 'payment.succeeded':      await handlePaymentSucceeded(event.data)      break    case 'payment.failed':      await handlePaymentFailed(event.data)      break    default:      console.log('Unknown event type:', event.type)  }}
+```
+
+### Purchase Created[​](#purchase-created "Direct link to Purchase Created")
+
+```
+async function handlePurchaseCreated(data: any) {  const { customerRef, purchaseId, planRef } = data  // Update your database  await db.purchases.create({    customerRef,    purchaseId,    planRef,    status: 'active',  })  // Clear purchase cache  await clearPurchaseCache(customerRef)  // Send welcome email, etc.  await sendWelcomeEmail(customerRef)}
+```
+
+### Purchase Updated[​](#purchase-updated "Direct link to Purchase Updated")
+
+```
+async function handlePurchaseUpdated(data: any) {  const { customerRef, purchaseId, planRef, status } = data  // Update purchase in database  await db.purchases.update({    where: { purchaseId },    data: { planRef, status },  })  // Clear cache  await clearPurchaseCache(customerRef)}
+```
+
+### Purchase Cancelled[​](#purchase-cancelled "Direct link to Purchase Cancelled")
+
+```
+async function handlePurchaseCancelled(data: any) {  const { customerRef, purchaseId } = data  // Update purchase status  await db.purchases.update({    where: { purchaseId },    data: { status: 'cancelled', cancelledAt: new Date() },  })  // Clear cache  await clearPurchaseCache(customerRef)  // Send cancellation email  await sendCancellationEmail(customerRef)}
+```
+
+### Payment Succeeded[​](#payment-succeeded "Direct link to Payment Succeeded")
+
+```
+async function handlePaymentSucceeded(data: any) {  const { customerRef, paymentIntentId, amount } = data  // Record payment  await db.payments.create({    customerRef,    paymentIntentId,    amount,    status: 'succeeded',  })  // Clear cache  await clearPurchaseCache(customerRef)}
+```
+
+### Payment Failed[​](#payment-failed "Direct link to Payment Failed")
+
+```
+async function handlePaymentFailed(data: any) {  const { customerRef, paymentIntentId, error } = data  // Record failed payment  await db.payments.create({    customerRef,    paymentIntentId,    status: 'failed',    error: error.message,  })  // Notify user  await sendPaymentFailedEmail(customerRef, error)}
+```
+
+## Complete Examples[​](#complete-examples "Direct link to Complete Examples")
+
+### Next.js Complete Example[​](#nextjs-complete-example "Direct link to Next.js Complete Example")
+
+```
+// app/api/webhooks/solvapay/route.tsimport { NextRequest, NextResponse } from 'next/server'import { verifyWebhook } from '@solvapay/server'import { clearPurchaseCache } from '@solvapay/next'export async function POST(request: NextRequest) {  try {    // Get raw body for signature verification    const payload = await request.text()    const signature = request.headers.get('x-solvapay-signature')    if (!signature) {      return NextResponse.json({ error: 'Missing signature' }, { status: 401 })    }    // Verify webhook signature    const verified = verifyWebhook(payload, signature, {      secret: process.env.SOLVAPAY_WEBHOOK_SECRET!,    })    if (!verified) {      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })    }    // Parse event    const event = JSON.parse(payload)    // Handle event    await handleWebhookEvent(event)    return NextResponse.json({ received: true })  } catch (error) {    console.error('Webhook error:', error)    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 })  }}async function handleWebhookEvent(event: any) {  const { type, data } = event  switch (type) {    case 'purchase.created':    case 'purchase.updated':    case 'purchase.cancelled':      // Clear purchase cache      if (data.customerRef) {        await clearPurchaseCache(data.customerRef)      }      // Update database      await updatePurchaseInDatabase(data)      break    case 'payment.succeeded':    case 'payment.failed':      // Handle payment events      await handlePaymentEvent(type, data)      break    default:      console.log('Unknown event type:', type)  }}
+```
+
+### Express.js Complete Example[​](#expressjs-complete-example "Direct link to Express.js Complete Example")
+
+```
+// routes/webhooks.tsimport express from 'express'import { verifyWebhook } from '@solvapay/server'import { clearPurchaseCache } from '@solvapay/next'const router = express.Router()// Important: Use express.raw() to get raw body for signature verificationrouter.post('/solvapay', express.raw({ type: 'application/json' }), async (req, res) => {  try {    const signature = req.headers['x-solvapay-signature'] as string    if (!signature) {      return res.status(401).json({ error: 'Missing signature' })    }    const payload = req.body.toString()    const verified = verifyWebhook(payload, signature, {      secret: process.env.SOLVAPAY_WEBHOOK_SECRET!,    })    if (!verified) {      return res.status(401).json({ error: 'Invalid signature' })    }    const event = JSON.parse(payload)    await handleWebhookEvent(event)    res.json({ received: true })  } catch (error) {    console.error('Webhook error:', error)    res.status(500).json({ error: 'Webhook processing failed' })  }})async function handleWebhookEvent(event: any) {  const { type, data } = event  switch (type) {    case 'purchase.created':    case 'purchase.updated':    case 'purchase.cancelled':      if (data.customerRef) {        await clearPurchaseCache(data.customerRef)      }      await updatePurchaseInDatabase(data)      break    case 'payment.succeeded':    case 'payment.failed':      await handlePaymentEvent(type, data)      break  }}export default router
+```
+
+## Best Practices[​](#best-practices "Direct link to Best Practices")
+
+1. **Always Verify Signatures**: Never process webhooks without verifying the signature.
+
+2. **Use Idempotency**: Handle duplicate webhook deliveries gracefully.
+
+3. **Process Asynchronously**: Process webhooks asynchronously to respond quickly.
+
+4. **Log Events**: Log all webhook events for debugging and auditing.
+
+5. **Handle Errors Gracefully**: Return appropriate status codes and log errors.
+
+6. **Clear Caches**: Clear purchase caches when purchase events occur.
+
+7. **Update Database**: Keep your database in sync with webhook events.
+
+## Testing Webhooks[​](#testing-webhooks "Direct link to Testing Webhooks")
+
+### Local Testing with ngrok[​](#local-testing-with-ngrok "Direct link to Local Testing with ngrok")
+
+```
+# Start your local servernpm run dev# In another terminal, expose with ngrokngrok http 3000# Use ngrok URL in SolvaPay dashboard webhook settings
+```
+
+### Test Webhook Payload[​](#test-webhook-payload "Direct link to Test Webhook Payload")
+
+```
+// Test webhook locallyconst testEvent = {  type: 'purchase.created',  data: {    customerRef: 'user_123',    purchaseId: 'sub_123',    planRef: 'pln_premium',  },  timestamp: new Date().toISOString(),}await handleWebhookEvent(testEvent)
+```
+
+## Next Steps[​](#next-steps "Direct link to Next Steps")
+
+* [Error Handling Strategies](/sdks/typescript/guides/error-handling) - Handle webhook errors
+* [Next.js Integration Guide](/sdks/typescript/guides/nextjs) - Next.js webhook setup
+* [API Reference](/sdks/packages/server/README.md) - Full API documentation

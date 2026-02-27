@@ -1,0 +1,50 @@
+---
+title: "Getting Started"
+description: "The SolvaPay MCP Server lets you manage your entire SolvaPay account — customers, agents, plans, purchases, payments, and more — directly from any AI assistant that supports the Model Context Proto..."
+---
+
+Instead of switching between your dashboard and your IDE, you can ask your AI assistant to create customers, check wallet balances, process refunds, and manage purchases using natural language.
+
+## What is MCP?
+
+The Model Context Protocol is an open standard that allows AI assistants (like Cursor, Claude, and others) to connect to external tools and data sources. When you connect SolvaPay as an MCP server, your AI assistant gains access to 38 tools that cover the full SolvaPay API.
+
+## Prerequisites
+
+- A SolvaPay account — [sign up here](/getting-started/create-account) if you don't have one
+- An AI assistant that supports MCP (Cursor, Claude Desktop, Windsurf, etc.)
+- An API key from your SolvaPay dashboard
+
+## Getting Your API Key
+
+1. Sign up or log in at [solvapay.com](https://solvapay.com).
+2. Navigate to **Settings > API Keys** in your dashboard.
+3. Create a new API key. You'll receive a secret key that looks like:
+   ```
+   sk_sandbox_abc123...
+   ```
+4. Copy this key — you'll need it for the [installation](./installation.md) step.
+
+Keys prefixed with `sk_sandbox_` operate in sandbox mode (test data). Keys prefixed with `sk_live_` operate in production mode. Use sandbox keys during development and testing.
+
+## What Can You Do?
+
+Once connected, you can manage your entire SolvaPay account through natural conversation:
+
+- **"Create a customer for jane@acme.com"** — creates a customer record
+- **"Set up a $49/month Pro plan"** — creates a pricing plan
+- **"What's my wallet balance?"** — checks your revenue
+- **"Refund $25 from transaction txn_D7E8F9G0"** — processes a partial refund
+- **"Check if customer cus_A1B2C3D4 has hit their usage limits"** — checks billing limits
+
+See the full list of [available tools](./tools.md) and [detailed examples](./examples.md).
+
+## MCP Server vs MCP Pay
+
+The **SolvaPay MCP Server** is for managing your SolvaPay provider account — think of it as a conversational dashboard. [MCP Pay](/mcp-pay/overview) is a different product that lets you monetize your own MCP servers by proxying and paywalling tool access.
+
+## Next Steps
+
+1. [Install and configure](./installation.md) the MCP server in your AI assistant
+2. Browse the [available tools](./tools.md)
+3. Try the [usage examples](./examples.md)

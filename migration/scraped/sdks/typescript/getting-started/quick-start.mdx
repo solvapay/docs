@@ -1,0 +1,86 @@
+---
+title: "Quick Start"
+description: "Get up and running with SolvaPay SDK in minutes. These examples are copy-paste ready and work out of the box."
+---
+
+## Table of Contents[​](#table-of-contents "Direct link to Table of Contents")
+
+* [Express.js: Protect an API Endpoint](#expressjs-protect-an-api-endpoint-5-minutes)
+* [Next.js: Add Payment Flow](#nextjs-add-payment-flow-10-minutes)
+* [MCP Server: Protect MCP Tools](#mcp-server-protect-mcp-tools-5-minutes)
+* [React: Add Payment UI Components](#react-add-payment-ui-components-10-minutes)
+* [Next Steps](#next-steps)
+
+## Express.js: Protect an API Endpoint (5 minutes)[​](#expressjs-protect-an-api-endpoint-5-minutes "Direct link to Express.js: Protect an API Endpoint (5 minutes)")
+
+Protect an Express.js API endpoint with paywall protection:
+
+```
+import express from 'express'import { createSolvaPay } from '@solvapay/server'const app = express()app.use(express.json())// Initialize SolvaPay (works without API key in stub mode)const solvaPay = createSolvaPay({  // apiKey: process.env.SOLVAPAY_SECRET_KEY // Optional for production})// Create payable handler for your agentconst payable = solvaPay.payable({  agent: 'agt_YOUR_AGENT', // Your agent reference from SolvaPay dashboard  plan: 'pln_YOUR_PLAN', // Your plan reference})// Your business logicasync function createTask(req: express.Request) {  const { title } = req.body  return {    success: true,    task: { id: '1', title, createdAt: new Date() },  }}// Protect the endpoint with one lineapp.post('/tasks', payable.http(createTask))app.listen(3000, () => {  console.log('Server running on http://localhost:3000')})
+```
+
+**Test it:**
+
+```
+# Make a request (replace with your customer reference)curl -X POST http://localhost:3000/tasks \  -H "Content-Type: application/json" \  -H "x-customer-ref: user_123" \  -d '{"title": "My task"}'
+```
+
+## Next.js: Add Payment Flow (10 minutes)[​](#nextjs-add-payment-flow-10-minutes "Direct link to Next.js: Add Payment Flow (10 minutes)")
+
+### 1. Set up API Routes[​](#1-set-up-api-routes "Direct link to 1. Set up API Routes")
+
+Create API routes for purchase checking and payment:
+
+```
+// app/api/check-purchase/route.tsimport { NextRequest, NextResponse } from 'next/server'import { checkPurchase } from '@solvapay/next'export async function GET(request: NextRequest) {  const result = await checkPurchase(request)  return result instanceof NextResponse ? result : NextResponse.json(result)}
+```
+
+```
+// app/api/create-payment-intent/route.tsimport { NextRequest, NextResponse } from 'next/server'import { createPaymentIntent } from '@solvapay/next'export async function POST(request: NextRequest) {  const { planRef, agentRef } = await request.json()  if (!planRef || !agentRef) {    return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 })  }  const result = await createPaymentIntent(request, { planRef, agentRef })  return result instanceof NextResponse ? result : NextResponse.json(result)}
+```
+
+### 2. Set up Provider[​](#2-set-up-provider "Direct link to 2. Set up Provider")
+
+```
+// app/layout.tsximport { SolvaPayProvider } from '@solvapay/react'export default function RootLayout({ children }) {  return (    <html>      <body>        <SolvaPayProvider          config={{            api: {              checkPurchase: '/api/check-purchase',              createPayment: '/api/create-payment-intent',            },          }}        >          {children}        </SolvaPayProvider>      </body>    </html>  )}
+```
+
+### 3. Add Payment Form[​](#3-add-payment-form "Direct link to 3. Add Payment Form")
+
+```
+// app/checkout/page.tsx'use client'import { PaymentForm } from '@solvapay/react'import { useRouter } from 'next/navigation'export default function CheckoutPage() {  const router = useRouter()  return (    <div>      <h1>Subscribe to Premium</h1>      <PaymentForm        planRef="pln_YOUR_PLAN"        agentRef="agt_YOUR_AGENT"        onSuccess={() => {          console.log('Payment successful!')          router.push('/dashboard')        }}        onError={error => {          console.error('Payment failed:', error)        }}      />    </div>  )}
+```
+
+## MCP Server: Protect MCP Tools (5 minutes)[​](#mcp-server-protect-mcp-tools-5-minutes "Direct link to MCP Server: Protect MCP Tools (5 minutes)")
+
+Protect MCP (Model Context Protocol) tools with paywall protection:
+
+```
+import { Server } from '@modelcontextprotocol/sdk/server/index.js'import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'import { createSolvaPay } from '@solvapay/server'// Initialize SolvaPayconst solvaPay = createSolvaPay({  // apiKey: process.env.SOLVAPAY_SECRET_KEY // Optional for production})// Create payable handlerconst payable = solvaPay.payable({  agent: 'agt_YOUR_AGENT',})// Your tool implementationasync function myTool(args: { input: string }) {  return {    success: true,    result: `Processed: ${args.input}`,  }}// Create MCP serverconst server = new Server(  {    name: 'my-mcp-server',    version: '1.0.0',  },  {    capabilities: { tools: {} },  },)// Handle tool execution with paywall protectionserver.setRequestHandler(CallToolRequestSchema, async request => {  const { name, arguments: args } = request.params  if (name === 'my_tool') {    // Protect the tool with one line    const handler = payable.mcp(myTool)    return await handler(args)  }  throw new Error(`Unknown tool: ${name}`)})// Start serverasync function main() {  const transport = new StdioServerTransport()  await server.connect(transport)  console.error('MCP server started')}main()
+```
+
+## React: Add Payment UI Components (10 minutes)[​](#react-add-payment-ui-components-10-minutes "Direct link to React: Add Payment UI Components (10 minutes)")
+
+### 1. Set up Provider[​](#1-set-up-provider "Direct link to 1. Set up Provider")
+
+```
+// App.tsx or layout componentimport { SolvaPayProvider } from '@solvapay/react'function App() {  return (    <SolvaPayProvider      config={{        api: {          checkPurchase: '/api/check-purchase',          createPayment: '/api/create-payment-intent',        },      }}    >      <YourApp />    </SolvaPayProvider>  )}
+```
+
+### 2. Use Purchase Hook[​](#2-use-purchase-hook "Direct link to 2. Use Purchase Hook")
+
+```
+// components/Dashboard.tsximport { usePurchase } from '@solvapay/react'function Dashboard() {  const { purchases, hasPaidPurchase, loading } = usePurchase()  if (loading) return <div>Loading...</div>  if (!hasPaidPurchase) {    return (      <div>        <h2>Upgrade to Premium</h2>        <a href="/checkout">Subscribe Now</a>      </div>    )  }  return (    <div>      <h2>Welcome, Premium User!</h2>      <p>Active purchases: {purchases.length}</p>    </div>  )}
+```
+
+### 3. Add Payment Form[​](#3-add-payment-form-1 "Direct link to 3. Add Payment Form")
+
+```
+// components/Checkout.tsximport { PaymentForm } from '@solvapay/react'function Checkout() {  return (    <div>      <h1>Subscribe to Premium</h1>      <PaymentForm        planRef="pln_YOUR_PLAN"        agentRef="agt_YOUR_AGENT"        onSuccess={() => {          window.location.href = '/dashboard'        }}      />    </div>  )}
+```
+
+## Next Steps[​](#next-steps "Direct link to Next Steps")
+
+* [Core Concepts](/sdks/typescript/getting-started/core-concepts) - Understand agents, plans, and the paywall flow
+* [Framework Guides](/sdks/typescript/guides/express) - Detailed integration guides for your framework
+* [Architecture Guide](/sdks/typescript/guides/architecture) - Detailed technical architecture

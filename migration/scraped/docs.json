@@ -1,0 +1,55 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "aspen",
+  "name": "SolvaPay Documentation",
+  "colors": {
+    "primary": "#0D9373",
+    "light": "#55D799",
+    "dark": "#0D9373"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": [
+          "getting-started"
+        ]
+      },
+      {
+        "group": "Create Account",
+        "pages": [
+          "getting-started/create-account"
+        ]
+      },
+      {
+        "group": "Choose Your Path",
+        "pages": [
+          "getting-started/choose-your-path"
+        ]
+      },
+      {
+        "group": "Create Product",
+        "pages": [
+          "getting-started/create-product"
+        ]
+      },
+      {
+        "group": "Test In Sandbox",
+        "pages": [
+          "getting-started/test-in-sandbox"
+        ]
+      },
+      {
+        "group": "Go Live",
+        "pages": [
+          "getting-started/go-live"
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/images/img/logo.svg",
+    "dark": "/images/img/logo-white.svg"
+  }
+}

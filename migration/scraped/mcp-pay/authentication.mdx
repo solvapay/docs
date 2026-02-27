@@ -1,0 +1,155 @@
+---
+title: "Authentication"
+description: "MCP Pay includes a full OAuth 2.0 server with PKCE support, enabling MCP clients like Cursor, Claude Desktop, and other AI tools to securely connect to your paywalled MCP servers."
+---
+
+## Supported Authentication Providers[​](#supported-authentication-providers "Direct link to Supported Authentication Providers")
+
+Users can authenticate using:
+
+* **Google** - Sign in with Google account
+* **GitHub** - Sign in with GitHub account
+
+No passwords or API keys to manage—users authenticate with their existing accounts.
+
+## How MCP Client Authentication Works[​](#how-mcp-client-authentication-works "Direct link to How MCP Client Authentication Works")
+
+When a user adds your MCP server to their client (e.g., Cursor), the following OAuth flow occurs:
+
+```
+┌──────────────┐     ┌─────────────────┐     ┌──────────────────┐│  MCP Client  │────▶│  SolvaPay OAuth │────▶│  Google/GitHub   ││  (Cursor)    │     │  Server         │     │  Login           │└──────────────┘     └─────────────────┘     └──────────────────┘       │                     │                        │       │  1. Authorize       │                        │       │─────────────────────▶                        │       │                     │  2. Redirect to login  │       │                     │────────────────────────▶       │                     │                        │       │                     │  3. User authenticates │       │                     │◀────────────────────────       │                     │                        │       │  4. Auth code       │                        │       │◀─────────────────────                        │       │                     │                        │       │  5. Exchange token  │                        │       │─────────────────────▶                        │       │                     │                        │       │  6. Access token    │                        │       │◀─────────────────────                        │
+```
+
+### Flow Steps[​](#flow-steps "Direct link to Flow Steps")
+
+1. **MCP client initiates OAuth** - Client requests authorization with PKCE challenge
+2. **Redirect to hosted login** - User sees a branded login page with your provider branding
+3. **User authenticates** - User clicks "Continue with Google" or "Continue with GitHub"
+4. **Authorization code returned** - SolvaPay redirects back to the MCP client with an auth code
+5. **Token exchange** - Client exchanges the code for an access token
+6. **Authenticated** - Client can now make tool calls with the access token
+
+## Dynamic Client Registration (DCR)[​](#dynamic-client-registration-dcr "Direct link to Dynamic Client Registration (DCR)")
+
+MCP Pay supports **Dynamic Client Registration**, allowing MCP clients to automatically register themselves as OAuth clients. This means users can simply paste your proxy URL into their MCP client, and the client will handle all OAuth setup automatically.
+
+### How DCR Works[​](#how-dcr-works "Direct link to How DCR Works")
+
+1. User adds your proxy URL to their MCP client
+2. Client discovers the OAuth endpoints via MCP protocol
+3. Client registers itself using the DCR endpoint
+4. Client receives client credentials
+5. Client proceeds with standard OAuth flow
+
+The DCR endpoint is available at your proxy URL and follows the **OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591)**.
+
+### Benefits of DCR[​](#benefits-of-dcr "Direct link to Benefits of DCR")
+
+* **Zero configuration** - Users just paste a URL
+* **Automatic setup** - No manual client ID/secret management
+* **Standard protocol** - Works with any DCR-compatible client
+
+## Hosted Login Page[​](#hosted-login-page "Direct link to Hosted Login Page")
+
+When users authenticate, they see a branded login page that includes:
+
+* Your provider logo and name
+* Your brand colors
+* Google and GitHub sign-in buttons
+* Automatic account creation for new users
+
+No additional configuration is needed—the login page automatically uses your provider branding configured in **Settings > Pages**.
+
+### First-Time Users[​](#first-time-users "Direct link to First-Time Users")
+
+When a user authenticates for the first time:
+
+1. Their account is automatically created
+2. They're assigned your default (free) plan
+3. They're redirected back to their MCP client
+4. They can immediately start using tools
+
+## OAuth Scopes[​](#oauth-scopes "Direct link to OAuth Scopes")
+
+The OAuth server supports standard OpenID Connect scopes:
+
+| Scope     | Description                      |
+| --------- | -------------------------------- |
+| `openid`  | Required for OpenID Connect      |
+| `profile` | Access to user's name and avatar |
+| `email`   | Access to user's email address   |
+
+## Custom Protocol Support[​](#custom-protocol-support "Direct link to Custom Protocol Support")
+
+MCP clients often use custom URL protocols for OAuth callbacks:
+
+* `cursor://` - Cursor IDE
+* `claude://` - Claude Desktop
+* `vscode://` - VS Code extensions
+
+MCP Pay fully supports these custom protocols, ensuring seamless authentication across different MCP client applications. The OAuth server correctly handles redirects to these custom schemes.
+
+## Token Lifecycle[​](#token-lifecycle "Direct link to Token Lifecycle")
+
+### Access Tokens[​](#access-tokens "Direct link to Access Tokens")
+
+* Used to authenticate tool calls
+* Short-lived for security
+* Automatically refreshed by MCP clients
+
+### Refresh Tokens[​](#refresh-tokens "Direct link to Refresh Tokens")
+
+* Used to obtain new access tokens
+* Longer-lived than access tokens
+* Revoked when user logs out or purchase is cancelled
+
+## Security Considerations[​](#security-considerations "Direct link to Security Considerations")
+
+### PKCE (Proof Key for Code Exchange)[​](#pkce-proof-key-for-code-exchange "Direct link to PKCE (Proof Key for Code Exchange)")
+
+All OAuth flows use PKCE to prevent authorization code interception attacks. This is especially important for public clients like desktop applications.
+
+### Token Storage[​](#token-storage "Direct link to Token Storage")
+
+* Tokens are securely stored by the MCP client
+* Access tokens are never exposed in URLs
+* Refresh tokens enable persistent sessions
+
+### Session Management[​](#session-management "Direct link to Session Management")
+
+Users can manage their active sessions through the customer portal, including:
+
+* Viewing connected clients
+* Revoking access to specific clients
+* Signing out of all sessions
+
+## Troubleshooting[​](#troubleshooting "Direct link to Troubleshooting")
+
+### Authentication Fails[​](#authentication-fails "Direct link to Authentication Fails")
+
+If users can't authenticate:
+
+1. Verify your MCP server is active in the console
+2. Check that the proxy URL is correct
+3. Ensure the user's browser allows popups (for OAuth redirect)
+
+### Token Expired[​](#token-expired "Direct link to Token Expired")
+
+If tool calls fail with authentication errors:
+
+1. The MCP client should automatically refresh the token
+2. If refresh fails, user may need to re-authenticate
+3. Check if the user's purchase is still active
+
+### DCR Not Working[​](#dcr-not-working "Direct link to DCR Not Working")
+
+If Dynamic Client Registration fails:
+
+1. Verify the MCP client supports DCR (RFC 7591)
+2. Check client is using the correct proxy URL
+3. Review client logs for specific error messages
+
+## Next Steps[​](#next-steps "Direct link to Next Steps")
+
+* [Hosted Pages](/mcp-pay/hosted-pages) - Configure checkout and customer portal
+* [Best Practices](/mcp-pay/best-practices) - Plan configuration and security tips

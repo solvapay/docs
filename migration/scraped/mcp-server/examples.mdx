@@ -1,0 +1,183 @@
+---
+title: "Examples"
+description: "Real-world examples of managing SolvaPay through your AI assistant. Each example shows the natural language prompt and what happens behind the scenes."
+---
+
+## Onboarding a New Customer[​](#onboarding-a-new-customer "Direct link to Onboarding a New Customer")
+
+**You:** Create a customer for [jane@acme.com](mailto:jane@acme.com) with the name "Jane Smith"
+
+**Assistant:** I'll create that customer for you.
+
+*Calls `create_customer` with `email: "jane@acme.com"`, `name: "Jane Smith"`*
+
+> The customer has been created:
+>
+> * **Reference:** `cus_A1B2C3D4`
+> * **Email:** [jane@acme.com](mailto:jane@acme.com)
+> * **Name:** Jane Smith
+
+***
+
+**You:** Make sure we have a customer for [bob@startup.io](mailto:bob@startup.io) — create one if they don't exist
+
+**Assistant:** I'll use the ensure tool to check.
+
+*Calls `ensure_customer` with `email: "bob@startup.io"`, `name: "Bob"`*
+
+> A customer for [bob@startup.io](mailto:bob@startup.io) already exists:
+>
+> * **Reference:** `cus_X7Y8Z9W0`
+> * **Email:** [bob@startup.io](mailto:bob@startup.io)
+>
+> No duplicate was created.
+
+The `ensure_customer` tool is idempotent — it's safe to call repeatedly with the same email. It will return the existing customer if one exists, or create a new one if not.
+
+***
+
+## Setting Up an Agent with Pricing[​](#setting-up-an-agent-with-pricing "Direct link to Setting Up an Agent with Pricing")
+
+**You:** Create an AI agent called "support-bot" for handling customer support, then set up a free starter plan and a $49/month pro plan
+
+**Assistant:**
+
+*Calls `create_agent` with `name: "support-bot"`, `description: "Customer support automation"`, `categories: ["support", "automation"]`*
+
+*Calls `create_plan` with `name: "Starter"`, `type: "usage-based"`, `price: 0`, `features: ["100 free requests/month", "Community support"]`*
+
+*Calls `create_plan` with `name: "Pro"`, `type: "recurring"`, `price: 4900`, `currency: "USD"`, `interval: "month"`, `features: ["Unlimited requests", "Priority support", "Custom integrations"]`*
+
+> I've created the agent and both plans:
+>
+> **Agent:** support-bot (`agt_P9Q0R1S2`)
+>
+> | Plan    | Reference      | Price     | Type        |
+> | ------- | -------------- | --------- | ----------- |
+> | Starter | `pln_F1G2H3J4` | Free      | Usage-based |
+> | Pro     | `pln_K5L6M7N8` | $49/month | Recurring   |
+
+***
+
+## Checking Revenue and Statistics[​](#checking-revenue-and-statistics "Direct link to Checking Revenue and Statistics")
+
+**You:** What's my current wallet balance?
+
+*Calls `get_wallet_balance`*
+
+> Your wallet balance is **$1,245.00 USD**.
+
+***
+
+**You:** Show me transaction stats for the last 30 days
+
+*Calls `get_transaction_stats` with `fromDate: "2026-01-11"`, `toDate: "2026-02-11"`*
+
+> Transaction statistics for the last 30 days:
+>
+> | Metric             | Value     |
+> | ------------------ | --------- |
+> | Total transactions | 84        |
+> | Successful         | 79        |
+> | Failed             | 3         |
+> | Refunded           | 2         |
+> | Total revenue      | $3,871.00 |
+
+***
+
+**You:** How much revenue has the support-bot agent generated?
+
+*Calls `get_agent_balance` with `agentRef: "agt_P9Q0R1S2"`*
+
+> The **support-bot** agent has generated **$892.50** in revenue.
+
+***
+
+## Managing Purchases[​](#managing-purchases "Direct link to Managing Purchases")
+
+**You:** What purchases does customer cus\_A1B2C3D4 have?
+
+*Calls `get_purchases_by_customer` with `customerRef: "cus_A1B2C3D4"`*
+
+> Jane Smith has 1 active purchase:
+>
+> * **Plan:** Pro ($49/month)
+> * **Status:** Active
+> * **Started:** 2026-01-15
+> * **Next billing:** 2026-02-15
+
+***
+
+**You:** Cancel that renewal — the customer requested a downgrade
+
+*Calls `cancel_renewal` with `purchaseRef: "sub_T3U4V5W6"`, `reason: "Customer requested downgrade"`*
+
+> The renewal has been cancelled. Jane Smith will retain access until the end of the current billing period (2026-02-15).
+
+***
+
+## Creating a Checkout Session[​](#creating-a-checkout-session "Direct link to Creating a Checkout Session")
+
+**You:** Generate a checkout link for customer cus\_X7Y8Z9W0 to purchase the Pro plan
+
+*Calls `create_checkout_session` with `customerRef: "cus_X7Y8Z9W0"`, `agentRef: "agt_P9Q0R1S2"`, `planRef: "pln_K5L6M7N8"`*
+
+> Here's the checkout URL for Bob:
+>
+> `https://checkout.solvapay.com/session/cs_abc123...`
+>
+> Send this link to the customer to complete their purchase.
+
+***
+
+## Processing a Refund[​](#processing-a-refund "Direct link to Processing a Refund")
+
+**You:** Refund $25 from transaction txn\_D7E8F9G0 — the customer was double-charged
+
+*Calls `create_refund` with `sourceTransactionId: "txn_D7E8F9G0"`, `amount: 2500`, `reason: "Double charge"`*
+
+> A partial refund of **$25.00** has been processed for transaction `txn_D7E8F9G0`. The refund reference is `txn_H1I2J3K4`.
+
+For a full refund, simply omit the `amount` parameter.
+
+***
+
+## Usage-Based Billing[​](#usage-based-billing "Direct link to Usage-Based Billing")
+
+**You:** Record that customer cus\_X7Y8Z9W0 made a successful API call to agent agt\_P9Q0R1S2
+
+*Calls `record_usage` with `customerRef: "cus_X7Y8Z9W0"`, `agentRef: "agt_P9Q0R1S2"`, `outcome: "success"`, `action: "api_call"`*
+
+> Usage event recorded successfully.
+
+***
+
+**You:** Check if that customer has hit their usage limits
+
+*Calls `check_limits` with `customerRef: "cus_X7Y8Z9W0"`, `agentRef: "agt_P9Q0R1S2"`*
+
+> The customer has used **87 of 100** free requests this period. They have **13 requests remaining** before they'll need to upgrade.
+
+***
+
+**You:** Record 5 usage events in bulk for today's batch
+
+*Calls `record_bulk_usage` with an array of 5 events*
+
+> 5 usage events recorded successfully.
+
+The `record_bulk_usage` tool accepts an array of events, each with `customerRef`, `agentRef`, and `outcome`. Use this for batch processing instead of making individual calls.
+
+***
+
+## Customer Self-Service Portal[​](#customer-self-service-portal "Direct link to Customer Self-Service Portal")
+
+**You:** Generate a billing portal link for customer cus\_A1B2C3D4
+
+*Calls `create_customer_session` with `customerRef: "cus_A1B2C3D4"`*
+
+> Here's the customer portal URL for Jane Smith:
+>
+> `https://billing.solvapay.com/portal/ps_xyz789...`
+>
+> The customer can use this link to manage their payment methods, view invoices, and update their purchase.

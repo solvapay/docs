@@ -1,0 +1,175 @@
+---
+title: "Error Handling Strategies"
+description: "This guide covers error handling patterns and best practices for SolvaPay SDK across different frameworks and use cases."
+---
+
+## Table of Contents[​](#table-of-contents "Direct link to Table of Contents")
+
+* [Error Types](#error-types)
+* [PaywallError Handling](#paywallerror-handling)
+* [Framework-Specific Patterns](#framework-specific-patterns)
+* [Best Practices](#best-practices)
+* [Complete Examples](#complete-examples)
+
+## Error Types[​](#error-types "Direct link to Error Types")
+
+SolvaPay SDK uses several error types:
+
+### PaywallError[​](#paywallerror "Direct link to PaywallError")
+
+Thrown when a paywall is triggered (purchase required or usage limit exceeded):
+
+```
+import { PaywallError } from '@solvapay/server'class PaywallError extends Error {  message: string  structuredContent: PaywallStructuredContent}
+```
+
+### SolvaPayError[​](#solvapayerror "Direct link to SolvaPayError")
+
+Base error class for SolvaPay SDK errors:
+
+```
+import { SolvaPayError } from '@solvapay/core'class SolvaPayError extends Error {  // Base error for SDK errors}
+```
+
+### Standard Errors[​](#standard-errors "Direct link to Standard Errors")
+
+Regular JavaScript errors from your business logic or network issues.
+
+## PaywallError Handling[​](#paywallerror-handling "Direct link to PaywallError Handling")
+
+### Understanding PaywallError[​](#understanding-paywallerror "Direct link to Understanding PaywallError")
+
+`PaywallError` is thrown when:
+
+* Customer doesn't have required purchase
+* Customer has exceeded usage limits
+* Customer needs to upgrade their plan
+
+It includes structured content with checkout URLs and metadata:
+
+```
+interface PaywallStructuredContent {  kind: 'payment_required'  agent: string  checkoutUrl: string  message: string  plan?: string  remaining?: number}
+```
+
+### Basic Handling[​](#basic-handling "Direct link to Basic Handling")
+
+```
+import { PaywallError } from '@solvapay/server'try {  const result = await payable.http(createTask)(req, res)  return result} catch (error) {  if (error instanceof PaywallError) {    // Handle paywall error    return res.status(402).json({      error: 'Payment required',      checkoutUrl: error.structuredContent.checkoutUrl,      message: error.structuredContent.message,    })  }  // Handle other errors  throw error}
+```
+
+## Framework-Specific Patterns[​](#framework-specific-patterns "Direct link to Framework-Specific Patterns")
+
+### Express.js[​](#expressjs "Direct link to Express.js")
+
+#### Basic Error Handling[​](#basic-error-handling "Direct link to Basic Error Handling")
+
+```
+import express from 'express'import { PaywallError } from '@solvapay/server'const app = express()// Protected routeapp.post('/api/tasks', payable.http(createTask))// Global error handlerapp.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {  if (error instanceof PaywallError) {    return res.status(402).json({      error: 'Payment required',      checkoutUrl: error.structuredContent.checkoutUrl,      agent: error.structuredContent.agent,      message: error.structuredContent.message,    })  }  // Log other errors  console.error('Unhandled error:', error)  res.status(500).json({ error: 'Internal server error' })})
+```
+
+#### Custom Error Middleware[​](#custom-error-middleware "Direct link to Custom Error Middleware")
+
+```
+function paywallErrorHandler(  error: Error,  req: express.Request,  res: express.Response,  next: express.NextFunction,) {  if (error instanceof PaywallError) {    // Custom paywall response    return res.status(402).json({      success: false,      error: {        type: 'paywall',        message: error.message,        checkoutUrl: error.structuredContent.checkoutUrl,        agent: error.structuredContent.agent,      },    })  }  next(error)}app.use(paywallErrorHandler)
+```
+
+#### Per-Route Error Handling[​](#per-route-error-handling "Direct link to Per-Route Error Handling")
+
+```
+async function handleWithErrorHandling(  req: express.Request,  res: express.Response,  next: express.NextFunction,) {  try {    const handler = payable.http(createTask)    await handler(req, res)  } catch (error) {    if (error instanceof PaywallError) {      return res.status(402).json({        error: 'Payment required',        checkoutUrl: error.structuredContent.checkoutUrl,      })    }    next(error)  }}app.post('/api/tasks', handleWithErrorHandling)
+```
+
+### Next.js[​](#nextjs "Direct link to Next.js")
+
+#### API Route Error Handling[​](#api-route-error-handling "Direct link to API Route Error Handling")
+
+```
+import { NextRequest, NextResponse } from 'next/server'import { PaywallError } from '@solvapay/server'export async function POST(request: NextRequest) {  try {    const handler = payable.next(createTask)    return await handler(request)  } catch (error) {    if (error instanceof PaywallError) {      return NextResponse.json(        {          error: 'Payment required',          checkoutUrl: error.structuredContent.checkoutUrl,          message: error.structuredContent.message,        },        { status: 402 },      )    }    console.error('Unhandled error:', error)    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })  }}
+```
+
+#### Using Helper Functions[​](#using-helper-functions "Direct link to Using Helper Functions")
+
+```
+import { NextRequest, NextResponse } from 'next/server'import { checkPurchase } from '@solvapay/next'import { isErrorResult, handleRouteError } from '@solvapay/server'export async function GET(request: NextRequest) {  const result = await checkPurchase(request)  // Check if result is an error  if (isErrorResult(result)) {    return NextResponse.json(result, { status: result.status || 500 })  }  return NextResponse.json(result)}
+```
+
+#### Error Handling Utility[​](#error-handling-utility "Direct link to Error Handling Utility")
+
+```
+// lib/error-handler.tsimport { NextRequest, NextResponse } from 'next/server'import { PaywallError } from '@solvapay/server'export function handleApiError(error: unknown, request: NextRequest) {  if (error instanceof PaywallError) {    return NextResponse.json(      {        error: 'Payment required',        checkoutUrl: error.structuredContent.checkoutUrl,        agent: error.structuredContent.agent,        message: error.structuredContent.message,      },      { status: 402 },    )  }  if (error instanceof Error) {    console.error('API Error:', error)    return NextResponse.json({ error: error.message }, { status: 500 })  }  return NextResponse.json({ error: 'Internal server error' }, { status: 500 })}// Usageexport async function POST(request: NextRequest) {  try {    const handler = payable.next(createTask)    return await handler(request)  } catch (error) {    return handleApiError(error, request)  }}
+```
+
+### React (Client-Side)[​](#react-client-side "Direct link to React (Client-Side)")
+
+#### Component Error Handling[​](#component-error-handling "Direct link to Component Error Handling")
+
+```
+import { PaymentForm } from '@solvapay/react'import { useState } from 'react'function CheckoutPage() {  const [error, setError] = useState<string | null>(null)  return (    <div>      {error && <div className="error-message">{error}</div>}      <PaymentForm        planRef="pln_premium"        agentRef="agt_myapi"        onSuccess={() => {          setError(null)          // Handle success        }}        onError={error => {          setError(error.message || 'Payment failed')        }}      />    </div>  )}
+```
+
+#### Hook Error Handling[​](#hook-error-handling "Direct link to Hook Error Handling")
+
+```
+import { useCheckout } from '@solvapay/react'function CustomCheckout() {  const { startCheckout, error, loading } = useCheckout(    'pln_premium',    'agt_myapi',  )  const handleCheckout = async () => {    try {      const result = await startCheckout()      if (!result.success) {        throw new Error(result.error || 'Payment failed')      }    } catch (error) {      console.error('Checkout error:', error)      // Handle error    }  }  return (    <div>      {error && <div>Error: {error.message}</div>}      <button onClick={handleCheckout} disabled={loading}>        Checkout      </button>    </div>  )}
+```
+
+### MCP Server[​](#mcp-server "Direct link to MCP Server")
+
+#### Tool Error Handling[​](#tool-error-handling "Direct link to Tool Error Handling")
+
+```
+import { PaywallError } from '@solvapay/server'import { CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js'server.setRequestHandler(CallToolRequestSchema, async request => {  const { name, arguments: args } = request.params  try {    switch (name) {      case 'create_task': {        const handler = payable.mcp(createTask)        const result = await handler(args)        return {          content: [            {              type: 'text',              text: JSON.stringify(result),            },          ],        }      }      default:        throw new Error(`Unknown tool: ${name}`)    }  } catch (error) {    if (error instanceof PaywallError) {      // Return paywall error in MCP format      return {        content: [          {            type: 'text',            text: JSON.stringify({              error: 'Payment required',              message: error.message,              checkoutUrl: error.structuredContent.checkoutUrl,              agent: error.structuredContent.agent,            }),          },        ],        isError: true,      }    }    // Handle other errors    return {      content: [        {          type: 'text',          text: JSON.stringify({            error: error instanceof Error ? error.message : 'Unknown error',          }),        },      ],      isError: true,    }  }})
+```
+
+## Best Practices[​](#best-practices "Direct link to Best Practices")
+
+### 1. Always Check Error Type[​](#1-always-check-error-type "Direct link to 1. Always Check Error Type")
+
+```
+try {  // Your code} catch (error) {  if (error instanceof PaywallError) {    // Handle paywall error  } else if (error instanceof SolvaPayError) {    // Handle SDK error  } else {    // Handle other errors  }}
+```
+
+### 2. Provide User-Friendly Messages[​](#2-provide-user-friendly-messages "Direct link to 2. Provide User-Friendly Messages")
+
+```
+if (error instanceof PaywallError) {  return res.status(402).json({    error: 'Purchase required',    message: 'Please subscribe to access this feature.',    checkoutUrl: error.structuredContent.checkoutUrl,  })}
+```
+
+### 3. Log Errors Appropriately[​](#3-log-errors-appropriately "Direct link to 3. Log Errors Appropriately")
+
+```
+catch (error) {  if (error instanceof PaywallError) {    // Don't log paywall errors as they're expected    // Just return the error response  } else {    // Log unexpected errors    console.error('Unexpected error:', error);    // Send generic error to client  }}
+```
+
+### 4. Use Error Boundaries (React)[​](#4-use-error-boundaries-react "Direct link to 4. Use Error Boundaries (React)")
+
+```
+import { ErrorBoundary } from 'react-error-boundary'function ErrorFallback({ error, resetErrorBoundary }) {  if (error.message.includes('Payment')) {    return (      <div>        <h2>Payment Required</h2>        <p>Please subscribe to access this feature.</p>        <button onClick={resetErrorBoundary}>Try Again</button>      </div>    )  }  return (    <div>      <h2>Something went wrong</h2>      <button onClick={resetErrorBoundary}>Try Again</button>    </div>  )}function App() {  return (    <ErrorBoundary FallbackComponent={ErrorFallback}>      <YourApp />    </ErrorBoundary>  )}
+```
+
+### 5. Retry Logic for Transient Errors[​](#5-retry-logic-for-transient-errors "Direct link to 5. Retry Logic for Transient Errors")
+
+```
+import { withRetry } from '@solvapay/server'async function createTaskWithRetry(req: express.Request) {  return withRetry(    async () => {      const handler = payable.http(createTask)      return await handler(req, res)    },    {      maxRetries: 3,      retryDelay: 1000,      shouldRetry: error => {        // Don't retry paywall errors        if (error instanceof PaywallError) {          return false        }        // Retry network errors        return error instanceof NetworkError      },    },  )}
+```
+
+## Complete Examples[​](#complete-examples "Direct link to Complete Examples")
+
+### Express.js Complete Example[​](#expressjs-complete-example "Direct link to Express.js Complete Example")
+
+```
+import express from 'express'import { createSolvaPay, PaywallError } from '@solvapay/server'const app = express()app.use(express.json())const solvaPay = createSolvaPay({ apiKey: process.env.SOLVAPAY_SECRET_KEY })const payable = solvaPay.payable({ agent: 'agt_myapi', plan: 'pln_premium' })// Protected routeapp.post('/api/tasks', payable.http(createTask))// Error handling middlewareapp.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {  if (error instanceof PaywallError) {    return res.status(402).json({      success: false,      error: {        type: 'paywall',        message: error.message,        checkoutUrl: error.structuredContent.checkoutUrl,        agent: error.structuredContent.agent,      },    })  }  // Log unexpected errors  console.error('Unhandled error:', {    message: error.message,    stack: error.stack,    path: req.path,    method: req.method,  })  // Don't expose internal errors to client  res.status(500).json({    success: false,    error: {      type: 'internal',      message: 'An internal error occurred',    },  })})app.listen(3000)
+```
+
+### Next.js Complete Example[​](#nextjs-complete-example "Direct link to Next.js Complete Example")
+
+```
+// app/api/tasks/route.tsimport { NextRequest, NextResponse } from 'next/server'import { createSolvaPay, PaywallError } from '@solvapay/server'const solvaPay = createSolvaPay({ apiKey: process.env.SOLVAPAY_SECRET_KEY })const payable = solvaPay.payable({ agent: 'agt_myapi', plan: 'pln_premium' })async function createTask(req: NextRequest) {  const body = await req.json()  return { success: true, task: { title: body.title } }}export async function POST(request: NextRequest) {  try {    const handler = payable.next(createTask)    return await handler(request)  } catch (error) {    if (error instanceof PaywallError) {      return NextResponse.json(        {          success: false,          error: {            type: 'paywall',            message: error.message,            checkoutUrl: error.structuredContent.checkoutUrl,            agent: error.structuredContent.agent,          },        },        { status: 402 },      )    }    console.error('API Error:', error)    return NextResponse.json(      {        success: false,        error: {          type: 'internal',          message: 'An internal error occurred',        },      },      { status: 500 },    )  }}
+```
+
+## Next Steps[​](#next-steps "Direct link to Next Steps")
+
+* [Express.js Integration Guide](/sdks/typescript/guides/express) - Learn Express integration
+* [Next.js Integration Guide](/sdks/typescript/guides/nextjs) - Learn Next.js integration
+* [Custom Authentication Adapters](/sdks/typescript/guides/custom-auth) - Handle auth errors
+* [API Reference](/sdks/packages/server/README.md) - Full API documentation

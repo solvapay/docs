@@ -1,0 +1,169 @@
+---
+title: "Security & Compliance"
+description: "This page covers the security model, audit capabilities, chargeback handling, and compliance considerations for the SolvaPay token system."
+---
+
+## Audit Trail[​](#audit-trail "Direct link to Audit Trail")
+
+Every token movement is recorded in an immutable, append-only ledger (`AccountTransaction`). Entries cannot be edited or deleted — only new entries can be appended.
+
+Each ledger entry includes:
+
+| Field              | Description                                             |
+| ------------------ | ------------------------------------------------------- |
+| `sequence`         | Monotonically increasing per-account counter            |
+| `type`             | Operation type (topup, reserve, capture, release, etc.) |
+| `amount`           | Token amount                                            |
+| `balanceAfter`     | Running balance after this entry                        |
+| `idempotencyKey`   | Dedup key for safe retries                              |
+| `lockId`           | Associated token lock (if applicable)                   |
+| `providerId`       | Provider involved (if applicable)                       |
+| `productReference` | Product involved (if applicable)                        |
+| `createdAt`        | Timestamp                                               |
+
+The provider earnings ledger (`ProviderEarnings`) is similarly immutable, tracking every payable increase and payout.
+
+### Reconciliation[​](#reconciliation "Direct link to Reconciliation")
+
+A daily reconciliation job compares each account's `cachedBalance` against the sum of ledger entries. Any discrepancy is flagged for admin review and logged to a reconciliation report. This provides a safety net against data corruption or bugs.
+
+## Concurrency Safety[​](#concurrency-safety "Direct link to Concurrency Safety")
+
+### No Double-Spend[​](#no-double-spend "Direct link to No Double-Spend")
+
+The verify (lock) operation uses an atomic MongoDB `findOneAndUpdate` with a `$expr` guard:
+
+```
+cachedBalance - lockedAmount >= requestedAmount
+```
+
+If two requests race to lock the same tokens, only one succeeds — the other receives an "insufficient balance" error. There is no window for double-spending.
+
+### No Lost Updates[​](#no-lost-updates "Direct link to No Lost Updates")
+
+Ledger writes use a unique `(accountId, sequence)` index. Concurrent writes to the same account are serialized by optimistic concurrency — if a sequence collision occurs, the write is retried with an incremented sequence number.
+
+### Idempotent Operations[​](#idempotent-operations "Direct link to Idempotent Operations")
+
+All critical operations (reserve, capture, release) include an `idempotencyKey`. The unique sparse index on this field prevents duplicate ledger entries. Retrying an operation with the same idempotency key is safe — the duplicate is rejected without side effects.
+
+## Chargeback Handling[​](#chargeback-handling "Direct link to Chargeback Handling")
+
+When a Stripe payment is disputed (`charge.dispute.created` webhook):
+
+1. The account associated with the disputed payment is identified
+2. The wallet is **frozen** (`walletStatus: 'frozen'`)
+3. A `reversal` ledger entry is recorded to claw back the disputed tokens
+4. All subsequent `verifyPayment` and `verifyVoucherPayment` calls are rejected while the wallet is frozen
+
+### Frozen Wallet Behavior[​](#frozen-wallet-behavior "Direct link to Frozen Wallet Behavior")
+
+| Operation               | Behavior When Frozen                     |
+| ----------------------- | ---------------------------------------- |
+| Top-up                  | Rejected                                 |
+| Verify (lock tokens)    | Rejected                                 |
+| Settle (existing lock)  | Allowed (lock was created before freeze) |
+| Release (existing lock) | Allowed                                  |
+| Create voucher          | Rejected                                 |
+| Spend voucher           | Rejected (verify step fails)             |
+
+An admin can manually unfreeze a wallet after the dispute is resolved.
+
+## Token Lock Safety[​](#token-lock-safety "Direct link to Token Lock Safety")
+
+### TTL Expiry[​](#ttl-expiry "Direct link to TTL Expiry")
+
+Every token lock has a time-to-live (default: 30 minutes, max: 24 hours). A background job runs every 60 seconds to release expired locks. This ensures tokens are never permanently locked if a provider fails to settle — whether due to crashes, network issues, or bugs.
+
+### State Machine[​](#state-machine "Direct link to State Machine")
+
+Locks follow a strict state machine with no backwards transitions:
+
+```
+reserved → settled   (normal completion)reserved → released  (cancellation or error)reserved → expired   (TTL exceeded)
+```
+
+Once a lock leaves the `reserved` state, it cannot be re-reserved, re-settled, or modified. Attempting to settle or release a non-reserved lock returns a `409 Conflict`.
+
+## Credit Classification[​](#credit-classification "Direct link to Credit Classification")
+
+SolvaPay tokens are classified as **prepaid marketplace credits**:
+
+| Property          | Value                                             |
+| ----------------- | ------------------------------------------------- |
+| Transferable      | No — tokens cannot be sent to other users         |
+| Withdrawable      | No — tokens cannot be converted back to fiat      |
+| P2P transfer      | Not supported                                     |
+| Ecosystem-bound   | Tokens are usable only within SolvaPay            |
+| Bearer instrument | No — tokens are ledger entries, not bearer tokens |
+| Blockchain        | No — entirely centralized ledger                  |
+
+This classification minimizes regulatory exposure. Tokens are not currency, securities, or stored value cards — they are prepaid marketplace credits similar to app store credit or gaming credits.
+
+## Voucher Token Security[​](#voucher-token-security "Direct link to Voucher Token Security")
+
+Voucher tokens (`spay_...`) are encrypted with AES using a server-side encryption key. The token payload contains:
+
+* Account reference
+* Voucher ID
+* Issuance timestamp
+* Version number
+
+The token cannot be:
+
+* **Forged** — requires the encryption key, which never leaves the backend
+* **Tampered with** — any modification corrupts the ciphertext
+* **Replayed after revocation** — the issuance timestamp is checked against the stored `tokenIssuedAt`
+
+### Token Revocation[​](#token-revocation "Direct link to Token Revocation")
+
+Reissuing a voucher token updates `tokenIssuedAt` on the voucher. Any token issued before this timestamp is rejected on resolution. This allows instant revocation of compromised tokens.
+
+## Account Identity[​](#account-identity "Direct link to Account Identity")
+
+Each consumer account has a cryptographic identity (Ed25519 key pair) provisioned on first use:
+
+| Field                 | Description                                            |
+| --------------------- | ------------------------------------------------------ |
+| `publicKey`           | Public key (stored on account)                         |
+| `encryptedPrivateKey` | Private key (encrypted at rest, not returned to users) |
+| `fingerprint`         | SHA-256 hash of the public key                         |
+
+The identity is included in voucher verify responses, allowing providers to cryptographically identify the consumer behind a voucher without accessing personal data.
+
+## Fraud Controls[​](#fraud-controls "Direct link to Fraud Controls")
+
+### New Account Restrictions[​](#new-account-restrictions "Direct link to New Account Restrictions")
+
+* Minimum top-up amount ($10) discourages throwaway accounts
+* Wallet status can be set to `frozen` by admins
+
+### Rate Limiting[​](#rate-limiting "Direct link to Rate Limiting")
+
+* Vouchers support per-request and per-period spend limits
+* API endpoints are rate-limited at the infrastructure level
+
+### Monitoring[​](#monitoring "Direct link to Monitoring")
+
+* All token operations are logged in the immutable ledger
+* The reconciliation job catches balance anomalies
+* Provider settlement includes platform-level oversight
+
+## Configuration[​](#configuration "Direct link to Configuration")
+
+Security-related environment variables:
+
+| Variable                  | Default  | Description                        |
+| ------------------------- | -------- | ---------------------------------- |
+| `TOKEN_PEG_USD`           | `0.0001` | USD value per token                |
+| `TOKEN_MIN_TOPUP_USD`     | `10`     | Minimum top-up amount              |
+| `TOKEN_DEFAULT_LOCK_TTL`  | `1800`   | Default lock TTL in seconds        |
+| `TOKEN_MAX_LOCK_TTL`      | `86400`  | Maximum lock TTL in seconds        |
+| `TOKEN_PLATFORM_FEE_RATE` | `0.10`   | Platform fee (0–1)                 |
+| `TOKEN_MIN_PAYOUT_TOKENS` | `100000` | Minimum tokens for provider payout |
+
+## Next Steps[​](#next-steps "Direct link to Next Steps")
+
+* [How It Works](/wallet/how-it-works) — Detailed token lifecycle and ledger mechanics
+* [Vouchers](/wallet/vouchers) — Voucher creation, token format, and payment flow
+* [SDK Integration](/wallet/sdk-integration) — Implement token payments in your service

@@ -1,68 +1,86 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "SolvaPay Documentation",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#04C4D9",
+    "light": "#06D6EC",
+    "dark": "#0497A9"
   },
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Docs",
         "groups": [
           {
             "group": "Getting started",
             "pages": [
-              "index",
-              "quickstart",
-              "development"
+              "getting-started/index",
+              "getting-started/create-account",
+              "getting-started/choose-your-path",
+              "getting-started/create-product",
+              "getting-started/test-in-sandbox",
+              "getting-started/go-live"
             ]
           },
           {
-            "group": "Customization",
+            "group": "MCP Pay",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "mcp-pay/overview",
+              "mcp-pay/quick-start",
+              "mcp-pay/create-hosted-mcp-pay-product",
+              "mcp-pay/authentication",
+              "mcp-pay/hosted-pages",
+              "mcp-pay/best-practices"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Wallet",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "wallet/overview",
+              "wallet/how-it-works",
+              "wallet/sdk-integration",
+              "wallet/provider-integration",
+              "wallet/vouchers",
+              "wallet/security"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "MCP Server",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "mcp-server/getting-started",
+              "mcp-server/installation",
+              "mcp-server/tools",
+              "mcp-server/examples",
+              "mcp-server/faq"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "SDKs",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "TypeScript SDK",
             "pages": [
-              "api-reference/introduction"
-            ]
-          },
-          {
-            "group": "Endpoint examples",
-            "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "sdks/typescript/intro",
+              "sdks/typescript/getting-started/introduction",
+              "sdks/typescript/getting-started/installation",
+              "sdks/typescript/getting-started/quick-start",
+              "sdks/typescript/getting-started/core-concepts",
+              "sdks/typescript/guides/architecture",
+              "sdks/typescript/guides/express",
+              "sdks/typescript/guides/nextjs",
+              "sdks/typescript/guides/react",
+              "sdks/typescript/guides/mcp",
+              "sdks/typescript/guides/custom-auth",
+              "sdks/typescript/guides/error-handling",
+              "sdks/typescript/guides/testing",
+              "sdks/typescript/guides/performance",
+              "sdks/typescript/guides/webhooks",
+              "sdks/typescript/examples/overview",
+              "sdks/typescript/publishing"
             ]
           }
         ]
@@ -71,14 +89,14 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
+          "anchor": "SolvaPay",
+          "href": "https://solvapay.com",
+          "icon": "globe"
         },
         {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "GitHub",
+          "href": "https://github.com/solvapay",
+          "icon": "github"
         }
       ]
     }
@@ -91,32 +109,32 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:contact@solvapay.com"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "href": "https://dashboard.solvapay.com"
     }
   },
   "contextual": {
     "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "x": "https://x.com/solvapay",
+      "github": "https://github.com/solvapay",
+      "linkedin": "https://linkedin.com/company/solvapay"
     }
   }
 }

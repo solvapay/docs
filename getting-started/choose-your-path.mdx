@@ -1,0 +1,84 @@
+---
+title: "Choose Your Path"
+description: "SolvaPay offers two ways to monetize your services."
+---
+
+## Decide in 10 Seconds
+
+- Choose **Hosted MCP Pay (No-Code)** if you want SolvaPay to host MCP auth, billing, and access
+  control for you.
+- Choose **SDK Integration** if you want to implement monetization directly in your code with full
+  control.
+
+## Quick Comparison
+
+| Feature | MCP Pay (No-Code) | SDK Integration |
+|---------|-------------------|-----------------|
+| Code changes required | None | Yes |
+| Setup time | Minutes | Hours |
+| Authentication | OAuth (Google/GitHub) | Custom or OAuth |
+| Supported platforms | MCP servers only | Any API, MCP, or web app |
+| Hosting | Managed by SolvaPay | Your infrastructure |
+| Customization | Configuration-based | Full programmatic control |
+
+## Hosted MCP Pay (No-Code)
+
+Hosted MCP Pay is the managed MCP monetization path. SolvaPay hosts authentication, billing, and
+access control for your MCP product.
+
+### How It Works
+
+1. Create a product in the product creation flow
+2. Select one or more plans
+3. Enable Hosted MCP Pay in the Integration step and configure MCP URL settings
+4. Share the resulting MCP server URL with users
+
+### Choose MCP Pay If You:
+
+- Have an existing MCP server you want to monetize
+- Want to launch quickly without code changes
+- Are comfortable with Google/GitHub OAuth for user authentication
+- Don't need custom authentication flows
+
+### Get Started
+
+1. [MCP Pay Overview](/mcp-pay/overview) - Understand hosted MCP monetization
+2. [MCP Pay Quick Start](/mcp-pay/quick-start) - Set up hosted MCP monetization
+3. [Create a Hosted MCP Pay Product](/mcp-pay/create-hosted-mcp-pay-product) - No-code hosted
+   MCP setup
+
+## SDK Integration
+
+The SolvaPay SDK lets you add paywall protection directly in your code. Wrap your endpoints or functions with a single line and SolvaPay handles purchase checks and usage tracking.
+
+### How It Works
+
+1. Install the `@solvapay/server` package
+2. Create a product and select plans in the console
+3. Wrap your business logic with `payable()`
+4. SolvaPay validates purchases on each request
+
+### Choose SDK If You:
+
+- Need custom authentication (Supabase, Auth0, your own system)
+- Want fine-grained control over paywall behavior
+- Are building a web app, REST API, or non-MCP service
+- Need to integrate with existing user management
+
+### Get Started
+
+1. [Create a Product](/getting-started/create-product) - Product flow for SDK-led setup
+2. [TypeScript SDK Introduction](/sdks/typescript/intro) - Overview and architecture
+3. [SDK Installation](/sdks/typescript/getting-started/installation) - Add SolvaPay to your project
+4. [SDK Quick Start](/sdks/typescript/getting-started/quick-start) - Protect your first endpoint
+
+## Can I Use Both?
+
+Yes. Some teams use MCP Pay for their MCP server while using the SDK for their web dashboard or REST API. Both share the same plans, customers, and billing in your SolvaPay account.
+Most teams start with one path for their first product, then add the second path as they expand.
+
+## Next Steps
+
+Once you've chosen your path and set up your integration:
+
+- [Test in Sandbox](/getting-started/test-in-sandbox) - Verify everything works before going live

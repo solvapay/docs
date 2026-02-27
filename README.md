@@ -1,16 +1,12 @@
-# Mintlify Starter Kit
+# SolvaPay docs (Mintlify)
 
-Use the starter kit to get your docs deployed and ready to customize.
+This repository hosts the Mintlify documentation site for SolvaPay.
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+## Ownership model
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
-
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
+- Product docs (`getting-started`, `mcp-pay`, `wallet`, `mcp-server`) are maintained in this repository.
+- TypeScript SDK docs (`sdks/typescript`) are upstream-owned and synced into this repository.
+- Do not manually edit `sdks/typescript/**`. Use the sync script.
 
 ## AI-assisted writing
 
@@ -20,9 +16,7 @@ Set up your AI coding tool to work with Mintlify:
 npx skills add https://mintlify.com/docs
 ```
 
-This command installs Mintlify's documentation skill for your configured AI tools like Claude Code, Cursor, Windsurf, and others. The skill includes component reference, writing standards, and workflow guidance.
-
-See the [AI tools guides](/ai-tools) for tool-specific setup.
+This command installs Mintlify's documentation skill for your configured AI tools.
 
 ## Development
 
@@ -39,6 +33,22 @@ mint dev
 ```
 
 View your local preview at `http://localhost:3000`.
+
+## Syncing TypeScript SDK docs
+
+Run the sync script from the docs root:
+
+```bash
+./scripts/sync-typescript-sdk-docs.sh
+```
+
+If your SDK docs source is in a custom location, set:
+
+```bash
+SDK_DOCS_SOURCE_DIR="/absolute/path/to/sdk/docs-site/sdks/typescript/docs" ./scripts/sync-typescript-sdk-docs.sh
+```
+
+The script uses `scripts/typescript-sdk-pages.txt` as the curated page list.
 
 ## Publishing changes
 

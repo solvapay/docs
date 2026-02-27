@@ -1,0 +1,81 @@
+---
+title: "Go Live"
+description: "Once you've tested your integration in sandbox mode, you're ready to switch to production and start accepting real payments."
+---
+
+## Onboarding Checklist
+
+Before you can switch to live mode, complete these steps:
+
+### Required
+
+- [ ] **Stripe account connected** - Connect your Stripe account in Settings > Payments
+- [ ] **Stripe account verified** - Complete Stripe's identity verification
+- [ ] **At least one plan created** - Create your pricing plans in the Plans section
+
+### Recommended
+
+- [ ] **Branding configured** - Upload your logo and set colors in Settings > Pages
+- [ ] **Integration tested** - Verify your setup works in sandbox mode
+
+You can check your onboarding progress in the console. Incomplete steps are highlighted.
+
+## Switch to Live Mode
+
+Once onboarding is complete:
+
+1. Open the SolvaPay console
+2. Find the **Sandbox/Live toggle** in the header
+3. Click to switch to **Live** mode
+4. Confirm the switch
+
+That's it. Your integration is now processing real payments.
+
+## What Changes in Live Mode
+
+| Aspect | Sandbox | Live |
+|--------|---------|------|
+| Payments | Test mode (no real charges) | Real charges processed |
+| Stripe credentials | Test keys | Live keys |
+| Customer data | Test data | Production data |
+| Webhooks | Test events | Real events |
+
+Your proxy URLs and API endpoints remain the same. The mode switch happens at the account level.
+
+## Switching Back to Sandbox
+
+You can switch back to sandbox mode at any time to:
+
+- Test new features or plans
+- Debug issues without affecting production
+- Train team members
+
+Your sandbox and live data are kept separate. Switching modes doesn't affect existing customers or purchases in either environment.
+
+## After Going Live
+
+### Monitor Your First Transactions
+
+- Check the Dashboard for real-time usage and revenue
+- Verify webhook events are being received
+- Monitor Stripe for successful payments
+
+### Set Up Alerts (Optional)
+
+Consider setting up alerts for:
+
+- Failed payments
+- Unusual usage patterns
+- Quota limit approaches
+
+## Need Help?
+
+If you encounter issues going live:
+
+- Review the [testing checklist](/getting-started/test-in-sandbox#testing-checklist)
+- Check Stripe's dashboard for payment issues
+- Contact support@solvapay.com
+
+---
+
+Congratulations on launching with SolvaPay! For ongoing reference, explore the full documentation for [MCP Pay](/mcp-pay/overview) or the [TypeScript SDK](/sdks/typescript/intro).

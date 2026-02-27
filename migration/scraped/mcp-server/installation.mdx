@@ -1,0 +1,106 @@
+---
+title: "Installation"
+description: "Connect the SolvaPay MCP Server to your AI assistant. The setup takes less than a minute."
+---
+
+## Cursor IDE[​](#cursor-ide "Direct link to Cursor IDE")
+
+Add the following to your Cursor MCP settings file (`~/.cursor/mcp.json`):
+
+```
+{  "mcpServers": {    "solvapay": {      "url": "https://mcp.solvapay.com/mcp",      "headers": {        "X-API-Key": "YOUR_API_KEY_HERE"      }    }  }}
+```
+
+After saving, restart Cursor or toggle the SolvaPay server off and on in the MCP settings panel. You should see 38 tools become available.
+
+## Claude Desktop[​](#claude-desktop "Direct link to Claude Desktop")
+
+Add the following to your Claude Desktop configuration file:
+
+* **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+* **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+```
+{  "mcpServers": {    "solvapay": {      "url": "https://mcp.solvapay.com/mcp",      "headers": {        "X-API-Key": "YOUR_API_KEY_HERE"      }    }  }}
+```
+
+Restart Claude Desktop to activate the connection.
+
+## OpenClaw Gateway[​](#openclaw-gateway "Direct link to OpenClaw Gateway")
+
+Use the `@solvapay/openclaw` plugin to add payment tools to your OpenClaw gateway. Your AI agent can then manage SolvaPay through WhatsApp, Telegram, Discord, and any other connected channel.
+
+**1. Install the plugin:**
+
+```
+openclaw plugins install @solvapay/openclaw
+```
+
+**2. Add the config to `~/.openclaw/openclaw.json`:**
+
+```
+{  plugins: {    entries: {      solvapay: {        enabled: true,        config: {          apiKey: "${SOLVAPAY_API_KEY}",        },      },    },  },  tools: {    allow: ["solvapay"],  },}
+```
+
+**3. Set the API key in `~/.openclaw/.env`:**
+
+```
+SOLVAPAY_API_KEY=sk_sandbox_your_key_here
+```
+
+**4. Restart the gateway:**
+
+```
+openclaw gateway restart
+```
+
+Check the logs with `openclaw gateway logs | grep SolvaPay` — you should see the plugin connect and discover 38 tools.
+
+See the [plugin README](https://github.com/solvapay/solvapay-openclaw) for full configuration options, troubleshooting, and development setup.
+
+## Other MCP Clients[​](#other-mcp-clients "Direct link to Other MCP Clients")
+
+The SolvaPay MCP Server uses the **Streamable HTTP** transport. Any MCP client that supports this transport can connect using:
+
+| Property           | Value                          |
+| ------------------ | ------------------------------ |
+| **Endpoint**       | `https://mcp.solvapay.com/mcp` |
+| **Transport**      | Streamable HTTP (stateless)    |
+| **Authentication** | `X-API-Key` header             |
+
+## Using Multiple Environments[​](#using-multiple-environments "Direct link to Using Multiple Environments")
+
+You can configure separate entries for sandbox and production:
+
+```
+{  "mcpServers": {    "solvapay-sandbox": {      "url": "https://mcp.solvapay.com/mcp",      "headers": {        "X-API-Key": "sk_sandbox_..."      }    },    "solvapay-production": {      "url": "https://mcp.solvapay.com/mcp",      "headers": {        "X-API-Key": "sk_live_..."      }    }  }}
+```
+
+Both use the same endpoint — the environment is determined by your API key prefix:
+
+| Key Prefix    | Environment | Data           |
+| ------------- | ----------- | -------------- |
+| `sk_sandbox_` | Sandbox     | Test data only |
+| `sk_live_`    | Production  | Real data      |
+
+## Verifying the Connection[​](#verifying-the-connection "Direct link to Verifying the Connection")
+
+After configuration, ask your AI assistant something simple like:
+
+> "List my SolvaPay customers"
+
+If the connection is working, you'll see a response from the `list_customers` tool. If you're on a fresh account, you'll see an empty list — that's expected.
+
+## Troubleshooting[​](#troubleshooting "Direct link to Troubleshooting")
+
+**"Authentication required" error**
+
+Your API key is missing or not being sent. Double-check that the `X-API-Key` header is set correctly in your MCP config.
+
+**"Invalid or expired secret key" error**
+
+The API key is being sent but is not valid. Verify the key in your SolvaPay dashboard under **Settings > API Keys**. Make sure you copied the full key including any trailing `=` characters.
+
+**Tools not appearing**
+
+Restart your AI assistant after saving the configuration. Some clients require a full restart rather than just a config reload.

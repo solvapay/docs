@@ -1,0 +1,483 @@
+---
+title: "Tools"
+description: "The SolvaPay MCP Server exposes 49 tools across 10 domains. Every tool is scoped to your account — you can only access data belonging to your API key."
+---
+
+## Customer Management[​](#customer-management "Direct link to Customer Management")
+
+| Tool              | Description                                         |
+| ----------------- | --------------------------------------------------- |
+| `create_customer` | Create a new customer                               |
+| `get_customer`    | Retrieve a customer by reference                    |
+| `list_customers`  | List customers with search and pagination           |
+| `update_customer` | Update a customer's details                         |
+| `delete_customer` | Delete a customer                                   |
+| `ensure_customer` | Create or retrieve a customer by email (idempotent) |
+
+### create\_customer[​](#create_customer "Direct link to create_customer")
+
+| Parameter   | Type   | Required | Description                  |
+| ----------- | ------ | -------- | ---------------------------- |
+| `email`     | string | Yes      | Customer email address       |
+| `name`      | string | No       | Customer display name        |
+| `telephone` | string | No       | Customer telephone number    |
+| `metadata`  | object | No       | Arbitrary key-value metadata |
+
+### get\_customer[​](#get_customer "Direct link to get_customer")
+
+| Parameter   | Type   | Required | Description                              |
+| ----------- | ------ | -------- | ---------------------------------------- |
+| `reference` | string | Yes      | Customer reference (e.g. `cus_A1B2C3D4`) |
+
+### list\_customers[​](#list_customers "Direct link to list_customers")
+
+| Parameter | Type   | Required | Default | Description               |
+| --------- | ------ | -------- | ------- | ------------------------- |
+| `limit`   | number | No       | 20      | Maximum results to return |
+| `offset`  | number | No       | 0       | Pagination offset         |
+| `search`  | string | No       | —       | Search by name or email   |
+
+### update\_customer[​](#update_customer "Direct link to update_customer")
+
+| Parameter   | Type   | Required | Description        |
+| ----------- | ------ | -------- | ------------------ |
+| `reference` | string | Yes      | Customer reference |
+| `name`      | string | No       | Updated name       |
+| `email`     | string | No       | Updated email      |
+| `telephone` | string | No       | Updated telephone  |
+| `metadata`  | object | No       | Updated metadata   |
+
+### delete\_customer[​](#delete_customer "Direct link to delete_customer")
+
+| Parameter   | Type   | Required | Description        |
+| ----------- | ------ | -------- | ------------------ |
+| `reference` | string | Yes      | Customer reference |
+
+### ensure\_customer[​](#ensure_customer "Direct link to ensure_customer")
+
+Creates a customer if one doesn't exist for the given email. Returns the existing customer if found.
+
+| Parameter     | Type   | Required | Description                           |
+| ------------- | ------ | -------- | ------------------------------------- |
+| `email`       | string | Yes      | Customer email (used as unique key)   |
+| `name`        | string | No       | Customer name (used only on creation) |
+| `externalRef` | string | No       | Your system's ID for this customer    |
+
+***
+
+## Agent Management[​](#agent-management "Direct link to Agent Management")
+
+| Tool           | Description                         |
+| -------------- | ----------------------------------- |
+| `create_agent` | Create a new AI agent               |
+| `get_agent`    | Retrieve an agent by reference      |
+| `list_agents`  | List agents with search and filters |
+| `update_agent` | Update an agent's details           |
+| `delete_agent` | Delete an agent                     |
+
+### create\_agent[​](#create_agent "Direct link to create_agent")
+
+| Parameter     | Type      | Required | Description       |
+| ------------- | --------- | -------- | ----------------- |
+| `name`        | string    | Yes      | Agent name        |
+| `description` | string    | No       | Agent description |
+| `categories`  | string\[] | No       | Category tags     |
+
+### get\_agent[​](#get_agent "Direct link to get_agent")
+
+| Parameter   | Type   | Required | Description                           |
+| ----------- | ------ | -------- | ------------------------------------- |
+| `reference` | string | Yes      | Agent reference (e.g. `agt_P9Q0R1S2`) |
+
+### list\_agents[​](#list_agents "Direct link to list_agents")
+
+| Parameter | Type   | Required | Default | Description       |
+| --------- | ------ | -------- | ------- | ----------------- |
+| `limit`   | number | No       | 20      | Maximum results   |
+| `offset`  | number | No       | 0       | Pagination offset |
+| `search`  | string | No       | —       | Search by name    |
+| `status`  | string | No       | —       | Filter by status  |
+
+### update\_agent[​](#update_agent "Direct link to update_agent")
+
+| Parameter     | Type      | Required | Description         |
+| ------------- | --------- | -------- | ------------------- |
+| `reference`   | string    | Yes      | Agent reference     |
+| `name`        | string    | No       | Updated name        |
+| `description` | string    | No       | Updated description |
+| `categories`  | string\[] | No       | Updated categories  |
+
+### delete\_agent[​](#delete_agent "Direct link to delete_agent")
+
+| Parameter   | Type   | Required | Description     |
+| ----------- | ------ | -------- | --------------- |
+| `reference` | string | Yes      | Agent reference |
+
+***
+
+## Plan Management[​](#plan-management "Direct link to Plan Management")
+
+| Tool                   | Description                             |
+| ---------------------- | --------------------------------------- |
+| `create_plan`          | Create a pricing plan                   |
+| `get_plan`             | Retrieve a plan by reference            |
+| `list_plans`           | List plans with filters                 |
+| `update_plan`          | Update a plan                           |
+| `delete_plan`          | Delete a plan                           |
+| `list_plans_for_agent` | List plans assigned to a specific agent |
+
+### create\_plan[​](#create_plan "Direct link to create_plan")
+
+| Parameter     | Type      | Required | Default | Description                                        |
+| ------------- | --------- | -------- | ------- | -------------------------------------------------- |
+| `name`        | string    | Yes      | —       | Plan name                                          |
+| `type`        | string    | Yes      | —       | Plan type (`recurring`, `one-time`, `usage-based`) |
+| `price`       | number    | Yes      | —       | Price in smallest currency unit (e.g. cents)       |
+| `currency`    | string    | No       | `USD`   | ISO 4217 currency code                             |
+| `interval`    | string    | No       | —       | Billing interval (`month`, `year`)                 |
+| `description` | string    | No       | —       | Plan description                                   |
+| `features`    | string\[] | No       | —       | Feature descriptions                               |
+| `usageLimit`  | number    | No       | —       | Maximum usage units per period                     |
+
+### get\_plan[​](#get_plan "Direct link to get_plan")
+
+| Parameter   | Type   | Required | Description                          |
+| ----------- | ------ | -------- | ------------------------------------ |
+| `reference` | string | Yes      | Plan reference (e.g. `pln_F1G2H3J4`) |
+
+### list\_plans[​](#list_plans "Direct link to list_plans")
+
+| Parameter | Type   | Required | Default | Description         |
+| --------- | ------ | -------- | ------- | ------------------- |
+| `limit`   | number | No       | 20      | Maximum results     |
+| `offset`  | number | No       | 0       | Pagination offset   |
+| `type`    | string | No       | —       | Filter by plan type |
+| `status`  | string | No       | —       | Filter by status    |
+
+### update\_plan[​](#update_plan "Direct link to update_plan")
+
+| Parameter     | Type      | Required | Description         |
+| ------------- | --------- | -------- | ------------------- |
+| `reference`   | string    | Yes      | Plan reference      |
+| `name`        | string    | No       | Updated name        |
+| `price`       | number    | No       | Updated price       |
+| `features`    | string\[] | No       | Updated features    |
+| `description` | string    | No       | Updated description |
+
+### delete\_plan[​](#delete_plan "Direct link to delete_plan")
+
+| Parameter   | Type   | Required | Description    |
+| ----------- | ------ | -------- | -------------- |
+| `reference` | string | Yes      | Plan reference |
+
+### list\_plans\_for\_agent[​](#list_plans_for_agent "Direct link to list_plans_for_agent")
+
+| Parameter  | Type   | Required | Description     |
+| ---------- | ------ | -------- | --------------- |
+| `agentRef` | string | Yes      | Agent reference |
+
+***
+
+## Purchase Management[​](#purchase-management "Direct link to Purchase Management")
+
+| Tool                        | Description                                  |
+| --------------------------- | -------------------------------------------- |
+| `list_purchases`            | List all purchases                           |
+| `get_purchase`              | Retrieve a purchase by ID                    |
+| `get_purchases_by_customer` | Purchases for a customer                     |
+| `get_purchases_by_agent`    | Purchases for an agent                       |
+| `cancel_renewal`            | Cancel renewal of a purchase                 |
+| `check_limits`              | Check usage limits for a customer/agent pair |
+
+### list\_purchases[​](#list_purchases "Direct link to list_purchases")
+
+| Parameter | Type   | Required | Description      |
+| --------- | ------ | -------- | ---------------- |
+| `status`  | string | No       | Filter by status |
+
+### get\_purchase[​](#get_purchase "Direct link to get_purchase")
+
+| Parameter | Type   | Required | Description              |
+| --------- | ------ | -------- | ------------------------ |
+| `id`      | string | Yes      | Purchase ID or reference |
+
+### get\_purchases\_by\_customer[​](#get_purchases_by_customer "Direct link to get_purchases_by_customer")
+
+| Parameter     | Type   | Required | Description        |
+| ------------- | ------ | -------- | ------------------ |
+| `customerRef` | string | Yes      | Customer reference |
+| `status`      | string | No       | Filter by status   |
+
+### get\_purchases\_by\_agent[​](#get_purchases_by_agent "Direct link to get_purchases_by_agent")
+
+| Parameter  | Type   | Required | Description      |
+| ---------- | ------ | -------- | ---------------- |
+| `agentRef` | string | Yes      | Agent reference  |
+| `status`   | string | No       | Filter by status |
+
+### cancel\_renewal[​](#cancel_renewal "Direct link to cancel_renewal")
+
+| Parameter     | Type   | Required | Description         |
+| ------------- | ------ | -------- | ------------------- |
+| `purchaseRef` | string | Yes      | Purchase reference  |
+| `reason`      | string | No       | Cancellation reason |
+
+### check\_limits[​](#check_limits "Direct link to check_limits")
+
+Returns usage limit status. If limits are exceeded, includes a checkout URL for the customer to upgrade.
+
+| Parameter     | Type   | Required | Description        |
+| ------------- | ------ | -------- | ------------------ |
+| `customerRef` | string | Yes      | Customer reference |
+| `agentRef`    | string | Yes      | Agent reference    |
+
+***
+
+## Payment & Checkout[​](#payment--checkout "Direct link to Payment & Checkout")
+
+| Tool                      | Description                            |
+| ------------------------- | -------------------------------------- |
+| `create_checkout_session` | Generate a checkout URL                |
+| `create_customer_session` | Generate a customer billing portal URL |
+
+### create\_checkout\_session[​](#create_checkout_session "Direct link to create_checkout_session")
+
+| Parameter     | Type   | Required | Description                              |
+| ------------- | ------ | -------- | ---------------------------------------- |
+| `customerRef` | string | Yes      | Customer reference                       |
+| `agentRef`    | string | Yes      | Agent reference                          |
+| `planRef`     | string | No       | Plan reference (uses default if omitted) |
+| `returnUrl`   | string | No       | Redirect URL after checkout              |
+
+### create\_customer\_session[​](#create_customer_session "Direct link to create_customer_session")
+
+Generates a URL where the customer can manage their billing, payment methods, and purchases.
+
+| Parameter     | Type   | Required | Description        |
+| ------------- | ------ | -------- | ------------------ |
+| `customerRef` | string | Yes      | Customer reference |
+
+***
+
+## Wallet & Revenue[​](#wallet--revenue "Direct link to Wallet & Revenue")
+
+| Tool                 | Description                      |
+| -------------------- | -------------------------------- |
+| `get_wallet_balance` | Get your wallet balance          |
+| `get_agent_balance`  | Get revenue for a specific agent |
+| `get_wallet_stats`   | Get aggregated wallet statistics |
+
+### get\_wallet\_balance[​](#get_wallet_balance "Direct link to get_wallet_balance")
+
+No parameters required. Returns your current wallet balance.
+
+### get\_agent\_balance[​](#get_agent_balance "Direct link to get_agent_balance")
+
+| Parameter  | Type   | Required | Description     |
+| ---------- | ------ | -------- | --------------- |
+| `agentRef` | string | Yes      | Agent reference |
+
+### get\_wallet\_stats[​](#get_wallet_stats "Direct link to get_wallet_stats")
+
+No parameters required. Returns aggregated wallet statistics.
+
+***
+
+## Usage Tracking[​](#usage-tracking "Direct link to Usage Tracking")
+
+| Tool                | Description                  |
+| ------------------- | ---------------------------- |
+| `record_usage`      | Record a single usage event  |
+| `record_bulk_usage` | Record multiple usage events |
+
+### record\_usage[​](#record_usage "Direct link to record_usage")
+
+| Parameter        | Type   | Required | Description                         |
+| ---------------- | ------ | -------- | ----------------------------------- |
+| `customerRef`    | string | Yes      | Customer reference                  |
+| `agentRef`       | string | Yes      | Agent reference                     |
+| `outcome`        | string | Yes      | Outcome (e.g. `success`, `failure`) |
+| `action`         | string | No       | Action name                         |
+| `requestId`      | string | No       | Correlation ID for tracing          |
+| `actionDuration` | number | No       | Duration in milliseconds            |
+
+### record\_bulk\_usage[​](#record_bulk_usage "Direct link to record_bulk_usage")
+
+| Parameter | Type  | Required | Description                                                  |
+| --------- | ----- | -------- | ------------------------------------------------------------ |
+| `events`  | array | Yes      | Array of usage event objects (same fields as `record_usage`) |
+
+***
+
+## Transactions & Refunds[​](#transactions--refunds "Direct link to Transactions & Refunds")
+
+| Tool                    | Description                    |
+| ----------------------- | ------------------------------ |
+| `list_transactions`     | List transactions with filters |
+| `get_transaction`       | Retrieve a transaction         |
+| `get_transaction_stats` | Get transaction statistics     |
+| `create_refund`         | Refund a transaction           |
+
+### list\_transactions[​](#list_transactions "Direct link to list_transactions")
+
+| Parameter  | Type   | Required | Default | Description           |
+| ---------- | ------ | -------- | ------- | --------------------- |
+| `limit`    | number | No       | 20      | Maximum results       |
+| `offset`   | number | No       | 0       | Pagination offset     |
+| `status`   | string | No       | —       | Filter by status      |
+| `fromDate` | string | No       | —       | Start date (ISO 8601) |
+| `toDate`   | string | No       | —       | End date (ISO 8601)   |
+
+### get\_transaction[​](#get_transaction "Direct link to get_transaction")
+
+| Parameter       | Type   | Required | Description    |
+| --------------- | ------ | -------- | -------------- |
+| `transactionId` | string | Yes      | Transaction ID |
+
+### get\_transaction\_stats[​](#get_transaction_stats "Direct link to get_transaction_stats")
+
+| Parameter  | Type   | Required | Description           |
+| ---------- | ------ | -------- | --------------------- |
+| `fromDate` | string | No       | Start date (ISO 8601) |
+| `toDate`   | string | No       | End date (ISO 8601)   |
+
+### create\_refund[​](#create_refund "Direct link to create_refund")
+
+| Parameter             | Type   | Required | Description                                    |
+| --------------------- | ------ | -------- | ---------------------------------------------- |
+| `sourceTransactionId` | string | Yes      | Transaction ID to refund                       |
+| `amount`              | number | No       | Partial refund amount (full refund if omitted) |
+| `reason`              | string | No       | Refund reason                                  |
+
+***
+
+## Token Payments[​](#token-payments "Direct link to Token Payments")
+
+Two-phase token payment tools for the x402 flow. Consumers pre-purchase tokens, and providers lock/settle/release them per request.
+
+| Tool                    | Description                                      |
+| ----------------------- | ------------------------------------------------ |
+| `verify_token_payment`  | Lock tokens from a consumer wallet (verify step) |
+| `settle_token_payment`  | Settle a lock with the actual amount consumed    |
+| `release_token_payment` | Release a lock without charging                  |
+| `get_token_wallet`      | Get token wallet state for a consumer account    |
+| `create_token_topup`    | Create a Stripe payment intent to top up tokens  |
+| `list_token_locks`      | List token locks for a consumer account          |
+| `get_token_lock`        | Get a specific token lock by ID                  |
+
+### verify\_token\_payment[​](#verify_token_payment "Direct link to verify_token_payment")
+
+Reserves tokens from the consumer's wallet. Returns a `lockId` used in subsequent settle or release calls.
+
+| Parameter        | Type   | Required | Description                                |
+| ---------------- | ------ | -------- | ------------------------------------------ |
+| `accountRef`     | string | Yes      | Consumer account reference                 |
+| `productRef`     | string | Yes      | Product reference                          |
+| `providerId`     | string | Yes      | Provider ID                                |
+| `maxAmount`      | number | Yes      | Maximum tokens to reserve (in microunits)  |
+| `externalRunId`  | string | No       | External run/task ID for correlation       |
+| `ttlSeconds`     | number | No       | Lock time-to-live in seconds               |
+| `idempotencyKey` | string | No       | Idempotency key to prevent duplicate locks |
+
+### settle\_token\_payment[​](#settle_token_payment "Direct link to settle_token_payment")
+
+Settles a token lock with the actual amount consumed. Unused tokens are released back to the consumer. The provider is credited.
+
+| Parameter     | Type   | Required | Description                            |
+| ------------- | ------ | -------- | -------------------------------------- |
+| `lockId`      | string | Yes      | Lock ID from verify step               |
+| `amount`      | number | Yes      | Actual tokens consumed (in microunits) |
+| `description` | string | No       | Description of the charge              |
+
+### release\_token\_payment[​](#release_token_payment "Direct link to release_token_payment")
+
+Releases a token lock without charging. All reserved tokens are returned to the consumer.
+
+| Parameter | Type   | Required | Description              |
+| --------- | ------ | -------- | ------------------------ |
+| `lockId`  | string | Yes      | Lock ID from verify step |
+| `reason`  | string | No       | Reason for release       |
+
+### get\_token\_wallet[​](#get_token_wallet "Direct link to get_token_wallet")
+
+| Parameter    | Type   | Required | Description                |
+| ------------ | ------ | -------- | -------------------------- |
+| `accountRef` | string | Yes      | Consumer account reference |
+
+### create\_token\_topup[​](#create_token_topup "Direct link to create_token_topup")
+
+Creates a Stripe PaymentIntent for the consumer to purchase tokens.
+
+| Parameter    | Type   | Required | Description                |
+| ------------ | ------ | -------- | -------------------------- |
+| `accountRef` | string | Yes      | Consumer account reference |
+| `amountUsd`  | number | Yes      | Top-up amount in USD       |
+
+### list\_token\_locks[​](#list_token_locks "Direct link to list_token_locks")
+
+| Parameter    | Type   | Required | Default | Description                                             |
+| ------------ | ------ | -------- | ------- | ------------------------------------------------------- |
+| `accountRef` | string | Yes      | —       | Consumer account reference                              |
+| `status`     | string | No       | —       | Filter by lock status (`active`, `settled`, `released`) |
+| `limit`      | number | No       | 20      | Maximum results                                         |
+| `offset`     | number | No       | 0       | Pagination offset                                       |
+
+### get\_token\_lock[​](#get_token_lock "Direct link to get_token_lock")
+
+| Parameter | Type   | Required | Description |
+| --------- | ------ | -------- | ----------- |
+| `lockId`  | string | Yes      | Lock ID     |
+
+***
+
+## Voucher Payments[​](#voucher-payments "Direct link to Voucher Payments")
+
+Vouchers are pre-funded, multi-use payment tokens that consumers can share with providers. Each voucher has a reserved token balance that is guaranteed available until expiry.
+
+| Tool                      | Description                                           |
+| ------------------------- | ----------------------------------------------------- |
+| `resolve_voucher`         | Resolve a voucher token to check balance and validity |
+| `verify_voucher_payment`  | Reserve tokens within a voucher (verify step)         |
+| `settle_voucher_payment`  | Settle a voucher lock with the actual amount consumed |
+| `release_voucher_payment` | Release a voucher lock without charging               |
+
+### resolve\_voucher[​](#resolve_voucher "Direct link to resolve_voucher")
+
+Decrypts and validates a voucher token without locking any funds. Use this to inspect a voucher before committing to a payment.
+
+| Parameter    | Type   | Required | Description                                            |
+| ------------ | ------ | -------- | ------------------------------------------------------ |
+| `token`      | string | Yes      | Encrypted voucher token                                |
+| `productRef` | string | No       | Product reference to validate against provider budgets |
+| `amount`     | number | No       | Amount to check availability for                       |
+
+### verify\_voucher\_payment[​](#verify_voucher_payment "Direct link to verify_voucher_payment")
+
+Reserves tokens from the voucher's balance. Returns a `lockId` for settle or release.
+
+| Parameter    | Type   | Required | Description                               |
+| ------------ | ------ | -------- | ----------------------------------------- |
+| `token`      | string | Yes      | Encrypted voucher token                   |
+| `maxAmount`  | number | Yes      | Maximum tokens to reserve (in microunits) |
+| `productRef` | string | Yes      | Product reference                         |
+| `providerId` | string | Yes      | Provider ID                               |
+| `ttlSeconds` | number | No       | Lock time-to-live in seconds              |
+
+### settle\_voucher\_payment[​](#settle_voucher_payment "Direct link to settle_voucher_payment")
+
+Settles a voucher lock. Unused tokens remain with the voucher. The provider is credited.
+
+| Parameter     | Type   | Required | Description                            |
+| ------------- | ------ | -------- | -------------------------------------- |
+| `lockId`      | string | Yes      | Lock ID from verify step               |
+| `amount`      | number | Yes      | Actual tokens consumed (in microunits) |
+| `description` | string | No       | Description of the charge              |
+
+### release\_voucher\_payment[​](#release_voucher_payment "Direct link to release_voucher_payment")
+
+Releases a voucher lock without charging. Reserved tokens are returned to the voucher balance.
+
+| Parameter | Type   | Required | Description              |
+| --------- | ------ | -------- | ------------------------ |
+| `lockId`  | string | Yes      | Lock ID from verify step |
+| `reason`  | string | No       | Reason for release       |

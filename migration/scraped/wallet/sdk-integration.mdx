@@ -1,0 +1,175 @@
+---
+title: "SDK Integration"
+description: "This guide shows how to integrate token-based payments into your service using the SolvaPay SDK. The SDK handles the full verify → execute → settle lifecycle automatically through the  API."
+---
+
+## Installation[​](#installation "Direct link to Installation")
+
+```
+npm install @solvapay/server
+```
+
+## Quick Start[​](#quick-start "Direct link to Quick Start")
+
+```
+import { createSolvaPay } from '@solvapay/server'const solvaPay = createSolvaPay({  apiKey: process.env.SOLVAPAY_SECRET_KEY,})
+```
+
+The SDK reads `SOLVAPAY_SECRET_KEY` from the environment by default, so you can omit the `apiKey` parameter if the env var is set.
+
+## Payment Schemes[​](#payment-schemes "Direct link to Payment Schemes")
+
+The `payable()` method accepts a `scheme` option that determines how payments are processed:
+
+### `limits` (Default)[​](#limits-default "Direct link to limits-default")
+
+Subscription-based access with usage quotas. No token locking — the SDK checks if the consumer's plan allows the request and tracks usage.
+
+```
+const handler = solvaPay.payable({  product: 'prd_myapi',  plan: 'pln_premium',  scheme: 'limits', // default, can be omitted})
+```
+
+### `upto` — Per-Request Token Billing[​](#upto--per-request-token-billing "Direct link to upto--per-request-token-billing")
+
+Two-phase token locking from the consumer's wallet. The SDK reserves tokens before your code runs and settles the actual amount after.
+
+```
+const handler = solvaPay.payable({  scheme: 'upto',  product: 'prd_myapi',  providerId: 'prv_xxx',  maxPrice: 500, // max 500 tokens per request  ttlSeconds: 1800, // lock TTL (default: 30 minutes)})
+```
+
+### `voucher` — Prepaid Voucher Tokens[​](#voucher--prepaid-voucher-tokens "Direct link to voucher--prepaid-voucher-tokens")
+
+Two-phase payment using a voucher token presented by the consumer. The consumer creates a voucher in their wallet, receives an encrypted token (`spay_...`), and presents it to the provider.
+
+```
+const handler = solvaPay.payable({  scheme: 'voucher',  product: 'prd_myapi',  providerId: 'prv_xxx',  maxPrice: 500,})
+```
+
+## Framework Adapters[​](#framework-adapters "Direct link to Framework Adapters")
+
+The `payable()` method returns a `PayableFunction` with adapters for different frameworks.
+
+### Express / Fastify[​](#express--fastify "Direct link to Express / Fastify")
+
+```
+const payable = solvaPay.payable({  scheme: 'upto',  product: 'prd_myapi',  providerId: 'prv_xxx',  maxPrice: 1000,})app.post('/analyze', payable.http(async (args) => {  const result = await runAnalysis(args.body)  await args.settle(result.tokenCost)  return result}))
+```
+
+### Next.js App Router[​](#nextjs-app-router "Direct link to Next.js App Router")
+
+```
+const payable = solvaPay.payable({  scheme: 'upto',  product: 'prd_myapi',  providerId: 'prv_xxx',  maxPrice: 1000,})export const POST = payable.next(async (args) => {  const result = await runAnalysis(args)  await args.settle(result.tokenCost)  return Response.json(result)})
+```
+
+### MCP Server[​](#mcp-server "Direct link to MCP Server")
+
+```
+const payable = solvaPay.payable({  scheme: 'upto',  product: 'prd_myapi',  providerId: 'prv_xxx',  maxPrice: 500,})server.tool('analyze', payable.mcp(async (args) => {  const result = await expensiveAnalysis(args)  await args.settle(result.tokenCost)  return result}))
+```
+
+### Pure Function[​](#pure-function "Direct link to Pure Function")
+
+```
+const payable = solvaPay.payable({  scheme: 'upto',  product: 'prd_myapi',  providerId: 'prv_xxx',  maxPrice: 500,})const protectedFn = await payable.function(async (args) => {  const result = await doWork(args)  await args.settle(result.cost)  return result})// Call with auth contextconst result = await protectedFn({  auth: { account_ref: 'acc_xxx' },  input: 'some data',})
+```
+
+## The `settle` Callback[​](#the-settle-callback "Direct link to the-settle-callback")
+
+When using `upto` or `voucher` schemes, your business logic receives a `settle` function in the args:
+
+```
+await args.settle(amount, description?)
+```
+
+| Parameter     | Type      | Description                                   |
+| ------------- | --------- | --------------------------------------------- |
+| `amount`      | `number`  | Actual tokens consumed (must be ≤ `maxPrice`) |
+| `description` | `string?` | Optional description for the ledger entry     |
+
+**Important behaviors:**
+
+* `settle` can only be called **once** per request
+* If your handler completes **without calling `settle`**, the lock is automatically **released** (no charge)
+* If your handler **throws an error**, the lock is automatically **released** (no charge)
+* Settling with `amount: 0` is valid — the lock is released and the provider receives nothing
+
+## Voucher Authentication[​](#voucher-authentication "Direct link to Voucher Authentication")
+
+For the `voucher` scheme, consumers present their voucher token in the request:
+
+### MCP / Function Args[​](#mcp--function-args "Direct link to MCP / Function Args")
+
+```
+// Consumer passes voucher token in authconst result = await protectedFn({  auth: { voucher_token: 'spay_abc123...' },  input: 'analyze this',})
+```
+
+### HTTP Header[​](#http-header "Direct link to HTTP Header")
+
+```
+POST /analyze HTTP/1.1x-solvapay-voucher: spay_abc123...Content-Type: application/json
+```
+
+The SDK extracts the token from `args.auth.voucher_token` or the `x-solvapay-voucher` header automatically.
+
+## Additional Context in Args[​](#additional-context-in-args "Direct link to Additional Context in Args")
+
+For `upto` and `voucher` schemes, the SDK injects additional context into your handler args:
+
+| Field              | Scheme  | Description                                      |
+| ------------------ | ------- | ------------------------------------------------ |
+| `args._lockId`     | both    | The token lock ID                                |
+| `args.settle`      | both    | Settlement callback                              |
+| `args._voucherId`  | voucher | The voucher ID                                   |
+| `args._accountRef` | voucher | Consumer account reference                       |
+| `args._identity`   | voucher | Consumer identity (fingerprint, publicKey)       |
+| `args._remaining`  | voucher | Remaining voucher balance after this reservation |
+
+## Low-Level Client Methods[​](#low-level-client-methods "Direct link to Low-Level Client Methods")
+
+If you need direct control over the verify/settle/release lifecycle (without the `payable()` wrapper), you can use the API client directly:
+
+### Token Lock (upto)[​](#token-lock-upto "Direct link to Token Lock (upto)")
+
+```
+// Verify (lock tokens)const lock = await solvaPay.verifyPayment({  accountRef: 'acc_xxx',  productRef: 'prd_myapi',  providerId: 'prv_xxx',  maxAmount: 500,  ttlSeconds: 1800,})// ... execute business logic ...// Settle (charge actual amount)const result = await solvaPay.settlePayment({  lockId: lock.lockId,  amount: 350,  description: 'API analysis',})// Or release (no charge)await solvaPay.releasePayment({  lockId: lock.lockId,  reason: 'cancelled',})
+```
+
+### Voucher Payment[​](#voucher-payment "Direct link to Voucher Payment")
+
+```
+// Verify voucherconst lock = await solvaPay.apiClient.verifyVoucherPayment({  token: 'spay_abc123...',  maxAmount: 500,  productRef: 'prd_myapi',  providerId: 'prv_xxx',})// ... execute business logic ...// Settleconst result = await solvaPay.apiClient.settleVoucherPayment({  lockId: lock.lockId,  amount: 200,  description: 'Analysis complete',})
+```
+
+### Read-Only Voucher Resolution[​](#read-only-voucher-resolution "Direct link to Read-Only Voucher Resolution")
+
+To inspect a voucher without locking tokens (e.g., to check balance before committing):
+
+```
+const info = await solvaPay.apiClient.resolveVoucher({  token: 'spay_abc123...',  productRef: 'prd_myapi',})console.log(info.balance)    // remaining tokensconsole.log(info.accountRef) // consumer accountconsole.log(info.status)     // 'active'
+```
+
+## Wallet Queries[​](#wallet-queries "Direct link to Wallet Queries")
+
+```
+const wallet = await solvaPay.getTokenWallet('acc_xxx')console.log(wallet.balance)           // total tokensconsole.log(wallet.lockedAmount)      // reserved tokensconsole.log(wallet.availableBalance)  // balance - lockedconsole.log(wallet.walletStatus)      // 'active' or 'frozen'
+```
+
+## Error Handling[​](#error-handling "Direct link to Error Handling")
+
+The SDK throws `SolvaPayError` for API failures. Common error scenarios:
+
+| Error                          | Cause                                     |
+| ------------------------------ | ----------------------------------------- |
+| `Insufficient tokens`          | Consumer's available balance \< maxAmount |
+| `Lock not found`               | Invalid lock ID                           |
+| `Lock is already settled`      | Trying to settle/release a completed lock |
+| `Lock is already released`     | Trying to settle a released lock          |
+| `Wallet is frozen`             | Consumer's wallet is frozen (chargeback)  |
+| `Voucher has expired`          | Voucher past its expiry date              |
+| `Insufficient voucher balance` | Voucher remaining \< maxAmount            |
+
+## Next Steps[​](#next-steps "Direct link to Next Steps")
+
+* [Provider Integration](/wallet/provider-integration) — Track earnings and receive payouts
+* [Vouchers](/wallet/vouchers) — Deep dive into voucher mechanics
+* [Security & Compliance](/wallet/security) — Audit trails and chargeback handling

@@ -1,0 +1,61 @@
+name: Sync TypeScript SDK docs
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [sync-typescript-sdk-docs]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout docs repo
+        uses: actions/checkout@v4
+
+      - name: Checkout SDK source repo
+        uses: actions/checkout@v4
+        with:
+          repository: solvapay/solvapay-sdk
+          path: _sdk
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Detect SDK docs source
+        run: |
+          if [ -d "$GITHUB_WORKSPACE/_sdk/docs" ]; then
+            echo "SDK_DOCS_SOURCE_DIR=$GITHUB_WORKSPACE/_sdk/docs" >> "$GITHUB_ENV"
+          else
+            echo "Missing SDK docs source directory: $GITHUB_WORKSPACE/_sdk/docs" >&2
+            exit 1
+          fi
+
+      - name: Sync TypeScript SDK docs
+        run: npx --yes tsx scripts/sync-typescript-sdk-docs.ts
+
+      - name: Install Mint CLI
+        run: npm install -g mint@latest
+
+      - name: Validate docs build
+        run: mint validate
+
+      - name: Check broken links
+        run: mint broken-links
+
+      - name: Create sync PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/sync-typescript-sdk-docs
+          title: "chore(docs): sync TypeScript SDK docs"
+          body: |
+            Automated sync of `sdks/typescript/**` from upstream SDK docs source.
+
+            - Ran `npx --yes tsx scripts/sync-typescript-sdk-docs.ts`
+            - Ran `mint validate`
+            - Ran `mint broken-links`
+          commit-message: "chore(docs): sync TypeScript SDK docs"

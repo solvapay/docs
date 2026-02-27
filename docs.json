@@ -55,7 +55,7 @@
           },
           {
             "group": "MCP Server",
-            "icon": "bot",
+            "icon": "server",
             "pages": [
               "mcp-server/getting-started",
               "mcp-server/installation",

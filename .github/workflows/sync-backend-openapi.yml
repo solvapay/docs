@@ -1,0 +1,42 @@
+name: Sync backend OpenAPI docs (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      openapi_url:
+        description: Optional OpenAPI URL override
+        required: false
+        type: string
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout docs repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Resolve OpenAPI URL
+        run: |
+          if [ -n "${{ github.event.inputs.openapi_url }}" ]; then
+            echo "BACKEND_OPENAPI_URL=${{ github.event.inputs.openapi_url }}" >> "$GITHUB_ENV"
+          else
+            echo "BACKEND_OPENAPI_URL=https://api-dev.solvapay.com/v1/openapi.json" >> "$GITHUB_ENV"
+          fi
+
+      - name: Sync backend OpenAPI
+        run: npx --yes tsx scripts/sync-backend-openapi.ts
+
+      - name: Install Mint CLI
+        run: npm install -g mint@latest
+
+      - name: Validate docs build
+        run: mint validate
+        continue-on-error: true
+
+      - name: Check broken links
+        run: mint broken-links

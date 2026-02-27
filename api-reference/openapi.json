@@ -1,72 +1,1737 @@
 {
-  "openapi": "3.1.0",
-  "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
+  "components": {
+    "schemas": {
+      "AuthResponse": {
+        "properties": {},
+        "type": "object"
+      },
+      "CancelPurchaseRequest": {
+        "properties": {
+          "reason": {
+            "description": "Reason for cancellation",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CancelRenewalRequest": {
+        "properties": {},
+        "type": "object"
+      },
+      "ChangePassword": {
+        "properties": {},
+        "type": "object"
+      },
+      "CheckLimitRequest": {
+        "properties": {
+          "customerRef": {
+            "description": "Customer reference identifier",
+            "example": "cus_3C4D5E6F",
+            "type": "string"
+          },
+          "planRef": {
+            "description": "Plan reference to pre-select when creating a checkout session. If provided and the customer needs to purchase, the checkout page skips plan selection and shows the payment form directly.",
+            "example": "pln_2B3C4D5E",
+            "type": "string"
+          },
+          "productRef": {
+            "description": "Product reference identifier",
+            "example": "prd_1A2B3C4D",
+            "type": "string"
+          }
+        },
+        "required": [
+          "customerRef",
+          "productRef"
+        ],
+        "type": "object"
+      },
+      "CheckName": {
+        "properties": {},
+        "type": "object"
+      },
+      "CheckoutSessionResponse": {
+        "properties": {
+          "amount": {
+            "description": "Amount in cents",
+            "example": 2999,
+            "type": "number"
+          },
+          "checkoutUrl": {
+            "description": "Checkout URL to open the checkout page",
+            "example": "https://solvapay.com/customer/checkout?id=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
+            "type": "string"
+          },
+          "currency": {
+            "description": "Currency code",
+            "example": "USD",
+            "type": "string"
+          },
+          "id": {
+            "description": "Checkout session ID",
+            "example": "507f1f77bcf86cd799439011",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "Public session ID used in checkout URL",
+            "example": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
+            "type": "string"
+          },
+          "status": {
+            "description": "Session status",
+            "example": "active",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "sessionId",
+          "amount",
+          "currency",
+          "status",
+          "checkoutUrl"
+        ],
+        "type": "object"
+      },
+      "CreateAdminAgent": {
+        "properties": {},
+        "type": "object"
+      },
+      "CreateAgentRequest": {
+        "properties": {},
+        "type": "object"
+      },
+      "CreateCheckoutSessionRequest": {
+        "properties": {
+          "customerReference": {
+            "description": "Customer reference",
+            "example": "cus_3c4d5e6f7g8h",
+            "type": "string"
+          },
+          "planRef": {
+            "description": "Plan reference (optional)",
+            "example": "pln_2b3c4d5e6f7g",
+            "type": "string"
+          },
+          "productRef": {
+            "description": "Product reference (required)",
+            "example": "prd_1a2b3c4d5e6f",
+            "type": "string"
+          }
+        },
+        "required": [
+          "customerReference",
+          "productRef"
+        ],
+        "type": "object"
+      },
+      "CreateCustomerRequest": {
+        "properties": {
+          "email": {
+            "description": "Customer email address (required)",
+            "example": "customer@example.com",
+            "type": "string"
+          },
+          "externalRef": {
+            "description": "External reference ID from your auth system to map this customer to an auth user (optional)",
+            "example": "auth_user_12345",
+            "type": "string"
+          },
+          "name": {
+            "description": "Customer full name (optional)",
+            "example": "John Doe",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "type": "object"
+      },
+      "CreateCustomerSessionRequest": {
+        "properties": {
+          "customerRef": {
+            "description": "Customer reference identifier",
+            "example": "cus_3c4d5e6f7g8h",
+            "type": "string"
+          }
+        },
+        "required": [
+          "customerRef"
+        ],
+        "type": "object"
+      },
+      "CreateCustomerSessionResponse": {
+        "properties": {
+          "customerUrl": {
+            "description": "Full customer URL based on backend configuration (ready to redirect customer)",
+            "example": "https://solvapay.com/customer/manage?id=e3f1c2d4b6a89f001122334455667788",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "Customer session ID/token",
+            "example": "e3f1c2d4b6a89f001122334455667788",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sessionId",
+          "customerUrl"
+        ],
+        "type": "object"
+      },
+      "CreatePlanRequest": {
+        "properties": {
+          "accessExpiryDays": {
+            "description": "Access expiry in days",
+            "example": 30,
+            "type": "number"
+          },
+          "basePrice": {
+            "description": "Base price for hybrid plans",
+            "example": 29.99,
+            "type": "number"
+          },
+          "billingCycle": {
+            "description": "Billing cycle (required for recurring/hybrid, optional for post-paid usage-based)",
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "yearly",
+              "custom"
+            ],
+            "example": "monthly",
+            "type": "string"
+          },
+          "billingModel": {
+            "description": "Billing model for usage-based plans",
+            "enum": [
+              "pre-paid",
+              "post-paid"
+            ],
+            "example": "pre-paid",
+            "type": "string"
+          },
+          "currency": {
+            "description": "Currency code (ISO 4217)",
+            "enum": [
+              "USD",
+              "EUR",
+              "GBP",
+              "SEK",
+              "NOK",
+              "DKK",
+              "CAD",
+              "AUD",
+              "JPY",
+              "CHF",
+              "PLN",
+              "CZK",
+              "HUF",
+              "RON",
+              "BGN",
+              "HRK",
+              "RSD",
+              "MKD",
+              "BAM",
+              "ALL",
+              "ISK",
+              "TRY",
+              "RUB",
+              "UAH",
+              "BYN",
+              "MDL",
+              "GEL",
+              "AMD",
+              "AZN",
+              "KZT",
+              "KGS",
+              "TJS",
+              "TMT",
+              "UZS",
+              "MNT",
+              "CNY",
+              "KRW",
+              "THB",
+              "VND",
+              "IDR",
+              "MYR",
+              "SGD",
+              "PHP",
+              "INR",
+              "PKR",
+              "BDT",
+              "LKR",
+              "NPR",
+              "AFN",
+              "IRR",
+              "IQD",
+              "JOD",
+              "KWD",
+              "LBP",
+              "OMR",
+              "QAR",
+              "SAR",
+              "SYP",
+              "AED",
+              "YER",
+              "ILS",
+              "EGP",
+              "MAD",
+              "TND",
+              "DZD",
+              "LYD",
+              "SDG",
+              "ETB",
+              "KES",
+              "TZS",
+              "UGX",
+              "RWF",
+              "BIF",
+              "DJF",
+              "SOS",
+              "ERN",
+              "SLL",
+              "GMD",
+              "GNF",
+              "CVE",
+              "STN",
+              "AOA",
+              "ZAR",
+              "BWP",
+              "SZL",
+              "LSL",
+              "NAD",
+              "ZMW",
+              "ZWL",
+              "MZN",
+              "MWK",
+              "MGA",
+              "MUR",
+              "SCR",
+              "KMF",
+              "MVR"
+            ],
+            "example": "USD",
+            "type": "string"
+          },
+          "default": {
+            "description": "Whether this is the default plan",
+            "example": false,
+            "type": "boolean"
+          },
+          "description": {
+            "description": "Plan description",
+            "example": "Basic recurring plan with monthly billing",
+            "type": "string"
+          },
+          "features": {
+            "description": "Plan features (generic key/value, shape is provider-defined)",
+            "example": {
+              "apiAccess": true,
+              "prioritySupport": false
+            },
+            "type": "object"
+          },
+          "freeUnits": {
+            "description": "Number of free units included",
+            "example": 100,
+            "type": "number"
+          },
+          "isFreeTier": {
+            "description": "Whether this is a free tier plan",
+            "example": false,
+            "type": "boolean"
+          },
+          "limits": {
+            "description": "Usage limits (shape varies by plan type)",
+            "example": {
+              "maxTransactions": 1000
+            },
+            "type": "object"
+          },
+          "maxActiveUsers": {
+            "description": "Maximum number of active users",
+            "example": 10,
+            "type": "number"
+          },
+          "metadata": {
+            "description": "Additional metadata",
+            "type": "object"
+          },
+          "name": {
+            "description": "Plan name",
+            "example": "Basic Plan",
+            "type": "string"
+          },
+          "price": {
+            "description": "Plan price",
+            "example": 29.99,
+            "type": "number"
+          },
+          "pricePerUnit": {
+            "description": "Price per unit for usage-based plans",
+            "example": 0.01,
+            "type": "number"
+          },
+          "quota": {
+            "description": "Usage quota for usage-based plans",
+            "example": 10000,
+            "type": "number"
+          },
+          "requiresPayment": {
+            "description": "Whether payment is required",
+            "example": true,
+            "type": "boolean"
+          },
+          "rolloverUnusedUnits": {
+            "description": "Whether to rollover unused units",
+            "example": false,
+            "type": "boolean"
+          },
+          "setupFee": {
+            "description": "Setup fee",
+            "example": 0,
+            "type": "number"
+          },
+          "status": {
+            "description": "Plan status",
+            "enum": [
+              "active",
+              "inactive",
+              "archived"
+            ],
+            "example": "active",
+            "type": "string"
+          },
+          "trialDays": {
+            "description": "Trial days",
+            "example": 7,
+            "type": "number"
+          },
+          "type": {
+            "description": "Plan type",
+            "enum": [
+              "recurring",
+              "usage-based",
+              "hybrid",
+              "one-time"
+            ],
+            "example": "recurring",
+            "type": "string"
+          },
+          "unit": {
+            "description": "Unit name for usage-based plans",
+            "example": "request",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "CreatePreregistrationDto": {
+        "properties": {
+          "businessType": {
+            "example": "SaaS",
+            "type": "string"
+          },
+          "companyName": {
+            "example": "Acme Corp",
+            "type": "string"
+          },
+          "customFields": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "email": {
+            "example": "jane@company.com",
+            "type": "string"
+          },
+          "fullName": {
+            "example": "Jane Smith",
+            "type": "string"
+          },
+          "useCase": {
+            "example": "Purchase billing for our platform",
+            "maxLength": 500,
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "fullName",
+          "companyName"
+        ],
+        "type": "object"
+      },
+      "CreateProductRequest": {
+        "properties": {
+          "config": {
+            "description": "Product-specific configuration",
+            "type": "object"
+          },
+          "description": {
+            "description": "Product description",
+            "example": "AI-powered writing tool",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "URL to the product image",
+            "type": "string"
+          },
+          "isMcpPay": {
+            "default": false,
+            "description": "Whether this product uses MCP Pay proxy",
+            "type": "boolean"
+          },
+          "metadata": {
+            "description": "Arbitrary key-value metadata",
+            "type": "object"
+          },
+          "name": {
+            "description": "Product name",
+            "example": "AI Writing Assistant",
+            "type": "string"
+          },
+          "productType": {
+            "description": "Free-form product type defined by the provider",
+            "example": "Coding Assistant",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "CreateSecretKey": {
+        "properties": {},
+        "type": "object"
+      },
+      "CreateUser": {
+        "properties": {},
+        "type": "object"
+      },
+      "CreateWebhookEndpointDto": {
+        "properties": {},
+        "type": "object"
+      },
+      "CustomerResponse": {
+        "properties": {
+          "email": {
+            "description": "Customer email address",
+            "example": "customer@example.com",
+            "type": "string"
+          },
+          "externalRef": {
+            "description": "External reference ID from your auth system (if set during creation or update)",
+            "example": "auth_user_12345",
+            "type": "string"
+          },
+          "name": {
+            "description": "Customer full name",
+            "example": "John Doe",
+            "type": "string"
+          },
+          "purchases": {
+            "description": "Active purchases",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseInfo"
+            },
+            "type": "array"
+          },
+          "reference": {
+            "description": "Customer reference identifier",
+            "example": "cus_3c4d5e6f7g8h",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference",
+          "name",
+          "email"
+        ],
+        "type": "object"
+      },
+      "CustomerSessionResponse": {
+        "properties": {
+          "customerUrl": {
+            "description": "Customer URL to open the customer page",
+            "example": "https://solvapay.com/customer/manage?id=e3f1c2d4b6a89f001122334455667788",
+            "type": "string"
+          },
+          "id": {
+            "description": "Customer session ID",
+            "example": "507f1f77bcf86cd799439011",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "Public session ID used in customer URL",
+            "example": "e3f1c2d4b6a89f001122334455667788",
+            "type": "string"
+          },
+          "status": {
+            "description": "Session status",
+            "example": "active",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "sessionId",
+          "status",
+          "customerUrl"
+        ],
+        "type": "object"
+      },
+      "DynamicClientRegistrationDto": {
+        "properties": {
+          "client_name": {
+            "example": "My AI Agent",
+            "type": "string"
+          },
+          "client_uri": {
+            "example": "https://example.com",
+            "type": "string"
+          },
+          "grant_types": {
+            "example": [
+              "authorization_code",
+              "refresh_token"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "logo_uri": {
+            "example": "https://example.com/logo.png",
+            "type": "string"
+          },
+          "policy_uri": {
+            "example": "https://example.com/policy",
+            "type": "string"
+          },
+          "redirect_uris": {
+            "example": [
+              "https://agent.example.com/callback"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "response_types": {
+            "example": [
+              "code"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "software_id": {
+            "example": "agent-123",
+            "type": "string"
+          },
+          "software_version": {
+            "example": "1.0.0",
+            "type": "string"
+          },
+          "tos_uri": {
+            "example": "https://example.com/tos",
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_name",
+          "redirect_uris"
+        ],
+        "type": "object"
+      },
+      "DynamicClientRegistrationResponseDto": {
+        "properties": {
+          "client_id": {
+            "example": "client-id-123",
+            "type": "string"
+          },
+          "client_id_issued_at": {
+            "example": 1734567890,
+            "type": "number"
+          },
+          "client_name": {
+            "example": "My AI Agent",
+            "type": "string"
+          },
+          "client_secret": {
+            "example": "client-secret-456",
+            "type": "string"
+          },
+          "client_secret_expires_at": {
+            "example": 0,
+            "type": "number"
+          },
+          "grant_types": {
+            "example": [
+              "authorization_code",
+              "refresh_token"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "redirect_uris": {
+            "example": [
+              "https://agent.example.com/callback"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "response_types": {
+            "example": [
+              "code"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scope": {
+            "example": "openid profile email",
+            "type": "string"
+          },
+          "token_endpoint_auth_method": {
+            "example": "client_secret_basic",
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_id",
+          "client_secret",
+          "client_id_issued_at",
+          "client_secret_expires_at",
+          "client_name",
+          "redirect_uris",
+          "grant_types",
+          "response_types",
+          "scope",
+          "token_endpoint_auth_method"
+        ],
+        "type": "object"
+      },
+      "ExecuteAnalyticsQuery": {
+        "properties": {},
+        "type": "object"
+      },
+      "ExecuteMultipleQueries": {
+        "properties": {},
+        "type": "object"
+      },
+      "ForgotPassword": {
+        "properties": {},
+        "type": "object"
+      },
+      "GetCustomerSessionResponse": {
+        "properties": {
+          "createdAt": {
+            "description": "Session creation date",
+            "example": "2025-01-01T11:45:00.000Z",
+            "type": "string"
+          },
+          "customer": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CustomerResponse"
+              }
+            ],
+            "description": "Customer object from session data"
+          },
+          "customerUrl": {
+            "description": "Full customer URL based on backend configuration (ready to redirect customer)",
+            "example": "https://solvapay.com/customer/manage?id=e3f1c2d4b6a89f001122334455667788",
+            "type": "string"
+          },
+          "expiresAt": {
+            "description": "Session expiration date",
+            "example": "2025-01-01T12:00:00.000Z",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "Customer session ID/token",
+            "example": "e3f1c2d4b6a89f001122334455667788",
+            "type": "string"
+          },
+          "status": {
+            "description": "Session status",
+            "enum": [
+              "active",
+              "expired",
+              "used"
+            ],
+            "example": "active",
+            "type": "string"
+          },
+          "updatedAt": {
+            "description": "Session last update date",
+            "example": "2025-01-01T11:45:00.000Z",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sessionId",
+          "status",
+          "customerUrl",
+          "expiresAt",
+          "customer",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "GithubLoginDto": {
+        "properties": {
+          "code": {
+            "description": "The authorization code returned by GitHub",
+            "type": "string"
+          },
+          "redirect_uri": {
+            "description": "The redirect URI used in the initial authorization request",
+            "type": "string"
+          },
+          "state": {
+            "description": "The state parameter returned by GitHub (contains client_id)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "redirect_uri",
+          "state"
+        ],
+        "type": "object"
+      },
+      "GoogleLoginDto": {
+        "properties": {
+          "code": {
+            "description": "The authorization code returned by Google",
+            "type": "string"
+          },
+          "redirect_uri": {
+            "description": "The redirect URI used in the initial authorization request",
+            "type": "string"
+          },
+          "state": {
+            "description": "The state parameter returned by Google (contains client_id)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "redirect_uri",
+          "state"
+        ],
+        "type": "object"
+      },
+      "LimitResponse": {
+        "properties": {
+          "checkoutSessionId": {
+            "description": "Checkout session ID if payment is required",
+            "example": "e3f1c2d4b6a89f001122334455667788",
+            "type": "string"
+          },
+          "checkoutUrl": {
+            "description": "Checkout URL if payment is required",
+            "example": "https://solvapay.com/customer/checkout?id=e3f1c2d4b6a89f001122334455667788",
+            "type": "string"
+          },
+          "remaining": {
+            "description": "Remaining usage units before hitting the limit",
+            "example": 997,
+            "type": "number"
+          },
+          "withinLimits": {
+            "description": "Whether the customer is within their usage limits",
+            "example": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "withinLimits",
+          "remaining"
+        ],
+        "type": "object"
+      },
+      "Login": {
+        "properties": {},
+        "type": "object"
+      },
+      "PurchaseInfo": {
+        "properties": {
+          "amount": {
+            "description": "Amount paid in original currency (in cents)",
+            "example": 9900,
+            "type": "number"
+          },
+          "cancellationReason": {
+            "description": "Reason for cancellation",
+            "example": "Customer request",
+            "type": "string"
+          },
+          "cancelledAt": {
+            "description": "When purchase was cancelled",
+            "example": "2025-10-28T10:00:00Z",
+            "type": "string"
+          },
+          "currency": {
+            "description": "Currency code",
+            "example": "USD",
+            "type": "string"
+          },
+          "endDate": {
+            "description": "End date of purchase",
+            "example": "2025-11-27T10:00:00Z",
+            "type": "string"
+          },
+          "planName": {
+            "description": "Plan name",
+            "example": "Pro Plan",
+            "type": "string"
+          },
+          "productReference": {
+            "description": "Product reference",
+            "example": "prd_abc123",
+            "type": "string"
+          },
+          "reference": {
+            "description": "Purchase reference",
+            "example": "sub_abc123",
+            "type": "string"
+          },
+          "startDate": {
+            "description": "Start date",
+            "example": "2025-10-27T10:00:00Z",
+            "type": "string"
+          },
+          "status": {
+            "description": "Purchase status",
+            "example": "active",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference",
+          "planName",
+          "status",
+          "startDate",
+          "amount",
+          "currency"
+        ],
+        "type": "object"
+      },
+      "RequestEmailChange": {
+        "properties": {},
+        "type": "object"
+      },
+      "ResetPassword": {
+        "properties": {},
+        "type": "object"
+      },
+      "SdkProductResponse": {
+        "properties": {
+          "balance": {
+            "description": "Product balance in cents",
+            "example": 0,
+            "type": "number"
+          },
+          "config": {
+            "description": "Product-specific configuration",
+            "type": "object"
+          },
+          "createdAt": {
+            "description": "Creation timestamp",
+            "type": "string"
+          },
+          "description": {
+            "description": "Product description",
+            "type": "string"
+          },
+          "id": {
+            "description": "Product ID",
+            "example": "507f1f77bcf86cd799439011",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "URL to the product image",
+            "type": "string"
+          },
+          "isMcpPay": {
+            "description": "Whether this product uses MCP Pay proxy",
+            "example": false,
+            "type": "boolean"
+          },
+          "metadata": {
+            "description": "Arbitrary key-value metadata",
+            "type": "object"
+          },
+          "name": {
+            "description": "Product name",
+            "example": "AI Writing Assistant",
+            "type": "string"
+          },
+          "plans": {
+            "description": "Plans associated with this product",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "productType": {
+            "description": "Free-form product type",
+            "type": "string"
+          },
+          "reference": {
+            "description": "Product reference",
+            "example": "prd_1A2B3C4D",
+            "type": "string"
+          },
+          "status": {
+            "description": "Product status",
+            "example": "active",
+            "type": "string"
+          },
+          "totalTransactions": {
+            "description": "Total number of transactions",
+            "example": 0,
+            "type": "number"
+          },
+          "updatedAt": {
+            "description": "Last update timestamp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "name",
+          "status",
+          "balance",
+          "totalTransactions",
+          "isMcpPay",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "Signup": {
+        "properties": {},
+        "type": "object"
+      },
+      "ThemeModeColorsDto": {
+        "properties": {
+          "background": {
+            "description": "Page background color",
+            "example": "#f7f7f8",
+            "type": "string"
+          },
+          "secondary": {
+            "description": "Secondary/muted text color",
+            "example": "#5c5c5c",
+            "type": "string"
+          },
+          "surface": {
+            "description": "Card/surface background color",
+            "example": "#ffffff",
+            "type": "string"
+          },
+          "text": {
+            "description": "Primary text color",
+            "example": "#181818",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ThemeOverridesDto": {
+        "properties": {
+          "dark": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ThemeModeColorsDto"
+              }
+            ],
+            "description": "Dark mode color overrides"
+          },
+          "light": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ThemeModeColorsDto"
+              }
+            ],
+            "description": "Light mode color overrides"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateAdminAgent": {
+        "properties": {},
+        "type": "object"
+      },
+      "UpdateAgentRequest": {
+        "properties": {},
+        "type": "object"
+      },
+      "UpdateBrandThemeDto": {
+        "properties": {
+          "brandName": {
+            "description": "Provider's brand name displayed on hosted pages",
+            "example": "Acme Corp",
+            "type": "string"
+          },
+          "fontFamily": {
+            "default": "Inter",
+            "description": "Font family for hosted pages",
+            "example": "Inter",
+            "type": "string"
+          },
+          "fontSize": {
+            "default": "16px",
+            "description": "Base font size",
+            "example": "16px",
+            "type": "string"
+          },
+          "primaryColor": {
+            "description": "Primary/accent color in hex format",
+            "example": "#3182ce",
+            "type": "string"
+          },
+          "themes": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ThemeOverridesDto"
+              }
+            ],
+            "description": "Per-mode color overrides for light and dark themes"
+          }
+        },
+        "required": [
+          "brandName",
+          "primaryColor"
+        ],
+        "type": "object"
+      },
+      "UpdateConnectedAccount": {
+        "properties": {},
+        "type": "object"
+      },
+      "UpdatePlanRequest": {
+        "properties": {},
+        "type": "object"
+      },
+      "UpdatePreferences": {
+        "properties": {},
+        "type": "object"
+      },
+      "UpdateProductRequest": {
+        "properties": {
+          "config": {
+            "description": "Product-specific configuration",
+            "type": "object"
+          },
+          "description": {
+            "description": "Product description",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "URL to the product image",
+            "type": "string"
+          },
+          "metadata": {
+            "description": "Arbitrary key-value metadata",
+            "type": "object"
+          },
+          "name": {
+            "description": "Product name",
+            "type": "string"
+          },
+          "productType": {
+            "description": "Free-form product type defined by the provider",
+            "type": "string"
+          },
+          "status": {
+            "description": "Product status",
+            "enum": [
+              "active",
+              "inactive",
+              "suspended"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateProfile": {
+        "properties": {},
+        "type": "object"
+      },
+      "UpdateProviderDto": {
+        "properties": {},
+        "type": "object"
+      },
+      "UpdateThemePreferenceDto": {
+        "properties": {
+          "mode": {
+            "description": "Selected UI theme mode",
+            "enum": [
+              "light",
+              "dark"
+            ],
+            "example": "dark",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode"
+        ],
+        "type": "object"
+      },
+      "UpdateUser": {
+        "properties": {},
+        "type": "object"
+      },
+      "UpdateWebhookEndpointDto": {
+        "properties": {},
+        "type": "object"
+      },
+      "VerifyEmail": {
+        "properties": {},
+        "type": "object"
+      }
     },
-    "version": "1.0.0"
+    "securitySchemes": {
+      "OAuth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://api-dev.solvapay.com/v1/oauth/authorize",
+            "scopes": {
+              "email": "Email address",
+              "openid": "OpenID Connect scope",
+              "profile": "Profile information"
+            },
+            "tokenUrl": "https://api-dev.solvapay.com/v1/oauth/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
   },
-  "servers": [
-    {
-      "url": "http://sandbox.mintlify.com"
-    }
-  ],
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
+  "info": {
+    "contact": {},
+    "description": "The SolvaPay REST API specification",
+    "title": "SolvaPay REST API",
+    "version": "1.0"
+  },
+  "openapi": "3.0.0",
   "paths": {
-    "/plants": {
+    "/v1/sdk/checkout-sessions": {
+      "post": {
+        "description": "Creates a hosted checkout session for a customer to purchase a product plan. Returns a session ID and checkout URL for redirect.",
+        "operationId": "CheckoutSessionSdkController_createCheckoutSession",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "customerRef": {
+                    "description": "Customer reference",
+                    "example": "cus_3C4D5E6F",
+                    "type": "string"
+                  },
+                  "planRef": {
+                    "description": "Plan reference (optional — shows plan selector if omitted)",
+                    "example": "pln_2b3c4d5e",
+                    "type": "string"
+                  },
+                  "productRef": {
+                    "description": "Product reference",
+                    "example": "prd_1A2B3C4D",
+                    "type": "string"
+                  },
+                  "returnUrl": {
+                    "description": "URL to redirect after checkout",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "customerRef",
+                  "productRef"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "checkoutUrl": {
+                      "description": "URL to redirect the customer to",
+                      "type": "string"
+                    },
+                    "sessionId": {
+                      "description": "Checkout session ID",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Checkout session created"
+          },
+          "400": {
+            "description": "Missing customerRef or productRef"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a checkout session",
+        "tags": [
+          "Checkout Sessions"
+        ]
+      }
+    },
+    "/v1/sdk/customers": {
       "get": {
-        "description": "Returns all plants from the system that the user has access to",
+        "description": "Retrieves a customer's details using their unique reference ID, externalRef, or email. Use query parameter 'reference' to look up by customer reference, 'externalRef' for external auth ID, or 'email' for customer email. Exactly one parameter must be provided. Returns the customer's name, email, and active purchases. Only customers owned by the authenticated provider can be accessed.",
+        "operationId": "CustomerSdkController_getCustomerByQuery",
         "parameters": [
           {
-            "name": "limit",
+            "description": "Customer reference identifier (use exactly one query parameter)",
             "in": "query",
-            "description": "The maximum number of results to return",
+            "name": "reference",
+            "required": false,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "example": "cus_3c4d5e6f7g8h",
+              "type": "string"
+            }
+          },
+          {
+            "description": "External reference ID from your auth system (use exactly one query parameter)",
+            "in": "query",
+            "name": "externalRef",
+            "required": false,
+            "schema": {
+              "example": "auth_user_12345",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Customer email address (use exactly one query parameter)",
+            "in": "query",
+            "name": "email",
+            "required": false,
+            "schema": {
+              "example": "customer@example.com",
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Plant response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "email": "customer@example.com",
+                  "externalRef": "auth_user_12345",
+                  "name": "John Doe",
+                  "purchases": [
+                    {
+                      "amount": 9900,
+                      "currency": "USD",
+                      "endDate": "2025-11-27T10:00:00Z",
+                      "planName": "Pro Plan",
+                      "productReference": "prd_abc123",
+                      "reference": "sub_abc123",
+                      "startDate": "2025-10-27T10:00:00Z",
+                      "status": "active"
+                    }
+                  ],
+                  "reference": "cus_3c4d5e6f7g8h"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerResponse"
+                }
+              }
+            },
+            "description": "Customer retrieved successfully"
+          },
+          "400": {
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
+                  "example": {
+                    "error": "Bad Request",
+                    "message": "Must provide exactly one of reference, externalRef, or email",
+                    "statusCode": 400
                   }
                 }
               }
-            }
+            },
+            "description": "Invalid request - must provide exactly one of reference, externalRef, or email"
           },
-          "400": {
-            "description": "Unexpected error",
+          "404": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "example": {
+                    "error": "Not Found",
+                    "message": "Customer not found",
+                    "statusCode": 404
+                  }
                 }
               }
-            }
+            },
+            "description": "Customer not found"
           }
-        }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Get customer by reference, externalRef, or email",
+        "tags": [
+          "Customers"
+        ]
       },
       "post": {
-        "description": "Creates a new plant in the store",
+        "description": "Creates a new customer record for the authenticated provider. Customers represent end-users who will purchase your products. Email is required and must be unique per provider. The name field is optional but recommended for better tracking.",
+        "operationId": "CustomerSdkController_createCustomer",
+        "parameters": [],
         "requestBody": {
-          "description": "Plant to add to the store",
+          "content": {
+            "application/json": {
+              "examples": {
+                "emailOnly": {
+                  "summary": "Email only",
+                  "value": {
+                    "email": "customer@example.com"
+                  }
+                },
+                "withName": {
+                  "summary": "Customer with name",
+                  "value": {
+                    "email": "customer@example.com",
+                    "name": "John Doe"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomerRequest"
+              }
+            }
+          },
+          "description": "Customer creation data",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "email": "customer@example.com",
+                  "externalRef": "auth_user_12345",
+                  "name": "John Doe",
+                  "reference": "cus_3c4d5e6f7g8h"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerResponse"
+                }
+              }
+            },
+            "description": "Customer created successfully"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "error": "Bad Request",
+                    "message": "Invalid email format",
+                    "statusCode": 400
+                  }
+                }
+              }
+            },
+            "description": "Invalid email or missing required fields"
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Create a new customer",
+        "tags": [
+          "Customers"
+        ]
+      }
+    },
+    "/v1/sdk/customers/{reference}": {
+      "get": {
+        "description": "Retrieves a customer's details using their unique reference ID. Returns the customer's name, email, and active purchases. Only customers owned by the authenticated provider can be accessed.",
+        "operationId": "CustomerSdkController_getCustomer",
+        "parameters": [
+          {
+            "description": "Customer reference identifier",
+            "in": "path",
+            "name": "reference",
+            "required": true,
+            "schema": {
+              "example": "cus_3c4d5e6f7g8h",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "email": "customer@example.com",
+                  "externalRef": "auth_user_12345",
+                  "name": "John Doe",
+                  "purchases": [
+                    {
+                      "amount": 9900,
+                      "currency": "USD",
+                      "endDate": "2025-11-27T10:00:00Z",
+                      "planName": "Pro Plan",
+                      "productReference": "prd_abc123",
+                      "reference": "sub_abc123",
+                      "startDate": "2025-10-27T10:00:00Z",
+                      "status": "active"
+                    }
+                  ],
+                  "reference": "cus_3c4d5e6f7g8h"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerResponse"
+                }
+              }
+            },
+            "description": "Customer retrieved successfully"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "error": "Not Found",
+                    "message": "Customer with reference cus_3c4d5e6f7g8h not found",
+                    "statusCode": 404
+                  }
+                }
+              }
+            },
+            "description": "Customer not found"
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Get customer by reference",
+        "tags": [
+          "Customers"
+        ]
+      }
+    },
+    "/v1/sdk/customers/customer-sessions": {
+      "post": {
+        "description": "Creates a customer session URL that can be used to redirect customers to the customer page. Returns the customer URL and session ID. The session is short-lived (15 minutes) for security reasons.",
+        "operationId": "CustomerSdkController_createCustomerSession",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "basic": {
+                  "summary": "Create customer session",
+                  "value": {
+                    "customerRef": "cus_3c4d5e6f7g8h"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomerSessionRequest"
+              }
+            }
+          },
+          "description": "Customer session creation request data",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "customerUrl": "https://solvapay.com/customer/manage?id=e3f1c2d4b6a89f001122334455667788",
+                  "sessionId": "e3f1c2d4b6a89f001122334455667788"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCustomerSessionResponse"
+                }
+              }
+            },
+            "description": "Customer session created successfully"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "error": "Bad Request",
+                    "message": "Customer not found",
+                    "statusCode": 400
+                  }
+                }
+              }
+            },
+            "description": "Invalid request data or customer not found"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "error": "Not Found",
+                    "message": "Customer not found",
+                    "statusCode": 404
+                  }
+                }
+              }
+            },
+            "description": "Customer not found"
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Create a customer session",
+        "tags": [
+          "Customers"
+        ]
+      }
+    },
+    "/v1/sdk/customers/customer-sessions/{sessionId}": {
+      "get": {
+        "description": "Retrieves a customer session by its sessionId with all data hydrated including customer details and purchases. The session must belong to the authenticated provider.",
+        "operationId": "CustomerSdkController_getCustomerSession",
+        "parameters": [
+          {
+            "description": "Customer session ID/token",
+            "in": "path",
+            "name": "sessionId",
+            "required": true,
+            "schema": {
+              "example": "e3f1c2d4b6a89f001122334455667788",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "createdAt": "2025-01-01T11:45:00.000Z",
+                  "customer": {
+                    "email": "customer@example.com",
+                    "externalRef": "auth_user_12345",
+                    "name": "John Doe",
+                    "purchases": [
+                      {
+                        "amount": 9900,
+                        "currency": "USD",
+                        "endDate": "2025-11-27T10:00:00Z",
+                        "planName": "Pro Plan",
+                        "productReference": "prd_abc123",
+                        "reference": "sub_abc123",
+                        "startDate": "2025-10-27T10:00:00Z",
+                        "status": "active"
+                      }
+                    ],
+                    "reference": "cus_3c4d5e6f7g8h"
+                  },
+                  "customerUrl": "https://solvapay.com/customer/manage?id=e3f1c2d4b6a89f001122334455667788",
+                  "expiresAt": "2025-01-01T12:00:00.000Z",
+                  "sessionId": "e3f1c2d4b6a89f001122334455667788",
+                  "status": "active",
+                  "updatedAt": "2025-01-01T11:45:00.000Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/GetCustomerSessionResponse"
+                }
+              }
+            },
+            "description": "Customer session retrieved successfully"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "error": "Not Found",
+                    "message": "Customer session not found: e3f1c2d4b6a89f001122334455667788",
+                    "statusCode": 404
+                  }
+                }
+              }
+            },
+            "description": "Customer session not found"
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Get customer session by sessionId",
+        "tags": [
+          "Customers"
+        ]
+      }
+    },
+    "/v1/sdk/limits": {
+      "post": {
+        "description": "Checks whether a customer has an active purchase for a product and is within their usage limits. Returns a checkout URL if payment is required.",
+        "operationId": "LimitsSdkController_checkLimits",
+        "parameters": [],
+        "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "$ref": "#/components/schemas/CheckLimitRequest"
               }
             }
           },
@@ -74,144 +1739,1219 @@
         },
         "responses": {
           "200": {
-            "description": "plant response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Plant"
+                  "$ref": "#/components/schemas/LimitResponse"
                 }
               }
-            }
+            },
+            "description": "Limit check result"
           },
           "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
+            "description": "Missing customerRef or productRef"
+          },
+          "404": {
+            "description": "Customer or product not found"
           }
-        }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check usage limits for a customer and product",
+        "tags": [
+          "Limits"
+        ]
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
+    "/v1/sdk/payment-intents": {
+      "get": {
+        "description": "Retrieves a paginated list of all payment intents created by the authenticated provider. Supports pagination through limit and offset query parameters.",
+        "operationId": "PaymentIntentSdkController_getPaymentIntents",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
+            "description": "Maximum number of results",
+            "in": "query",
+            "name": "limit",
+            "required": false,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "description": "Pagination offset",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "example": 0,
+              "type": "number"
             }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "example": {
+                    "paymentIntents": [
+                      {
+                        "amount": 4999,
+                        "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_xxx",
+                        "createdAt": "2025-10-11T10:30:00.000Z",
+                        "currency": "usd",
+                        "id": "pi_1a2b3c4d5e6f7g8h",
+                        "planRef": "pln_2b3c4d5e6f7g",
+                        "status": "succeeded",
+                        "stripePaymentIntentId": "pi_stripe_1234567890"
+                      }
+                    ],
+                    "total": 1
+                  }
                 }
               }
+            },
+            "description": "Payment intents retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "List payment intents for the provider",
+        "tags": [
+          "Payment Intents"
+        ]
+      },
+      "post": {
+        "description": "Creates a new payment intent for a customer to purchase a plan. Payment intents are used with Stripe.js to process payments. Requires an idempotency key to prevent duplicate charges. Returns client secret and publishable key needed for frontend integration.",
+        "operationId": "PaymentIntentSdkController_createPaymentIntent",
+        "parameters": [
+          {
+            "description": "Unique idempotency key to prevent duplicate payments (required)",
+            "in": "header",
+            "name": "idempotency-key",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
-        }
-      }
-    }
-  },
-  "webhooks": {
-    "/plant/webhook": {
-      "post": {
-        "description": "Information about a new plant added to the store",
+        ],
         "requestBody": {
-          "description": "Plant added to the store",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "properties": {
+                  "customerReference": {
+                    "description": "Customer reference identifier",
+                    "example": "cus_3c4d5e6f7g8h",
+                    "type": "string"
+                  },
+                  "planRef": {
+                    "description": "Plan reference to purchase",
+                    "example": "pln_2b3c4d5e6f7g",
+                    "type": "string"
+                  },
+                  "pricingTier": {
+                    "description": "Name of the pricing tier to purchase (for plans with pricingTiers). If not specified, uses the plan base price.",
+                    "example": "Pro",
+                    "type": "string"
+                  },
+                  "productRef": {
+                    "description": "Product reference that owns the plan",
+                    "example": "prd_1A2B3C4D",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "planRef",
+                  "productRef",
+                  "customerReference"
+                ],
+                "type": "object"
               }
             }
+          },
+          "description": "Payment intent creation data",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "amount": 4999,
+                    "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_AbCdEf123456",
+                    "createdAt": "2025-10-18T10:30:00.000Z",
+                    "currency": "usd",
+                    "customerReference": "cus_3c4d5e6f7g8h",
+                    "exchangeRate": 1,
+                    "expiresAt": "2025-10-19T10:30:00.000Z",
+                    "id": "6743f1a2b3c4d5e6f7g8h9i0",
+                    "originalAmount": 4999,
+                    "planRef": "pln_2b3c4d5e6f7g",
+                    "publishableKey": "pk_test_...",
+                    "status": "requires_payment_method",
+                    "stripePaymentIntentId": "pi_1a2b3c4d5e6f7g8h",
+                    "transactionId": "6743f1a2b3c4d5e6f7g8h9i1"
+                  }
+                }
+              }
+            },
+            "description": "Payment intent created successfully"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "error": "Bad Request",
+                    "message": "idempotency-key header is required",
+                    "statusCode": 400
+                  }
+                }
+              }
+            },
+            "description": "Missing required fields or invalid data"
           }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Create a payment intent",
+        "tags": [
+          "Payment Intents"
+        ]
+      }
+    },
+    "/v1/sdk/payment-intents/{id}": {
+      "get": {
+        "description": "Retrieves detailed information about a specific payment intent including amount, currency, and client secret for Stripe integration.",
+        "operationId": "PaymentIntentSdkController_getPaymentIntent",
+        "parameters": [
+          {
+            "description": "Payment intent ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "example": "pi_1a2b3c4d5e6f7g8h",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "amount": 4999,
+                    "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_xxx",
+                    "currency": "usd",
+                    "planRef": "pln_2b3c4d5e6f7g"
+                  }
+                }
+              }
+            },
+            "description": "Payment intent retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Get a specific payment intent by ID",
+        "tags": [
+          "Payment Intents"
+        ]
+      }
+    },
+    "/v1/sdk/payment-intents/{id}/process": {
+      "post": {
+        "description": "Processes a payment intent that has been confirmed on the client-side using Stripe.js. Polls the database for payment intent status to become succeeded (up to 10 seconds). Returns the current status of the payment intent.",
+        "operationId": "PaymentIntentSdkController_processPaymentIntent",
+        "parameters": [
+          {
+            "description": "Stripe payment intent ID (format: pi_xxx)",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "example": "pi_1a2b3c4d5e6f7g8h",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "customerRef": {
+                    "description": "Customer reference identifier",
+                    "example": "cus_456",
+                    "type": "string"
+                  },
+                  "planRef": {
+                    "description": "Plan reference - helps determine if payment is for purchase",
+                    "example": "pln_789",
+                    "type": "string"
+                  },
+                  "productRef": {
+                    "description": "Product reference that owns the plan",
+                    "example": "prd_123",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "productRef",
+                  "customerRef"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "description": "Payment processing data",
+          "required": true
         },
         "responses": {
           "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
+            "content": {
+              "application/json": {
+                "examples": {
+                  "cancelled": {
+                    "description": "Payment intent cancelled",
+                    "value": {
+                      "status": "cancelled"
+                    }
+                  },
+                  "failed": {
+                    "description": "Payment intent failed",
+                    "value": {
+                      "status": "failed"
+                    }
+                  },
+                  "succeeded": {
+                    "description": "Payment intent confirmed successfully",
+                    "value": {
+                      "status": "succeeded"
+                    }
+                  },
+                  "timeout": {
+                    "description": "Timeout waiting for payment intent confirmation",
+                    "value": {
+                      "message": "Timeout while waiting for payment intent confirmation, try again later. This could be due to Stripe webhooks not being configured correctly.",
+                      "status": "timeout"
+                    }
+                  }
+                },
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "description": "Optional message, only present for timeout status",
+                      "example": "Timeout while waiting for payment intent confirmation, try again later. This could be due to Stripe webhooks not being configured correctly.",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "Payment intent status",
+                      "enum": [
+                        "succeeded",
+                        "timeout",
+                        "failed",
+                        "cancelled"
+                      ],
+                      "example": "succeeded",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Payment intent status"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "error": "Bad Request",
+                    "message": "Payment not succeeded. Status: requires_payment_method",
+                    "statusCode": 400
+                  }
+                }
+              }
+            },
+            "description": "Payment not succeeded or invalid request"
           }
-        }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Process payment intent after client-side confirmation",
+        "tags": [
+          "Payment Intents"
+        ]
+      }
+    },
+    "/v1/sdk/products": {
+      "get": {
+        "description": "Retrieves a paginated list of products for the authenticated provider. Supports filtering by status, search term, and MCP Pay flag.",
+        "operationId": "ProductSdkController_listProducts",
+        "parameters": [
+          {
+            "description": "Max results (1-100)",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "description": "Pagination offset",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "description": "Search by name or description",
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by status",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "enum": [
+                "active",
+                "inactive",
+                "suspended"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter MCP Pay products",
+            "in": "query",
+            "name": "isMcpPay",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Products retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List products",
+        "tags": [
+          "Products"
+        ]
+      },
+      "post": {
+        "description": "Creates a new product for the authenticated provider. Products are the unified revenue target that replaces the legacy Agent/McpServer entities.",
+        "operationId": "ProductSdkController_createProduct",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SdkProductResponse"
+                }
+              }
+            },
+            "description": "Product created successfully"
+          },
+          "400": {
+            "description": "Missing required fields or validation error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a product",
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/v1/sdk/products/{productRef}": {
+      "delete": {
+        "description": "Deletes a product permanently in sandbox or when no purchases exist. In live mode with purchases, the product is deactivated instead.",
+        "operationId": "ProductSdkController_deleteProduct",
+        "parameters": [
+          {
+            "description": "Product reference or ID",
+            "in": "path",
+            "name": "productRef",
+            "required": true,
+            "schema": {
+              "example": "prd_1A2B3C4D",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product deleted or deactivated successfully"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a product",
+        "tags": [
+          "Products"
+        ]
+      },
+      "get": {
+        "description": "Retrieves a product by its reference or ID, including associated plans.",
+        "operationId": "ProductSdkController_getProduct",
+        "parameters": [
+          {
+            "description": "Product reference or ID",
+            "in": "path",
+            "name": "productRef",
+            "required": true,
+            "schema": {
+              "example": "prd_1A2B3C4D",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SdkProductResponse"
+                }
+              }
+            },
+            "description": "Product retrieved successfully"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a product by reference",
+        "tags": [
+          "Products"
+        ]
+      },
+      "put": {
+        "description": "Updates an existing product. Only provided fields are updated.",
+        "operationId": "ProductSdkController_updateProduct",
+        "parameters": [
+          {
+            "description": "Product reference or ID",
+            "in": "path",
+            "name": "productRef",
+            "required": true,
+            "schema": {
+              "example": "prd_1A2B3C4D",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SdkProductResponse"
+                }
+              }
+            },
+            "description": "Product updated successfully"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a product",
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/v1/sdk/products/{productRef}/plans": {
+      "get": {
+        "operationId": "PlanSdkController_listPlans",
+        "parameters": [
+          {
+            "description": "Product reference or ID",
+            "in": "path",
+            "name": "productRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "List plans for a product",
+        "tags": [
+          "Plans"
+        ]
+      },
+      "post": {
+        "operationId": "PlanSdkController_createPlan",
+        "parameters": [
+          {
+            "description": "Product reference or ID",
+            "in": "path",
+            "name": "productRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Create a plan for a product",
+        "tags": [
+          "Plans"
+        ]
+      }
+    },
+    "/v1/sdk/products/{productRef}/plans/{planRef}": {
+      "delete": {
+        "operationId": "PlanSdkController_deletePlan",
+        "parameters": [
+          {
+            "description": "Product reference or ID",
+            "in": "path",
+            "name": "productRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Plan reference or ID",
+            "in": "path",
+            "name": "planRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Delete a plan from a product",
+        "tags": [
+          "Plans"
+        ]
+      },
+      "get": {
+        "operationId": "PlanSdkController_getPlan",
+        "parameters": [
+          {
+            "description": "Product reference or ID",
+            "in": "path",
+            "name": "productRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Plan reference or ID",
+            "in": "path",
+            "name": "planRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Get a plan for a product",
+        "tags": [
+          "Plans"
+        ]
+      },
+      "put": {
+        "operationId": "PlanSdkController_updatePlan",
+        "parameters": [
+          {
+            "description": "Product reference or ID",
+            "in": "path",
+            "name": "productRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Plan reference or ID",
+            "in": "path",
+            "name": "planRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Update a plan for a product",
+        "tags": [
+          "Plans"
+        ]
+      }
+    },
+    "/v1/sdk/purchases": {
+      "get": {
+        "description": "Retrieves all purchases for the authenticated provider with optional filtering by status, product, or customer.",
+        "operationId": "PurchaseSdkController_listPurchases",
+        "parameters": [
+          {
+            "description": "Filter by purchase status",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "enum": [
+                "pending",
+                "active",
+                "trialing",
+                "past_due",
+                "cancelled",
+                "expired",
+                "suspended",
+                "refunded"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by product ID",
+            "in": "query",
+            "name": "productId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by customer ID",
+            "in": "query",
+            "name": "customerId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Purchases retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List purchases for provider",
+        "tags": [
+          "Purchases"
+        ]
+      }
+    },
+    "/v1/sdk/purchases/{id}": {
+      "get": {
+        "description": "Retrieves a single purchase including plan snapshot, usage, and billing details.",
+        "operationId": "PurchaseSdkController_getPurchase",
+        "parameters": [
+          {
+            "description": "Purchase ID or reference",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "example": "pur_1A2B3C4D",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Purchase retrieved successfully"
+          },
+          "404": {
+            "description": "Purchase not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a purchase by ID or reference",
+        "tags": [
+          "Purchases"
+        ]
+      }
+    },
+    "/v1/sdk/purchases/{purchaseRef}/cancel": {
+      "post": {
+        "description": "Cancels an active purchase. For recurring purchases, cancellation takes effect at the end of the current billing period.",
+        "operationId": "PurchaseSdkController_cancelPurchase",
+        "parameters": [
+          {
+            "description": "Purchase reference or ID",
+            "in": "path",
+            "name": "purchaseRef",
+            "required": true,
+            "schema": {
+              "example": "pur_1A2B3C4D",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelPurchaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Purchase cancelled successfully"
+          },
+          "404": {
+            "description": "Purchase not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel a purchase",
+        "tags": [
+          "Purchases"
+        ]
+      }
+    },
+    "/v1/sdk/purchases/customer/{customerRef}": {
+      "get": {
+        "description": "Retrieves all purchases for a specific customer. Useful for billing history and access checks.",
+        "operationId": "PurchaseSdkController_getPurchasesForCustomer",
+        "parameters": [
+          {
+            "description": "Customer reference or ID",
+            "in": "path",
+            "name": "customerRef",
+            "required": true,
+            "schema": {
+              "example": "cus_3C4D5E6F",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer purchases retrieved successfully"
+          },
+          "404": {
+            "description": "Customer not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get purchases for a customer",
+        "tags": [
+          "Purchases"
+        ]
+      }
+    },
+    "/v1/sdk/purchases/product/{productRef}": {
+      "get": {
+        "description": "Retrieves all purchases for a specific product. Each billing period creates a new purchase document.",
+        "operationId": "PurchaseSdkController_getPurchasesForProduct",
+        "parameters": [
+          {
+            "description": "Product reference or ID",
+            "in": "path",
+            "name": "productRef",
+            "required": true,
+            "schema": {
+              "example": "prd_1A2B3C4D",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product purchases retrieved successfully"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get purchases for a product",
+        "tags": [
+          "Purchases"
+        ]
+      }
+    },
+    "/v1/sdk/usages": {
+      "post": {
+        "description": "Records a usage event for a customer against a product. Atomically increments usage counters on the active purchase and appends an event to the usage log.",
+        "operationId": "UsageSdkController_recordUsage",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action": {
+                    "description": "Action type",
+                    "enum": [
+                      "transaction",
+                      "api_call",
+                      "hour",
+                      "email",
+                      "storage",
+                      "custom"
+                    ],
+                    "example": "api_call",
+                    "type": "string"
+                  },
+                  "customActionKey": {
+                    "description": "Custom action key for custom action types",
+                    "type": "string"
+                  },
+                  "customerRef": {
+                    "description": "Customer reference",
+                    "example": "cus_3C4D5E6F",
+                    "type": "string"
+                  },
+                  "description": {
+                    "description": "Human-readable description of the event",
+                    "type": "string"
+                  },
+                  "metadata": {
+                    "description": "Arbitrary metadata",
+                    "type": "object"
+                  },
+                  "productRef": {
+                    "description": "Product reference",
+                    "example": "prd_1A2B3C4D",
+                    "type": "string"
+                  },
+                  "toolName": {
+                    "description": "Tool or feature name",
+                    "type": "string"
+                  },
+                  "units": {
+                    "description": "Number of usage units (default: 1)",
+                    "example": 1,
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "customerRef",
+                  "productRef"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "outcome": {
+                      "enum": [
+                        "success",
+                        "paywall"
+                      ],
+                      "example": "success",
+                      "type": "string"
+                    },
+                    "success": {
+                      "example": true,
+                      "type": "boolean"
+                    },
+                    "units": {
+                      "example": 1,
+                      "type": "number"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Usage recorded successfully"
+          },
+          "400": {
+            "description": "Missing customerRef or productRef"
+          },
+          "404": {
+            "description": "Customer or product not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record a usage event",
+        "tags": [
+          "Usage"
+        ]
+      }
+    },
+    "/v1/sdk/usages/bulk": {
+      "post": {
+        "description": "Records multiple usage events in a single request. Each event is processed independently.",
+        "operationId": "UsageSdkController_recordBulkUsage",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "events": {
+                    "items": {
+                      "properties": {
+                        "action": {
+                          "type": "string"
+                        },
+                        "customerRef": {
+                          "type": "string"
+                        },
+                        "productRef": {
+                          "type": "string"
+                        },
+                        "units": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "customerRef",
+                        "productRef"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "events"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk usage events processed"
+          },
+          "400": {
+            "description": "Events array is required and must not be empty"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record bulk usage events",
+        "tags": [
+          "Usage"
+        ]
       }
     }
   },
-  "components": {
-    "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
-      }
-    }
-  }
+  "servers": [],
+  "tags": []
 }

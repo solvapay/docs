@@ -1,0 +1,10 @@
+/* Hide Mintlify attribution in the footer */
+footer a[href*='mintlify.com'] {
+  display: none !important;
+}
+
+/* Hide the attribution wrapper when the credit link is present */
+footer div:has(> a[href*='mintlify.com']),
+footer p:has(> a[href*='mintlify.com']) {
+  display: none !important;
+}

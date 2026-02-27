@@ -87,12 +87,18 @@
             ]
           }
         ]
+      },
+      {
+        "tab": "API reference",
+        "openapi": [
+          "api-reference/openapi.json"
+        ]
       }
     ],
     "global": {
       "anchors": [
         {
-          "anchor": "SolvaPay",
+          "anchor": "SolvaPay website",
           "href": "https://solvapay.com",
           "icon": "globe"
         },

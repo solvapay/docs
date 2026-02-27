@@ -6,7 +6,9 @@ This repository hosts the Mintlify documentation site for SolvaPay.
 
 - Product docs (`getting-started`, `mcp-pay`, `wallet`, `mcp-server`) are maintained in this repository.
 - TypeScript SDK docs (`sdks/typescript`) are upstream-owned and synced into this repository.
+- API reference (`api-reference/openapi.json`) is generated from backend OpenAPI and synced manually.
 - Do not manually edit `sdks/typescript/**`. Use the sync script.
+- Do not manually edit `api-reference/openapi.json`. Use the sync script.
 
 ## AI-assisted writing
 
@@ -49,6 +51,27 @@ SDK_DOCS_SOURCE_DIR="/absolute/path/to/sdk/docs-site/sdks/typescript/docs" ./scr
 ```
 
 The script uses `scripts/typescript-sdk-pages.txt` as the curated page list.
+
+## Syncing backend OpenAPI docs
+
+Run the sync script from the docs root:
+
+```bash
+npx --yes tsx scripts/sync-backend-openapi.ts
+```
+
+If you want to test against another backend environment, set:
+
+```bash
+BACKEND_OPENAPI_URL="https://api.solvapay.com/v1/openapi.json" npx --yes tsx scripts/sync-backend-openapi.ts
+```
+
+The sync uses fail-closed path filtering and only keeps external SDK operations under `/v1/sdk/*`.
+Non-SDK operations (for example `ui/*`, admin, and internal endpoints) are excluded from published API reference output.
+
+You can also run `.github/workflows/sync-backend-openapi.yml` manually (`workflow_dispatch`) if you prefer syncing through GitHub Actions.
+
+See `API_REFERENCE_OWNERSHIP.md` for generated file ownership policy.
 
 ## Publishing changes
 

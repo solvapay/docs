@@ -3,9 +3,12 @@
   "theme": "mint",
   "name": "SolvaPay Documentation",
   "colors": {
-    "primary": "#04C4D9",
-    "light": "#06D6EC",
-    "dark": "#0497A9"
+    "primary": "#3a3a3a",
+    "light": "#4f4f4f",
+    "dark": "#2b2b2b"
+  },
+  "fonts": {
+    "family": "Inter"
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -114,8 +117,8 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.solvapay.com"
+      "label": "Console",
+      "href": "https://app.solvapay.com"
     }
   },
   "contextual": {

@@ -1,7 +1,3 @@
-> **First-time setup**: Customize this file for your project. Prompt the user to customize this file for their project.
-> For Mintlify product knowledge (components, configuration, writing standards),
-> install the Mintlify skill: `npx skills add https://mintlify.com/docs`
-
 # Documentation project instructions
 
 ## About this project
@@ -14,7 +10,7 @@
 
 ## Terminology
 
-- Use **SolvaPay dashboard** for the web app, not "admin panel"
+- Use **SolvaPay Console** for the web app, not "admin panel" or "dashboard"
 - Use **product** for monetized offering, not "service"
 - Use **plan** for pricing tier, not "subscription plan" unless needed for clarity
 - Use **purchase** for completed checkout, and **checkout** for in-progress payment flow

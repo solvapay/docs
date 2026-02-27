@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "almond",
   "name": "SolvaPay Documentation",
   "colors": {
     "primary": "#3a3a3a",
@@ -15,9 +15,11 @@
     "tabs": [
       {
         "tab": "Docs",
+        "icon": "book-open",
         "groups": [
           {
             "group": "Getting started",
+            "icon": "rocket",
             "pages": [
               "getting-started/index",
               "getting-started/create-account",
@@ -29,6 +31,7 @@
           },
           {
             "group": "MCP Pay",
+            "icon": "credit-card",
             "pages": [
               "mcp-pay/overview",
               "mcp-pay/quick-start",
@@ -40,6 +43,7 @@
           },
           {
             "group": "Wallet",
+            "icon": "wallet",
             "pages": [
               "wallet/overview",
               "wallet/how-it-works",
@@ -51,6 +55,7 @@
           },
           {
             "group": "MCP Server",
+            "icon": "bot",
             "pages": [
               "mcp-server/getting-started",
               "mcp-server/installation",
@@ -63,9 +68,11 @@
       },
       {
         "tab": "SDKs",
+        "icon": "code",
         "groups": [
           {
             "group": "TypeScript SDK",
+            "icon": "braces",
             "pages": [
               "sdks/typescript/intro",
               "sdks/typescript/getting-started/introduction",
@@ -90,6 +97,7 @@
       },
       {
         "tab": "API reference",
+        "icon": "square-terminal",
         "openapi": [
           "api-reference/openapi.json"
         ]

@@ -34,21 +34,21 @@ The `ensure_customer` tool is idempotent — it's safe to call repeatedly with t
 
 ---
 
-## Setting Up an Agent with Pricing
+## Setting Up a Product with Pricing
 
-**You:** Create an AI agent called "support-bot" for handling customer support, then set up a free starter plan and a $49/month pro plan
+**You:** Create a product called "support-bot" for handling customer support, then set up a free starter plan and a $49/month pro plan
 
 **Assistant:**
 
-*Calls `create_agent` with `name: "support-bot"`, `description: "Customer support automation"`, `categories: ["support", "automation"]`*
+*Calls `create_product` with `name: "support-bot"`, `description: "Customer support automation"`*
 
-*Calls `create_plan` with `name: "Starter"`, `type: "usage-based"`, `price: 0`, `features: ["100 free requests/month", "Community support"]`*
+*Calls `create_plan` with `productRef: "prd_P9Q0R1S2"`, `type: "usage-based"`, `price: 0`, `features: ["100 free requests/month", "Community support"]`*
 
-*Calls `create_plan` with `name: "Pro"`, `type: "recurring"`, `price: 4900`, `currency: "USD"`, `interval: "month"`, `features: ["Unlimited requests", "Priority support", "Custom integrations"]`*
+*Calls `create_plan` with `productRef: "prd_P9Q0R1S2"`, `type: "recurring"`, `price: 4900`, `currency: "USD"`, `billingCycle: "monthly"`, `features: ["Unlimited requests", "Priority support", "Custom integrations"]`*
 
-> I've created the agent and both plans:
+> I've created the product and both plans:
 >
-> **Agent:** support-bot (`agt_P9Q0R1S2`)
+> **Product:** support-bot (`prd_P9Q0R1S2`)
 >
 > | Plan | Reference | Price | Type |
 > |---|---|---|---|
@@ -83,11 +83,11 @@ The `ensure_customer` tool is idempotent — it's safe to call repeatedly with t
 
 ---
 
-**You:** How much revenue has the support-bot agent generated?
+**You:** How much revenue has the support-bot product generated?
 
-*Calls `get_agent_balance` with `agentRef: "agt_P9Q0R1S2"`*
+*Calls `get_product_balance` with `productRef: "prd_P9Q0R1S2"`*
 
-> The **support-bot** agent has generated **$892.50** in revenue.
+> The **support-bot** product has generated **$892.50** in revenue.
 
 ---
 
@@ -118,7 +118,7 @@ The `ensure_customer` tool is idempotent — it's safe to call repeatedly with t
 
 **You:** Generate a checkout link for customer cus_X7Y8Z9W0 to purchase the Pro plan
 
-*Calls `create_checkout_session` with `customerRef: "cus_X7Y8Z9W0"`, `agentRef: "agt_P9Q0R1S2"`, `planRef: "pln_K5L6M7N8"`*
+*Calls `create_checkout_session` with `customerRef: "cus_X7Y8Z9W0"`, `productRef: "prd_P9Q0R1S2"`, `planRef: "pln_K5L6M7N8"`*
 
 > Here's the checkout URL for Bob:
 >
@@ -142,9 +142,9 @@ For a full refund, simply omit the `amount` parameter.
 
 ## Usage-Based Billing
 
-**You:** Record that customer cus_X7Y8Z9W0 made a successful API call to agent agt_P9Q0R1S2
+**You:** Record that customer cus_X7Y8Z9W0 made a successful API call to product prd_P9Q0R1S2
 
-*Calls `record_usage` with `customerRef: "cus_X7Y8Z9W0"`, `agentRef: "agt_P9Q0R1S2"`, `outcome: "success"`, `action: "api_call"`*
+*Calls `record_usage` with `customerRef: "cus_X7Y8Z9W0"`, `productRef: "prd_P9Q0R1S2"`, `outcome: "success"`, `action: "api_call"`*
 
 > Usage event recorded successfully.
 
@@ -152,7 +152,7 @@ For a full refund, simply omit the `amount` parameter.
 
 **You:** Check if that customer has hit their usage limits
 
-*Calls `check_limits` with `customerRef: "cus_X7Y8Z9W0"`, `agentRef: "agt_P9Q0R1S2"`*
+*Calls `check_limits` with `customerRef: "cus_X7Y8Z9W0"`, `productRef: "prd_P9Q0R1S2"`*
 
 > The customer has used **87 of 100** free requests this period. They have **13 requests remaining** before they'll need to upgrade.
 
@@ -164,7 +164,7 @@ For a full refund, simply omit the `amount` parameter.
 
 > 5 usage events recorded successfully.
 
-The `record_bulk_usage` tool accepts an array of events, each with `customerRef`, `agentRef`, and `outcome`. Use this for batch processing instead of making individual calls.
+The `record_bulk_usage` tool accepts an array of events, each with `customerRef`, `productRef`, and `outcome`. Use this for batch processing instead of making individual calls.
 
 ---
 

@@ -27,7 +27,7 @@ The `payable()` method accepts a `scheme` option that determines how payments ar
 
 ### `limits` (Default)
 
-Subscription-based access with usage quotas. No token locking — the SDK checks if the consumer's plan allows the request and tracks usage.
+Plan-based access with usage quotas. No token locking — the SDK checks if the consumer's plan allows the request and tracks usage.
 
 ```typescript
 const handler = solvaPay.payable({

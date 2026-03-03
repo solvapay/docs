@@ -28,7 +28,7 @@
 - Code formatting for file names, commands, paths, and code references
 - Put prerequisites at the top of setup guides
 - Prefer task-oriented headings (for example, "Create a product")
-- Keep examples realistic to SolvaPay workflows (agents, plans, purchases, webhooks)
+- Keep examples realistic to SolvaPay workflows (products, plans, purchases, webhooks)
 - Avoid marketing language ("powerful", "seamless", "robust")
 - Link internal docs with root-relative links and no file extension
 - For API or SDK pages, include one minimal working example before advanced patterns

@@ -1,6 +1,6 @@
 ---
 title: "Tools"
-description: "The SolvaPay MCP Server exposes 49 tools across 10 domains."
+description: "The SolvaPay MCP Server exposes tools across 10 domains."
 ---
 
 ## Customer Management
@@ -65,31 +65,30 @@ Creates a customer if one doesn't exist for the given email. Returns the existin
 
 ---
 
-## Agent Management
+## Product Management
 
 | Tool | Description |
 |---|---|
-| `create_agent` | Create a new AI agent |
-| `get_agent` | Retrieve an agent by reference |
-| `list_agents` | List agents with search and filters |
-| `update_agent` | Update an agent's details |
-| `delete_agent` | Delete an agent |
+| `create_product` | Create a new product |
+| `get_product` | Retrieve a product by reference |
+| `list_products` | List products with search and filters |
+| `update_product` | Update a product's details |
+| `delete_product` | Delete a product |
 
-### create_agent
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `name` | string | Yes | Agent name |
-| `description` | string | No | Agent description |
-| `categories` | string[] | No | Category tags |
-
-### get_agent
+### create_product
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `reference` | string | Yes | Agent reference (e.g. `agt_P9Q0R1S2`) |
+| `name` | string | Yes | Product name |
+| `description` | string | No | Product description |
 
-### list_agents
+### get_product
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `reference` | string | Yes | Product reference (e.g. `prd_P9Q0R1S2`) |
+
+### list_products
 
 | Parameter | Type | Required | Default | Description |
 |---|---|---|---|---|
@@ -98,20 +97,19 @@ Creates a customer if one doesn't exist for the given email. Returns the existin
 | `search` | string | No | — | Search by name |
 | `status` | string | No | — | Filter by status |
 
-### update_agent
+### update_product
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `reference` | string | Yes | Agent reference |
+| `reference` | string | Yes | Product reference |
 | `name` | string | No | Updated name |
 | `description` | string | No | Updated description |
-| `categories` | string[] | No | Updated categories |
 
-### delete_agent
+### delete_product
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `reference` | string | Yes | Agent reference |
+| `reference` | string | Yes | Product reference |
 
 ---
 
@@ -124,26 +122,26 @@ Creates a customer if one doesn't exist for the given email. Returns the existin
 | `list_plans` | List plans with filters |
 | `update_plan` | Update a plan |
 | `delete_plan` | Delete a plan |
-| `list_plans_for_agent` | List plans assigned to a specific agent |
+| `list_plans_for_product` | List plans assigned to a specific product |
 
 ### create_plan
 
 | Parameter | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `name` | string | Yes | — | Plan name |
+| `productRef` | string | Yes | — | Product reference to attach the plan to |
 | `type` | string | Yes | — | Plan type (`recurring`, `one-time`, `usage-based`) |
-| `price` | number | Yes | — | Price in smallest currency unit (e.g. cents) |
+| `price` | number | No | — | Price in smallest currency unit (e.g. cents) |
 | `currency` | string | No | `USD` | ISO 4217 currency code |
-| `interval` | string | No | — | Billing interval (`month`, `year`) |
-| `description` | string | No | — | Plan description |
+| `billingCycle` | string | No | — | Billing cycle (`monthly`, `yearly`) |
 | `features` | string[] | No | — | Feature descriptions |
-| `usageLimit` | number | No | — | Maximum usage units per period |
+| `limits` | object | No | — | Usage limits configuration |
 
 ### get_plan
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `reference` | string | Yes | Plan reference (e.g. `pln_F1G2H3J4`) |
+| `productRef` | string | No | Product reference (improves lookup performance) |
 
 ### list_plans
 
@@ -159,22 +157,25 @@ Creates a customer if one doesn't exist for the given email. Returns the existin
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `reference` | string | Yes | Plan reference |
-| `name` | string | No | Updated name |
+| `productRef` | string | No | Product reference (improves lookup performance) |
 | `price` | number | No | Updated price |
 | `features` | string[] | No | Updated features |
-| `description` | string | No | Updated description |
+| `limits` | object | No | Updated usage limits |
+| `metadata` | object | No | Updated metadata |
+| `status` | string | No | Updated status |
 
 ### delete_plan
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `reference` | string | Yes | Plan reference |
+| `productRef` | string | No | Product reference (improves lookup performance) |
 
-### list_plans_for_agent
+### list_plans_for_product
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `agentRef` | string | Yes | Agent reference |
+| `productRef` | string | Yes | Product reference |
 
 ---
 
@@ -185,9 +186,9 @@ Creates a customer if one doesn't exist for the given email. Returns the existin
 | `list_purchases` | List all purchases |
 | `get_purchase` | Retrieve a purchase by ID |
 | `get_purchases_by_customer` | Purchases for a customer |
-| `get_purchases_by_agent` | Purchases for an agent |
+| `get_purchases_by_product` | Purchases for a product |
 | `cancel_renewal` | Cancel renewal of a purchase |
-| `check_limits` | Check usage limits for a customer/agent pair |
+| `check_limits` | Check usage limits for a customer/product pair |
 
 ### list_purchases
 
@@ -208,11 +209,11 @@ Creates a customer if one doesn't exist for the given email. Returns the existin
 | `customerRef` | string | Yes | Customer reference |
 | `status` | string | No | Filter by status |
 
-### get_purchases_by_agent
+### get_purchases_by_product
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `agentRef` | string | Yes | Agent reference |
+| `productRef` | string | Yes | Product reference |
 | `status` | string | No | Filter by status |
 
 ### cancel_renewal
@@ -229,7 +230,7 @@ Returns usage limit status. If limits are exceeded, includes a checkout URL for 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `customerRef` | string | Yes | Customer reference |
-| `agentRef` | string | Yes | Agent reference |
+| `productRef` | string | Yes | Product reference |
 
 ---
 
@@ -245,7 +246,7 @@ Returns usage limit status. If limits are exceeded, includes a checkout URL for 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `customerRef` | string | Yes | Customer reference |
-| `agentRef` | string | Yes | Agent reference |
+| `productRef` | string | Yes | Product reference |
 | `planRef` | string | No | Plan reference (uses default if omitted) |
 | `returnUrl` | string | No | Redirect URL after checkout |
 
@@ -264,18 +265,18 @@ Generates a URL where the customer can manage their billing, payment methods, an
 | Tool | Description |
 |---|---|
 | `get_wallet_balance` | Get your wallet balance |
-| `get_agent_balance` | Get revenue for a specific agent |
+| `get_product_balance` | Get revenue for a specific product |
 | `get_wallet_stats` | Get aggregated wallet statistics |
 
 ### get_wallet_balance
 
 No parameters required. Returns your current wallet balance.
 
-### get_agent_balance
+### get_product_balance
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `agentRef` | string | Yes | Agent reference |
+| `productRef` | string | Yes | Product reference |
 
 ### get_wallet_stats
 
@@ -295,7 +296,7 @@ No parameters required. Returns aggregated wallet statistics.
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `customerRef` | string | Yes | Customer reference |
-| `agentRef` | string | Yes | Agent reference |
+| `productRef` | string | Yes | Product reference |
 | `outcome` | string | Yes | Outcome (e.g. `success`, `failure`) |
 | `action` | string | No | Action name |
 | `requestId` | string | No | Correlation ID for tracing |

@@ -1,6 +1,6 @@
 ---
 title: "Tools"
-description: "The SolvaPay MCP Server exposes tools across 10 domains."
+description: "The SolvaPay MCP Server exposes 27 tools across 8 domains."
 ---
 
 ## Customer Management
@@ -220,7 +220,7 @@ Creates a customer if one doesn't exist for the given email. Returns the existin
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `purchaseRef` | string | Yes | Purchase reference |
+| `purchaseId` | string | Yes | Purchase ID or reference |
 | `reason` | string | No | Cancellation reason |
 
 ### check_limits
@@ -350,135 +350,3 @@ No parameters required. Returns aggregated wallet statistics.
 | `amount` | number | No | Partial refund amount (full refund if omitted) |
 | `reason` | string | No | Refund reason |
 
----
-
-## Token Payments
-
-Two-phase token payment tools for the x402 flow. Consumers pre-purchase tokens, and providers lock/settle/release them per request.
-
-| Tool | Description |
-|---|---|
-| `verify_token_payment` | Lock tokens from a consumer wallet (verify step) |
-| `settle_token_payment` | Settle a lock with the actual amount consumed |
-| `release_token_payment` | Release a lock without charging |
-| `get_token_wallet` | Get token wallet state for a consumer account |
-| `create_token_topup` | Create a Stripe payment intent to top up tokens |
-| `list_token_locks` | List token locks for a consumer account |
-| `get_token_lock` | Get a specific token lock by ID |
-
-### verify_token_payment
-
-Reserves tokens from the consumer's wallet. Returns a `lockId` used in subsequent settle or release calls.
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `accountRef` | string | Yes | Consumer account reference |
-| `productRef` | string | Yes | Product reference |
-| `providerId` | string | Yes | Provider ID |
-| `maxAmount` | number | Yes | Maximum tokens to reserve (in microunits) |
-| `externalRunId` | string | No | External run/task ID for correlation |
-| `ttlSeconds` | number | No | Lock time-to-live in seconds |
-| `idempotencyKey` | string | No | Idempotency key to prevent duplicate locks |
-
-### settle_token_payment
-
-Settles a token lock with the actual amount consumed. Unused tokens are released back to the consumer. The provider is credited.
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `lockId` | string | Yes | Lock ID from verify step |
-| `amount` | number | Yes | Actual tokens consumed (in microunits) |
-| `description` | string | No | Description of the charge |
-
-### release_token_payment
-
-Releases a token lock without charging. All reserved tokens are returned to the consumer.
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `lockId` | string | Yes | Lock ID from verify step |
-| `reason` | string | No | Reason for release |
-
-### get_token_wallet
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `accountRef` | string | Yes | Consumer account reference |
-
-### create_token_topup
-
-Creates a Stripe PaymentIntent for the consumer to purchase tokens.
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `accountRef` | string | Yes | Consumer account reference |
-| `amountUsd` | number | Yes | Top-up amount in USD |
-
-### list_token_locks
-
-| Parameter | Type | Required | Default | Description |
-|---|---|---|---|---|
-| `accountRef` | string | Yes | — | Consumer account reference |
-| `status` | string | No | — | Filter by lock status (`active`, `settled`, `released`) |
-| `limit` | number | No | 20 | Maximum results |
-| `offset` | number | No | 0 | Pagination offset |
-
-### get_token_lock
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `lockId` | string | Yes | Lock ID |
-
----
-
-## Voucher Payments
-
-Vouchers are pre-funded, multi-use payment tokens that consumers can share with providers. Each voucher has a reserved token balance that is guaranteed available until expiry.
-
-| Tool | Description |
-|---|---|
-| `resolve_voucher` | Resolve a voucher token to check balance and validity |
-| `verify_voucher_payment` | Reserve tokens within a voucher (verify step) |
-| `settle_voucher_payment` | Settle a voucher lock with the actual amount consumed |
-| `release_voucher_payment` | Release a voucher lock without charging |
-
-### resolve_voucher
-
-Decrypts and validates a voucher token without locking any funds. Use this to inspect a voucher before committing to a payment.
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `token` | string | Yes | Encrypted voucher token |
-| `productRef` | string | No | Product reference to validate against provider budgets |
-| `amount` | number | No | Amount to check availability for |
-
-### verify_voucher_payment
-
-Reserves tokens from the voucher's balance. Returns a `lockId` for settle or release.
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `token` | string | Yes | Encrypted voucher token |
-| `maxAmount` | number | Yes | Maximum tokens to reserve (in microunits) |
-| `productRef` | string | Yes | Product reference |
-| `providerId` | string | Yes | Provider ID |
-| `ttlSeconds` | number | No | Lock time-to-live in seconds |
-
-### settle_voucher_payment
-
-Settles a voucher lock. Unused tokens remain with the voucher. The provider is credited.
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `lockId` | string | Yes | Lock ID from verify step |
-| `amount` | number | Yes | Actual tokens consumed (in microunits) |
-| `description` | string | No | Description of the charge |
-
-### release_voucher_payment
-
-Releases a voucher lock without charging. Reserved tokens are returned to the voucher balance.
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `lockId` | string | Yes | Lock ID from verify step |
-| `reason` | string | No | Reason for release |

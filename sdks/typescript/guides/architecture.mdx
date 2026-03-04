@@ -125,7 +125,7 @@ The SDK consists of **6 published packages** focused on clear use cases:
 
 - `tsup` builds ESM+CJS+types for every package.
 - `turbo` orchestrates `build/test/lint/dev`.
-- Version independently with Changesets (add later), or keep in lockstep early on.
+- Version independently with Changesets, or keep in lockstep early on.
 - Node engines: `>=18.17`; Edge builds avoid Node APIs.
 
 ## Security & Env Hygiene
@@ -152,7 +152,7 @@ import { createSolvaPayClient, verifyWebhook, createSolvaPay } from '@solvapay/s
 
 // Unified API for paywall protection:
 const solvaPay = createSolvaPay({ apiKey: 'sk_...' })
-const payable = solvaPay.payable({ product: 'my-api' })
+const payable = solvaPay.payable({ product: 'prd_myapi' })
 
 // Use with different adapters:
 app.post('/endpoint', payable.http(handler)) // Express/Fastify

@@ -93,14 +93,6 @@
         ],
         "type": "object"
       },
-      "CreateAdminAgent": {
-        "properties": {},
-        "type": "object"
-      },
-      "CreateAgentRequest": {
-        "properties": {},
-        "type": "object"
-      },
       "CreateCheckoutSessionRequest": {
         "properties": {
           "customerReference": {
@@ -1078,14 +1070,6 @@
             "description": "Light mode color overrides"
           }
         },
-        "type": "object"
-      },
-      "UpdateAdminAgent": {
-        "properties": {},
-        "type": "object"
-      },
-      "UpdateAgentRequest": {
-        "properties": {},
         "type": "object"
       },
       "UpdateBrandThemeDto": {
@@ -2180,7 +2164,7 @@
         ]
       },
       "post": {
-        "description": "Creates a new product for the authenticated provider. Products are the unified revenue target that replaces the legacy Agent/McpServer entities.",
+        "description": "Creates a new product for the authenticated provider.",
         "operationId": "ProductSdkController_createProduct",
         "parameters": [],
         "requestBody": {

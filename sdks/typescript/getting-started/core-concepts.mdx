@@ -24,7 +24,7 @@ A **Product** represents your API, service, or application that you want to mone
 - **Description** - What the product does
 
 Products are created in the SolvaPay dashboard and represent the service you're protecting. New
-products are available for SDK integration by default and are active in SolvaPay MCP distribution.
+products are available for SDK integration by default and are listed in the SolvaPay marketplace.
 
 ```typescript
 // All endpoints for this product share the same paywall rules
@@ -196,7 +196,7 @@ const purchases = customer.purchases
 // Cancel renewal
 await solvaPay.cancelRenewal({
   customerRef: 'user_123',
-  purchaseRef: 'sub_...',
+  purchaseRef: 'pur_...',
 })
 ```
 

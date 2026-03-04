@@ -380,7 +380,7 @@ async function handleWebhookEvent(event: any) {
 // routes/webhooks.ts
 import express from 'express'
 import { verifyWebhook } from '@solvapay/server'
-import { clearPurchaseCache } from '@solvapay/next'
+import { clearPurchaseCache } from '@solvapay/server'
 
 const router = express.Router()
 
@@ -473,7 +473,7 @@ const testEvent = {
   type: 'purchase.created',
   data: {
     customerRef: 'user_123',
-    purchaseId: 'sub_123',
+    purchaseId: 'pur_123',
     planRef: 'pln_premium',
   },
   timestamp: new Date().toISOString(),

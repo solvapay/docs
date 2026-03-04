@@ -1,57 +1,65 @@
 ---
 title: "Create a Product"
-description: "Use this flow if you are a developer building with the SDK or shipping product access without writing code."
+description: "Create a product to monetize your API, MCP server, or AI-powered service."
 ---
+
+Products are the core unit in SolvaPay. Each product represents a service you want to monetize — an API, an MCP server, a chat assistant, or any feature behind a paywall. Plans (pricing options) are created inside each product.
 
 This product flow is ideal for:
 
 - SDK-backed MCP server products
-- Chat agent access products
+- Chat-based AI service access
 - API access and app feature monetization
-
-By default, new products are available for **SDK Integration** and active in **SolvaPay MCP
-Distribution**.
 
 ## Prerequisites
 
-- SolvaPay provider account
-- At least one plan already created (or created during this flow)
+- A SolvaPay provider account — [create one here](/get-started/create-account) if you haven't
 
-## Step 1: Open Products
+## Step 1: Product Details
 
-Go to **Products** in the provider dashboard and start product creation.
+Go to **Products** in the sidebar and click **Create product**.
 
+Fill in:
 
-## Step 2: Fill Product Details
+- **Name** — a human-readable product name (e.g. "Code Review API")
+- **Description** — what the product does
+- **Image** (optional) — a product icon or logo
 
-Enter your product details:
+## Step 2: Pricing
 
-- Name
-- Description
-- Optional tags and image
+Add one or more pricing options (plans) for this product. Click **Add pricing option** to create each plan inline.
 
+Each plan defines:
 
-## Step 3: Select Plans and Create Product
+- **Type** — recurring, one-time, or usage-based
+- **Price** and **currency**
+- **Billing cycle** (for recurring plans) — monthly or yearly
+- **Features** and **usage limits** (optional)
 
-In the Plans step:
+You can add multiple plans (e.g. a Free tier, a Pro plan, and an Enterprise plan). Plans are created as part of the product — there is no separate "Plans" section.
 
-1. Select one or more existing plans, or create a new plan inline
-2. Confirm selected plans
-3. Click **Create product**
+After adding your pricing options, you can either click **Create product** to finish, or continue to the optional integration step.
 
-Once created, your product is active and ready for SDK-led integration workflows.
+## Step 3: Integration (Optional)
 
-## Result: Product Is Ready by Default
+Choose how customers will access your product:
 
-On the product details page, you can confirm:
+- **SDK Integration** — use the SolvaPay SDK to protect your endpoints with paywall logic
+- **Hosted MCP Pay** — SolvaPay proxies and paywalls your MCP server with zero code changes
 
-- Product is active
-- Plans are attached
-- Integration options are available
+If you skip this step, your product defaults to SDK integration mode.
 
+## Result
+
+After creation, your product is active and visible on the product detail page. From there you can:
+
+- Copy the product reference (`prd_...`) for use in the SDK
+- View and manage attached plans
+- Configure or change the integration mode
+- Track purchases and usage
 
 ## What to Do Next
 
-- Integrate checkout/access control with the SDK
-- Share product access according to your selected plans
-- Validate purchases and usage in sandbox before going live
+- [Choose Your Path](/get-started/choose-your-path) — decide between MCP Pay and SDK integration
+- [Test in Sandbox](/get-started/test-in-sandbox) — validate purchases and usage before going live
+- [SDK Quick Start](/sdks/typescript/getting-started/quick-start) — integrate paywall protection

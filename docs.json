@@ -54,6 +54,22 @@
             ]
           },
           {
+            "group": "Plans",
+            "icon": "tags",
+            "pages": [
+              "plans/overview",
+              "plans/billing"
+            ]
+          },
+          {
+            "group": "Meters",
+            "icon": "gauge",
+            "pages": [
+              "meters/overview",
+              "meters/events"
+            ]
+          },
+          {
             "group": "MCP Server",
             "icon": "server",
             "pages": [

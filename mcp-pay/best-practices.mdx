@@ -43,27 +43,35 @@ Structure your plans by tool access to create clear value differentiation:
 
 ## Quota Management
 
-Configure appropriate quotas per plan to balance user experience with cost control.
+Quotas are enforced through [meters](/meters/overview) — every MCP tool call automatically records a meter event against a `tool:{toolName}` meter. Plans reference these meters to set limits.
+
+### How Meter-Based Quotas Work
+
+1. Each MCP tool gets an auto-created meter (e.g. `tool:search_documents`)
+2. Every tool invocation records a meter event (fire-and-forget, non-blocking)
+3. Usage-based and hybrid plans reference a meter via `meterId` and define a `limit`
+4. On each request, SolvaPay queries the meter timeseries to check current usage against the plan's limit
 
 ### Quota Settings
 
-| Setting | Description |
-|---------|-------------|
-| **Units** | Number of tool calls included per billing period |
-| **Free Units** | Bonus units (e.g., for trials or promotions) |
-| **Overage Behavior** | What happens when quota is exceeded |
+| Setting | Plan Field | Description |
+|---------|-----------|-------------|
+| **Hard cap** | `limit` | Maximum units per billing period (`0` = unlimited) |
+| **Free units** | `freeUnits` | Units included before billing starts |
+| **Price per unit** | `pricePerUnit` | Cost per metered unit for post-paid billing |
+| **Overage policy** | `overagePolicy` | Whether to allow usage beyond the limit (hybrid plans) |
 
 ### Overage Options
 
-1. **Hard limit** - Block requests when quota exhausted
-2. **Soft limit** - Allow continued use, charge overage fees
-3. **Notify only** - Allow use but alert the user
+1. **Hard limit** (`limit` with no overage policy) - Block requests when quota exhausted. The paywall response includes a checkout URL.
+2. **Soft limit** (hybrid plan with `overagePolicy.allowOverage: true`) - Allow continued use, charge overage at `overageRate` per unit up to `maxOverage`
+3. **Unlimited** (`limit: 0`) - No cap on usage
 
 ### Quota Recommendations
 
-- **Free tier:** Hard limit to prevent abuse
-- **Paid tiers:** Soft limit with overage, or generous quotas
-- **Enterprise:** Unlimited or very high limits
+- **Free tier:** Hard limit to prevent abuse (e.g. `limit: 100`, `freeUnits: 100`)
+- **Paid tiers:** Usage-based with generous limits or hybrid with overage
+- **Enterprise:** `limit: 0` (unlimited) or very high limits
 
 ## Tool Assignment Patterns
 
@@ -235,3 +243,6 @@ If authenticated tool calls fail:
 - [MCP Pay Overview](/mcp-pay/overview) - Review core concepts
 - [Quick Start](/mcp-pay/quick-start) - Set up your first product
 - [Authentication](/mcp-pay/authentication) - Deep dive into OAuth
+- [Meters](/meters/overview) - Meter definitions and auto-created tool meters
+- [Plans](/plans/overview) - Plan types and meter-based pricing
+- [Billing](/plans/billing) - Usage-based billing and end-of-period processing

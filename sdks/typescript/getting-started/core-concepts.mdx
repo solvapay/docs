@@ -6,6 +6,8 @@ description: "Understanding the key concepts in SolvaPay SDK will help you build
 ## Table of Contents
 
 - [Products and Plans](#products-and-plans)
+- [Plan Types](#plan-types)
+- [Meters](#meters)
 - [Customer References](#customer-references)
 - [Paywall Protection Flow](#paywall-protection-flow)
 - [Purchase Lifecycle](#purchase-lifecycle)
@@ -35,15 +37,13 @@ const payable = solvaPay.payable({
 
 ### Plans
 
-A **Plan** represents a purchase tier or pricing model. Plans define:
+A **Plan** defines a pricing model and access tier for a product. Plans are embedded inside products — each product has its own set of plans. Every plan includes:
 
-- **Plan Reference** (`pln_...`) - Unique identifier for the plan
-- **Name** - Plan name (e.g., "Premium", "Pro")
-- **Price** - Purchase price
-- **Usage Limits** - What's included (e.g., 1000 API calls/month)
-- **Features** - What features are available
-
-Plans are created in the SolvaPay dashboard and can be associated with products.
+- **Plan Reference** (`pln_...`) - Unique identifier
+- **Type** - `recurring`, `usage-based`, `one-time`, or `hybrid`
+- **Price** and **currency**
+- **Features** - Provider-defined feature flags
+- **Status** - `active`, `inactive`, or `archived`
 
 ```typescript
 // Protect endpoints with a specific plan requirement
@@ -56,8 +56,34 @@ const payable = solvaPay.payable({
 ### Product-Plan Relationship
 
 - **One product can have multiple plans** - Different tiers (Free, Pro, Enterprise)
-- **Plans can be shared across products** - Reuse plans for multiple services
+- **Plans are embedded in products** - Created and managed as part of the product
+- **One default plan per product** - Used as the fallback for MCP tool access and sign-ups
 - **Paywall checks** - Verify user has the required plan for the product
+
+## Plan Types
+
+SolvaPay supports four plan types:
+
+| Type | Description | Best For |
+|------|-------------|----------|
+| **Recurring** | Fixed price billed on a cycle (monthly, yearly, etc.) | SaaS subscriptions |
+| **Usage-Based** | Pay-per-use tracked by a [meter](/meters/overview) | APIs, token-based services |
+| **Hybrid** | Recurring base fee + usage-based overage | Enterprise SaaS with variable usage |
+| **One-Time** | Single purchase, no recurring billing | Digital goods, lifetime access |
+
+Usage-based and hybrid plans reference a **meter** via `meterId` to track consumption and enforce limits. See [Plans documentation](/plans/overview) for full details on each type.
+
+## Meters
+
+**Meters** are standalone metric definitions that track usage independently of products, plans, and purchases. A meter defines *what* to measure (e.g. API requests, tokens, tool calls), and **meter events** are the raw data points recorded against those definitions.
+
+- **Default meters** (`api_requests`, `requests`, `api_calls`, `tokens`) are auto-created for every provider
+- **MCP tool meters** (`tool:{toolName}`) are auto-created when MCP servers discover tools
+- **Custom meters** can be created for any business-specific metric
+
+Plans link to meters to enable usage-based billing and limit enforcement. The meter event timeseries is the source of truth for all usage queries.
+
+See [Meters documentation](/meters/overview) for details.
 
 ## Customer References
 
@@ -250,41 +276,51 @@ const user = await getAuthenticatedUser(request)
 
 ## Usage Tracking
 
-### Automatic Usage Tracking
+### Meter-Based Tracking
 
-SolvaPay automatically tracks usage when you use `payable()`:
+SolvaPay tracks usage through **meter events** — timestamped data points stored in a MongoDB timeseries collection. Events are recorded automatically when you use `payable()`, and can also be recorded manually.
 
-- **Per Request** - Each protected request is tracked
-- **Per Customer** - Usage is tracked per customer reference
-- **Per Product** - Usage is tracked per product
-- **Per Plan** - Usage limits are enforced per plan
+Usage is tracked:
+
+- **Per Meter** - Each metric has its own event stream (e.g. `api_requests`, `tool:search`)
+- **Per Customer** - Usage is scoped to individual customers
+- **Per Provider** - Multi-tenant isolation ensures providers only see their own data
+
+### Automatic Tracking
+
+When you use `payable()`, each request automatically records a meter event. MCP tool calls through the SolvaPay proxy are also tracked automatically against `tool:{toolName}` meters.
 
 ### Manual Usage Tracking
 
-You can also track usage manually:
+Record events directly for custom metrics:
 
 ```typescript
-// Track custom usage
+// Track custom usage via SDK
 await solvaPay.trackUsage({
   customerRef: 'user_123',
-  productRef: 'prd_myapi',
-  amount: 1, // Usage amount
-  metadata: {
-    /* custom data */
+  meterName: 'api_requests',
+  value: 1,
+  properties: {
+    endpoint: '/api/v1/search',
   },
 })
 ```
 
 ### Usage Limits
 
-Usage limits are enforced automatically:
+Usage-based and hybrid plans enforce limits through meters:
 
-- **Plan Limits** - Set in SolvaPay dashboard
-- **Free Tier Limits** - Automatic for all customers
-- **Custom Limits** - Can be set per customer
+- **Hard caps** - The plan's `limit` field sets a maximum per billing period
+- **Free units** - The plan's `freeUnits` defines included usage before billing starts
+- **Overage** - Hybrid plans can allow overage beyond the limit at a specified rate
+
+Limit checks query the meter event timeseries in real time — `sum(meterName, customerId, periodStart, now)` is compared against the plan's hard cap. When limits are exceeded, requests are denied with a paywall response that includes a checkout URL for upgrading.
 
 ## Next Steps
 
 - [Quick Start](./quick-start.mdx) - Try the examples
 - [Framework Guides](../guides/express.mdx) - Framework-specific integration
 - [Architecture Guide](../guides/architecture.mdx) - Detailed technical architecture
+- [Plans](/plans/overview) - Plan types, pricing models, and configuration
+- [Meters](/meters/overview) - Meter definitions and management
+- [Billing](/plans/billing) - Billing cycles and usage-based billing

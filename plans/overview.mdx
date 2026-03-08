@@ -1,0 +1,229 @@
+---
+title: "Plans"
+description: "Plans define pricing models and access tiers for your products. Each plan type supports different billing strategies."
+---
+
+Plans are pricing options embedded within products. They define how customers pay for access — whether through a flat recurring fee, per-unit usage charges, a one-time purchase, or a combination of recurring and usage-based billing.
+
+## Plan Types
+
+SolvaPay supports four plan types, each optimized for different monetization strategies:
+
+### Recurring
+
+Fixed-price plans billed on a regular cycle. Best for SaaS subscriptions with predictable pricing.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `billingCycle` | `enum` | `weekly`, `monthly`, `quarterly`, `yearly`, or `custom` |
+| `setupFee` | `number` | One-time fee charged on first billing |
+| `trialDays` | `number` | Free trial period before billing starts |
+| `autoRenew` | `boolean` | Whether the plan auto-renews at period end |
+| `cancellationNoticeDays` | `number` | Notice required to cancel (default: 1 day) |
+| `pricingTiers` | `array` | Optional tiered pricing (e.g. Basic, Pro, Enterprise) |
+| `prorationPolicy` | `object` | How to handle mid-cycle upgrades/downgrades |
+| `limits` | `object` | Optional `maxTransactions` cap |
+
+```json
+{
+  "type": "recurring",
+  "price": 1900,
+  "currency": "USD",
+  "billingCycle": "monthly",
+  "trialDays": 14,
+  "autoRenew": true,
+  "features": {
+    "api_access": true,
+    "priority_support": true
+  }
+}
+```
+
+### Usage-Based
+
+Pay-per-use plans where customers are billed based on actual consumption tracked by a [meter](/meters/overview).
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `meterId` | `ObjectId` | Reference to the meter that tracks usage |
+| `billingModel` | `enum` | `pre-paid` (pay upfront for a quota) or `post-paid` (pay after usage) |
+| `pricePerUnit` | `number` | Cost per metered unit |
+| `limit` | `number` | Hard usage cap per period (`0` = unlimited) |
+| `freeUnits` | `number` | Units included before billing starts |
+| `rolloverUnusedUnits` | `boolean` | Carry unused units to the next period |
+| `billingCycle` | `string` | Required for post-paid plans |
+| `limits` | `object` | Optional `maxTransactions`, `maxUsage` |
+
+```json
+{
+  "type": "usage-based",
+  "price": 0,
+  "currency": "USD",
+  "billingModel": "post-paid",
+  "billingCycle": "monthly",
+  "meterId": "60f7b2...",
+  "pricePerUnit": 10,
+  "freeUnits": 100,
+  "limit": 10000
+}
+```
+
+<Note>
+The `meterId` links the plan to a specific meter. When checking limits, SolvaPay queries the meter's event timeseries for the customer's total usage in the current billing period and compares it against the plan's `limit`.
+</Note>
+
+### Hybrid
+
+Combines a recurring base price with usage-based overage billing. Best for enterprise SaaS where customers pay a base fee that includes some usage, with additional charges for overages.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `basePrice` | `number` | Fixed recurring portion |
+| `billingCycle` | `enum` | Same options as recurring plans |
+| `meterId` | `ObjectId` | Reference to the meter that tracks usage |
+| `limit` | `number` | Included units in the base price |
+| `freeUnits` | `number` | Additional free units beyond the base |
+| `pricePerUnit` | `number` | Flat per-unit rate (fallback if no tiers) |
+| `usageTiers` | `array` | Volume-based tiered pricing for the usage component |
+| `overagePolicy` | `object` | `allowOverage`, `overageRate`, `maxOverage` |
+| `billingStrategy` | `object` | Whether to bill `recurring_first`, `usage_first`, or `combined` |
+
+```json
+{
+  "type": "hybrid",
+  "basePrice": 4900,
+  "currency": "USD",
+  "billingCycle": "monthly",
+  "meterId": "60f7b2...",
+  "limit": 1000,
+  "freeUnits": 0,
+  "pricePerUnit": 5,
+  "overagePolicy": {
+    "allowOverage": true,
+    "overageRate": 8,
+    "maxOverage": 5000
+  },
+  "usageTiers": [
+    { "name": "Standard", "minUsage": 0, "maxUsage": 500, "pricePerUnit": 5 },
+    { "name": "High Volume", "minUsage": 501, "maxUsage": 2000, "pricePerUnit": 3 },
+    { "name": "Enterprise", "minUsage": 2001, "pricePerUnit": 1 }
+  ]
+}
+```
+
+### One-Time
+
+Single-purchase plans for digital goods, lifetime access, or physical products.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `isRecurring` | `boolean` | Whether the one-time purchase can be repeated |
+| `limits` | `object` | Optional `maxTransactions` |
+| `availability` | `object` | `startDate`, `endDate`, `maxQuantity`, `currentQuantity` |
+| `fulfillment` | `object` | `type` (digital/physical), `deliveryMethod`, `estimatedDelivery` |
+| `warranty` | `object` | `duration`, `unit`, `terms` |
+| `returnPolicy` | `object` | `allowed`, `period`, `conditions` |
+
+```json
+{
+  "type": "one-time",
+  "price": 9900,
+  "currency": "USD",
+  "fulfillment": {
+    "type": "digital",
+    "deliveryMethod": "instant"
+  }
+}
+```
+
+## Common Plan Fields
+
+All plan types share these base fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `reference` | `string` | Auto-generated identifier (`pln_XXXXXXXX`) |
+| `price` | `number` | Base price in smallest currency unit (e.g. cents) |
+| `currency` | `string` | ISO 4217 currency code (default: `USD`) |
+| `status` | `enum` | `active`, `inactive`, or `archived` |
+| `isFreeTier` | `boolean` | Whether this is a free tier |
+| `requiresPayment` | `boolean` | Whether payment is needed to activate |
+| `default` | `boolean` | Whether this is the product's default plan |
+| `maxActiveUsers` | `number?` | Maximum concurrent users on this plan |
+| `accessExpiryDays` | `number?` | Days until access expires |
+| `features` | `object` | Provider-defined feature flags |
+| `metadata` | `object` | Arbitrary provider-defined metadata |
+
+## Plans Are Embedded in Products
+
+Plans are stored as sub-documents inside product documents — there is no separate plans collection. Each product has a `plans[]` array where each entry is discriminated by the `kind` field.
+
+This means:
+- A product owns its plans
+- Plans are created, updated, and deleted through the product
+- Plan references (`pln_...`) are globally unique across all products
+
+```
+Product (prd_myapi)
+├── Plan: Free Tier (pln_abc123) — recurring, $0/month
+├── Plan: Pro (pln_def456) — usage-based, $0.01/request
+└── Plan: Enterprise (pln_ghi789) — hybrid, $49/month + overage
+```
+
+## Plan API
+
+All plan endpoints are scoped to a product:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/sdk/products/:productRef/plans` | List plans for a product |
+| `GET` | `/sdk/products/:productRef/plans/:planRef` | Get a single plan |
+| `POST` | `/sdk/products/:productRef/plans` | Create a plan |
+| `PUT` | `/sdk/products/:productRef/plans/:planRef` | Update a plan |
+| `DELETE` | `/sdk/products/:productRef/plans/:planRef` | Delete a plan |
+
+Plans can also be managed via the NATS event bus using the `solvapay.plan.*` subjects.
+
+## Default Plan
+
+Each product can have one default plan. Setting a new plan as default automatically un-defaults all other plans in that product. The default plan is used as the fallback for:
+
+- MCP server tool access (when no specific plan is assigned to a tool)
+- New customer sign-ups (when auto-provisioning is configured)
+
+## Plans and MCP Servers
+
+Plans integrate with MCP servers in two ways:
+
+- **Server default plan** — the `defaultPlanId` on an MCP server determines which plan is used for general tool access
+- **Per-tool plan assignments** — individual MCP tools can reference specific plans via `planIds`, enabling tool-level access tiering
+
+When plans are created, updated, or deleted, MCP server configurations are automatically synced.
+
+## Purchase Snapshots
+
+When a customer purchases a plan, the plan's configuration is **frozen into a snapshot** on the purchase record:
+
+```json
+{
+  "planSnapshot": {
+    "reference": "pln_abc123",
+    "price": 1900,
+    "currency": "USD",
+    "planType": "usage-based",
+    "billingCycle": "monthly",
+    "meterId": "60f7b2...",
+    "limit": 10000,
+    "freeUnits": 100,
+    "pricePerUnit": 10
+  }
+}
+```
+
+This ensures billing is deterministic — changing a plan's price or limits does not retroactively affect existing purchases.
+
+## Next Steps
+
+- [Billing](/plans/billing) — billing cycles, usage billing, and end-of-period processing
+- [Meters](/meters/overview) — meter definitions linked to usage-based plans
+- [Meter Events](/meters/events) — how usage data is recorded and queried

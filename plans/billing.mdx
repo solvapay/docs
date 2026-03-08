@@ -1,0 +1,188 @@
+---
+title: "Billing"
+description: "How SolvaPay handles billing cycles, usage-based billing, and end-of-period processing."
+---
+
+SolvaPay automates billing through a combination of purchase lifecycle management and scheduled jobs. Recurring and usage-based plans are billed automatically, with usage costs calculated from meter event data.
+
+## Billing Cycles
+
+Billing cycles determine how often customers are charged and when usage counters reset:
+
+| Cycle | Duration | Use Case |
+|-------|----------|----------|
+| `weekly` | 7 days | High-frequency, short-commitment services |
+| `monthly` | 30 days | Standard SaaS subscriptions |
+| `quarterly` | 90 days | Discounted longer-term plans |
+| `yearly` | 365 days | Annual subscriptions with savings |
+| `custom` | 30 days (default) | Custom billing arrangements |
+
+The billing cycle is set on the plan and determines:
+
+- When the next payment is due (`nextBillingDate` on the purchase)
+- The time window for usage aggregation (`periodStart` to `periodEnd`)
+- When usage counters reset
+
+## Purchase States
+
+A purchase moves through these states during its lifecycle:
+
+| State | Description |
+|-------|-------------|
+| `trialing` | Customer is in a free trial period (set by `trialDays` on the plan) |
+| `active` | Purchase is active and the customer has access |
+| `cancelled` | Cancel requested but still active until period end |
+| `expired` | Purchase has ended (trial expired without payment, or cancelled and period ended) |
+| `past_due` | Payment failed; purchase may be suspended |
+
+## Usage Tracking on Purchases
+
+For usage-based and hybrid plans, each purchase maintains a `usage` subdocument that tracks the current billing period:
+
+```json
+{
+  "usage": {
+    "used": 0,
+    "periodStart": "2025-01-01T00:00:00Z",
+    "periodEnd": "2025-02-01T00:00:00Z",
+    "resetDate": "2025-02-01T00:00:00Z",
+    "overageUnits": 0,
+    "overageCost": 0,
+    "carriedOverUnits": 0
+  }
+}
+```
+
+The **actual usage count comes from the meter event timeseries**, not from the `usage.used` field. The timeseries is the source of truth — limit checks query `MeterEventService.sum()` from `periodStart` to the current time.
+
+## Limit Checking Flow
+
+When a customer makes a request to a protected endpoint, access is determined by:
+
+1. **Find the active purchase** for the customer and product
+2. **Look up the plan** to get `meterId` and `limit`
+3. If no `meterId` or `limit` is `0` — **unlimited access**, allow immediately
+4. **Resolve the meter name** from the `meterId`
+5. **Query the timeseries** — `sum(providerId, meterName, customerId, periodStart, now)`
+6. **Compare against the hard cap** — if `used >= limit`, deny with a paywall response
+
+The response includes:
+
+```json
+{
+  "hasAccess": true,
+  "used": 750,
+  "remaining": 250,
+  "limit": 1000,
+  "freeUnits": 100,
+  "isExceeded": false,
+  "meterName": "api_requests"
+}
+```
+
+When access is denied, the response includes a checkout URL so the customer can upgrade.
+
+## End-of-Period Billing
+
+A daily cron job (11:00 AM UTC) processes end-of-period billing for usage-based and hybrid plans. For each active recurring purchase whose billing period has ended:
+
+### Usage-Based Plans
+
+1. Query the meter timeseries for total usage in the period
+2. Subtract `freeUnits` from the total
+3. Apply the `pricePerUnit` to the billable amount
+4. Respect the `limit` as a hard cap (usage beyond the cap is not billed unless overage is allowed)
+5. Create a payment intent for the calculated cost
+
+**Example:**
+
+```
+Plan: 100 free units, $0.01/unit, 10,000 limit
+Usage: 5,250 events in the period
+
+Billable = max(0, min(5250, 10000) - 100) = 5,150 units
+Cost = 5,150 × $0.01 = $51.50
+```
+
+### Hybrid Plans
+
+Hybrid plans combine a recurring base fee with usage-based charges:
+
+1. The base price is billed as part of the regular renewal
+2. Usage beyond the included amount is calculated separately
+3. **Tiered pricing** is applied if `usageTiers` are defined — each tier has its own `pricePerUnit` for a range of usage
+4. **Overage** beyond the plan's `limit` is charged at the `overagePolicy.overageRate` (or `pricePerUnit` as fallback)
+5. The `overagePolicy.maxOverage` caps the maximum overage units
+
+**Example with tiered pricing:**
+
+```
+Base: $49/month, 1,000 included units
+Tiers:
+  0–500:     $0.05/unit
+  501–2,000: $0.03/unit
+  2,001+:    $0.01/unit
+Overage: allowed, rate $0.08/unit, max 5,000
+
+Usage: 3,500 events
+
+Included: 1,000 (covered by base price)
+Billable: 2,500 units
+  Tier 1: 500 × $0.05 = $25.00
+  Tier 2: 1,500 × $0.03 = $45.00
+  Tier 3: 500 × $0.01 = $5.00
+Usage cost: $75.00
+Total: $49.00 (base) + $75.00 (usage) = $124.00
+```
+
+## Renewal Processing
+
+A daily cron job (10:00 AM UTC) handles recurring plan renewals:
+
+1. Find purchases where `nextBillingDate ≤ now` and `autoRenew` is enabled
+2. For paid plans, create a payment intent for the plan price
+3. For free plans, process the renewal directly
+4. Advance `nextBillingDate` to the next billing cycle
+
+## Trial Expiration
+
+A daily cron job (8:00 AM UTC) handles trial expirations:
+
+- If the plan requires payment: the purchase is **suspended** until payment is received
+- If the plan is a free tier: the purchase transitions to **active**
+
+## Usage Reset
+
+A periodic job (every 30 minutes) resets usage counters on purchases whose reset date has passed:
+
+1. Set `usage.used` to `0` (or carry-over amount if `rolloverUnusedUnits` is enabled)
+2. Advance `periodStart` and `periodEnd` to the next period
+3. Calculate the next `resetDate`
+
+Since the actual usage is derived from the meter event timeseries using the `periodStart` window, advancing `periodStart` effectively "resets" visible usage without deleting any events.
+
+## Billing Strategies (Hybrid Plans)
+
+Hybrid plans support different billing strategies:
+
+| Strategy | Description |
+|----------|-------------|
+| `recurring_first` | Bill the base fee first, then calculate usage charges |
+| `usage_first` | Calculate usage first, then add the base fee |
+| `combined` | Bill both components together |
+
+## Proration (Recurring Plans)
+
+When a customer upgrades or downgrades mid-cycle, proration policies determine how the change is handled:
+
+| Method | Description |
+|--------|-------------|
+| `proportional` | Charge/credit proportional to remaining days in the cycle |
+| `full` | Charge the full new price immediately |
+| `none` | Wait until the next billing cycle to apply the change |
+
+## Next Steps
+
+- [Plans](/plans/overview) — plan types and configuration
+- [Meters](/meters/overview) — meter definitions
+- [Meter Events](/meters/events) — how usage data is recorded

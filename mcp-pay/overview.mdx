@@ -27,8 +27,8 @@ origin MCP server.
 
 - **Authentication** - OAuth 2.0 with Google and GitHub sign-in
 - **Authorization** - Purchase-plan checks per tool
-- **Usage Tracking** - Invocation tracking and quota enforcement
-- **Billing** - Hosted checkout and billing flows
+- **Usage Tracking** - Every tool call is automatically recorded as a [meter event](/meters/events) against a `tool:{toolName}` meter. Quota enforcement uses real-time meter aggregation.
+- **Billing** - Hosted checkout and billing flows with support for recurring, usage-based, hybrid, and one-time [plans](/plans/overview)
 - **Dynamic Client Registration** - MCP clients can auto-register OAuth clients
 
 ```mermaid
@@ -57,6 +57,8 @@ flowchart LR
 | **Signup default plan** | The plan automatically assigned to new users |
 | **Server default plan** | The default plan used for tool access in Hosted MCP Pay unless overridden |
 | **Hosted MCP Pay** | Optional managed mode for auth, identity, billing, and payment |
+| **Meter** | A [metric definition](/meters/overview) that tracks usage (e.g. `tool:search_documents`). Auto-created for each discovered MCP tool. |
+| **Meter event** | A [timestamped data point](/meters/events) recorded each time a tool is called. Powers quota enforcement and billing. |
 
 ## Next Steps
 

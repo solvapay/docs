@@ -48,3 +48,74 @@ When users connect to the hosted MCP server URL:
 - Test the MCP URL with a sandbox account in your MCP client
 - Review [Authentication](/mcp-pay/authentication) for OAuth behavior
 - Configure [Hosted Pages](/mcp-pay/hosted-pages) for branded customer flows
+
+## API quickstart (SDK bootstrap endpoint)
+
+If you want the same setup flow through API, use the SDK bootstrap route:
+
+`POST /v1/sdk/products/mcp/bootstrap`
+
+This creates in one call:
+- MCP-enabled product
+- pricing plans (for example `free` and `pro`)
+- origin URL configuration
+- tool-to-plan mapping
+
+Canonical request fields are:
+- `originUrl`
+- `defaultPlanId` (or `defaultPlanRef` / `defaultPlanKey` during bootstrap)
+- `tools[].noPlan`
+- `tools[].planIds` (or `planRefs` / `planKeys` during bootstrap)
+
+```bash
+curl -X POST "https://api.solvapay.com/v1/sdk/products/mcp/bootstrap" \
+  -H "Authorization: Bearer $SOLVAPAY_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Docs Assistant",
+    "originUrl": "https://origin.example.com/mcp",
+    "plans": [
+      { "key": "free", "name": "Free", "price": 0, "isFreeTier": true, "requiresPayment": false },
+      { "key": "pro", "name": "Pro", "price": 20, "billingCycle": "monthly", "requiresPayment": true }
+    ],
+    "defaultPlanKey": "free",
+    "tools": [
+      { "name": "list_docs", "planKeys": ["free"] },
+      { "name": "deep_research", "planKeys": ["pro"] },
+      { "name": "health_check", "noPlan": true }
+    ]
+  }'
+```
+
+Use this for the fastest onboarding. If you need fine-grained lifecycle control, use the granular
+product, plan, and MCP server endpoints.
+
+## Tool and default-plan precedence
+
+When SolvaPay evaluates access for a tool:
+
+1. If `tools[].noPlan` is `true`, the tool is public.
+2. Otherwise, SolvaPay checks if the user's purchase plan is in:
+   - `tools[].planIds`, or
+   - the MCP server `defaultPlanId`.
+
+During bootstrap, default plan resolution uses this order:
+1. `defaultPlanId`
+2. `defaultPlanRef`
+3. `defaultPlanKey`
+4. implicit `free`
+
+## Troubleshooting bootstrap errors
+
+Common validation failures for `POST /v1/sdk/products/mcp/bootstrap`:
+
+- `UNKNOWN_PLAN_KEY`  
+  A tool references a `planKeys` value not declared in `plans[].key`.
+- `UNKNOWN_PLAN_REFERENCE`  
+  `defaultPlanRef` or `tools[].planRefs` points to a plan not created by the same bootstrap request.
+- `PLAN_PRODUCT_MISMATCH`  
+  `tools[].planIds` includes a plan ID outside the plans created in this bootstrap call.
+- `DUPLICATE_TOOL_NAME`  
+  The same tool name appears more than once in `tools`.
+- origin URL validation error (`originUrl`)  
+  `originUrl` must be a valid `https://` URL.

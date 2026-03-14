@@ -60,6 +60,40 @@ export const payable = solvaPay.payable({
 })
 ```
 
+### Optional: bootstrap product + plans + MCP config
+
+If you want a one-call setup for an MCP integration, use `bootstrapMcpProduct`:
+
+```typescript
+const bootstrap = await solvaPay.bootstrapMcpProduct({
+  name: 'Docs Assistant',
+  originUrl: 'https://origin.example.com/mcp',
+  plans: [
+    { key: 'free', name: 'Free', price: 0, isFreeTier: true, requiresPayment: false },
+    { key: 'pro', name: 'Pro', price: 20, billingCycle: 'monthly', requiresPayment: true },
+  ],
+  defaultPlanKey: 'free',
+  tools: [
+    { name: 'list_docs', planKeys: ['free'] },
+    { name: 'deep_research', planKeys: ['pro'] },
+    { name: 'health_check', noPlan: true },
+  ],
+})
+
+console.log(bootstrap.product.reference)
+console.log(bootstrap.mcpServer.mcpProxyUrl)
+```
+
+For enterprise workflows, you can still use separate endpoints for product, plans, and MCP server
+management.
+
+Field naming for bootstrap payloads:
+- Use `originUrl` for the origin MCP endpoint.
+- Use `defaultPlanId` as canonical persisted default plan field.
+- During bootstrap, you can resolve plan mapping with `defaultPlanRef` or `defaultPlanKey`.
+- For tool mapping, prefer `planIds` as canonical persisted field; bootstrap also accepts
+  `planRefs` and `planKeys`.
+
 `createSolvaPay()` also accepts `apiKey` directly if you don't need a custom client:
 
 ```typescript

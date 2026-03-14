@@ -71,7 +71,7 @@ SolvaPay supports four plan types:
 | **Hybrid** | Recurring base fee + usage-based overage | Enterprise SaaS with variable usage |
 | **One-Time** | Single purchase, no recurring billing | Digital goods, lifetime access |
 
-Usage-based and hybrid plans reference a **meter** via `meterId` to track consumption and enforce limits. See [Plans documentation](/plans/overview) for full details on each type.
+Usage-based plans automatically measure requests and enforce limits. Hybrid plans combine a recurring base fee with usage-based overage tracking. See [Plans documentation](/plans/overview) for full details on each type.
 
 ## Meters
 
@@ -314,7 +314,7 @@ Usage-based and hybrid plans enforce limits through meters:
 - **Free units** - The plan's `freeUnits` defines included usage before billing starts
 - **Overage** - Hybrid plans can allow overage beyond the limit at a specified rate
 
-Limit checks query the meter event timeseries in real time — `sum(meterName, customerId, periodStart, now)` is compared against the plan's hard cap. When limits are exceeded, requests are denied with a paywall response that includes a checkout URL for upgrading.
+Limit checks query the meter event timeseries in real time — `sum(meterName, customerRef, periodStart, now)` is compared against the plan's hard cap. When limits are exceeded, requests are denied with a paywall response that includes a checkout URL for upgrading.
 
 ## Next Steps
 

@@ -49,7 +49,7 @@ Quotas are enforced through [meters](/meters/overview) — every MCP tool call a
 
 1. Each MCP tool gets an auto-created meter (e.g. `tool:search_documents`)
 2. Every tool invocation records a meter event (fire-and-forget, non-blocking)
-3. Usage-based and hybrid plans reference a meter via `meterId` and define a `limit`
+3. Usage-based and hybrid plans automatically track requests and define a `limit`
 4. On each request, SolvaPay queries the meter timeseries to check current usage against the plan's limit
 
 ### Quota Settings

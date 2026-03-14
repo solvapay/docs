@@ -1,37 +1,38 @@
 ---
-title: "Meter Events"
-description: "Record and query usage data with meter events — the raw data points that power billing, limits, and analytics."
+title: "Usage Records"
+description: "Record and query usage data — the raw data points that power billing, limits, and analytics."
 ---
 
-Meter events are timestamped data points stored in a MongoDB timeseries collection. They are the source of truth for all usage tracking in SolvaPay — limit checks, billing calculations, and analytics dashboards all query from the same event stream.
+Usage records are timestamped data points stored in a MongoDB timeseries collection. They are the source of truth for all usage tracking in SolvaPay — limit checks, billing calculations, and analytics dashboards all query from the same data stream.
 
-## Event Structure
+## Record Structure
 
-Each meter event contains:
+Each usage record contains:
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `timestamp` | `Date` | When the event occurred |
 | `metadata.providerId` | `ObjectId` | The provider that owns this event |
-| `metadata.meterName` | `string` | Which meter this event belongs to (e.g. `api_requests`, `tool:search`) |
-| `metadata.customerId` | `ObjectId` | The customer who triggered the event |
+| `metadata.meterName` | `string` | Which meter this record belongs to (e.g. `requests`) |
+| `metadata.customerId` | `ObjectId` | The customer who triggered the event (mapped from `customerRef` in the SDK) |
 | `value` | `number` | Numeric value (defaults to `1` for counters) |
 | `properties` | `object?` | Arbitrary key-value tags for filtering and analysis |
 
-Events are immutable. Once recorded, they cannot be modified or deleted. MongoDB's timeseries engine automatically compresses and indexes events by metadata and time for efficient aggregation.
+Usage records are immutable. Once recorded, they cannot be modified or deleted. MongoDB's timeseries engine automatically compresses and indexes records by metadata and time for efficient aggregation.
 
-## Recording Events
+## Recording Usage
+
+Usage is recorded via `UsageService.recordUsage()`, which writes to the Usage timeseries collection.
 
 ### Via SDK Endpoint
 
-Record events directly from your backend using the SDK API:
+Record usage directly from your backend using the SDK API:
 
 ```bash
-# Record a single event
-POST /sdk/meter-events
+# Record a single usage record
+POST /sdk/usages
 {
-  "meterName": "api_requests",
-  "customerId": "cus_abc123",
+  "customerRef": "cus_abc123",
   "value": 1,
   "properties": {
     "endpoint": "/api/v1/search",
@@ -41,62 +42,46 @@ POST /sdk/meter-events
 ```
 
 ```bash
-# Record events in bulk
-POST /sdk/meter-events/bulk
+# Record usage in bulk
+POST /sdk/usages/bulk
 {
-  "events": [
-    { "meterName": "api_requests", "customerId": "cus_abc123", "value": 1 },
-    { "meterName": "tokens", "customerId": "cus_abc123", "value": 150 },
-    { "meterName": "api_requests", "customerId": "cus_def456", "value": 1 }
+  "records": [
+    { "customerRef": "cus_abc123", "value": 1 },
+    { "customerRef": "cus_def456", "value": 1 }
   ]
 }
 ```
 
-### Via Usage Endpoint
-
-The usage endpoint provides a higher-level interface with automatic meter resolution:
-
-```bash
-POST /sdk/usages
-{
-  "toolName": "search_documents",
-  "customerId": "cus_abc123",
-  "value": 1
-}
-```
-
-When `toolName` is provided, the meter name is automatically resolved to `tool:{toolName}`. If no `toolName` or explicit `meterName` is given, events default to the `api_requests` meter.
-
 ### Via NATS Event Bus
 
-For internal services, events can be published over NATS:
+For internal services, usage can be published over NATS:
 
 ```typescript
-// Record a single event
+// Record a single usage record
 await nats.publish('solvapay.meter.record', {
-  meterName: 'api_requests',
+  meterName: 'requests',
   userId: 'cus_abc123',
   value: 1,
   properties: { endpoint: '/search' }
 })
 
-// Record events in bulk
+// Record usage in bulk
 await nats.publish('solvapay.meter.recordBulk', {
   events: [
-    { meterName: 'api_requests', userId: 'cus_abc123', value: 1 },
-    { meterName: 'tokens', userId: 'cus_abc123', value: 250 }
+    { meterName: 'requests', userId: 'cus_abc123', value: 1 },
+    { meterName: 'requests', userId: 'cus_def456', value: 1 }
   ]
 })
 ```
 
 ### Automatic MCP Tool Tracking
 
-Every MCP tool call through the SolvaPay proxy automatically records a meter event. No SDK integration needed — the proxy records against the tool's auto-created meter (e.g. `tool:search_documents`) with the outcome as a property:
+Every MCP tool call through the SolvaPay proxy automatically records a usage record against the provider's `requests` meter. No SDK integration needed — the proxy records usage with the outcome as a property:
 
 ```json
 {
-  "meterName": "tool:search_documents",
-  "customerId": "cus_abc123",
+  "meterName": "requests",
+  "customerRef": "cus_abc123",
   "value": 1,
   "properties": {
     "outcome": "success"
@@ -106,7 +91,7 @@ Every MCP tool call through the SolvaPay proxy automatically records a meter eve
 
 This happens fire-and-forget so it never blocks the tool call response.
 
-## Querying Events
+## Querying Usage
 
 ### Aggregated Usage
 
@@ -130,37 +115,35 @@ When no `customerId` is specified, the aggregation runs across all customers.
 
 ### Analytics Queries
 
-The meter event timeseries powers several analytics views:
+The Usage timeseries powers several analytics views:
 
 | Query | Description |
 |-------|-------------|
-| **Overall daily stats** | Total events per day across all meters |
+| **Overall daily stats** | Total usage records per day |
 | **Usage by customer** | Total usage grouped by customer |
-| **Usage by meter** | Total usage grouped by meter |
-| **Usage by MCP tool** | Usage for meters with the `tool:` prefix |
 
-## How Events Power Billing and Limits
+## How Usage Powers Billing and Limits
 
 ### Limit Checking
 
 When a customer makes a request to a protected endpoint, the system:
 
 1. Finds the customer's active purchase for the product
-2. Looks up the plan to get the `meterId` and `limit`
-3. Resolves the meter name from the `meterId`
-4. Queries `MeterEventService.sum()` for usage from `periodStart` to now
+2. Looks up the plan to get the `limit`
+3. Resolves the plan's auto-assigned requests meter
+4. Queries `UsageService.sumForMeter()` for usage from `periodStart` to now
 5. Compares the total against the plan's hard cap
 
 If usage exceeds the limit, the request is denied with a paywall response including a checkout URL.
 
 ```
-Request → Find Purchase → Resolve Plan Meter
+Request → Find Purchase → Resolve Requests Meter
                               ↓
-                    Query MeterEvent timeseries
+                    Query Usage timeseries
                     (sum from periodStart to now)
                               ↓
                     used >= limit? → Paywall
-                    used < limit?  → Allow + Record Event
+                    used < limit?  → Allow + Record Usage
 ```
 
 ### End-of-Period Billing
@@ -168,21 +151,21 @@ Request → Find Purchase → Resolve Plan Meter
 For post-paid and hybrid plans, a daily cron job:
 
 1. Finds purchases with expired billing periods
-2. Queries the meter timeseries for total usage in the period
+2. Queries the Usage timeseries for total usage in the period
 3. Subtracts free units from the total
 4. Applies the plan's pricing (flat rate or tiered)
 5. Creates a payment intent for the calculated amount
 
 See [Billing](/plans/billing) for the full billing flow.
 
-## Event Properties
+## Record Properties
 
 The optional `properties` field supports arbitrary key-value pairs for filtering and analysis:
 
 ```json
 {
-  "meterName": "api_requests",
-  "customerId": "cus_abc123",
+  "meterName": "requests",
+  "customerRef": "cus_abc123",
   "value": 1,
   "properties": {
     "endpoint": "/api/v1/search",
@@ -193,19 +176,19 @@ The optional `properties` field supports arbitrary key-value pairs for filtering
 }
 ```
 
-Properties are stored with the event and available in analytics queries. Use them to add context like API endpoints, tool names, regions, or response codes.
+Properties are stored with the usage record and available in analytics queries. Use them to add context like API endpoints, tool names, regions, or response codes.
 
 ## Environment Isolation
 
-Meter events are stored in environment-specific collections:
+Usage records are stored in environment-specific collections:
 
-- `MeterEvents_sandbox` — sandbox environment events
-- `MeterEvents_live` — live environment events
+- `Usage_sandbox` — sandbox environment records
+- `Usage_live` — live environment records
 
-Events in sandbox never mix with live data. The environment is determined by the provider's configuration.
+Records in sandbox never mix with live data. The environment is determined by the provider's configuration.
 
 ## Next Steps
 
-- [Meters](/meters/overview) — meter definitions and management
+- [Meters](/meters/overview) — meter definitions
 - [Plans](/plans/overview) — how plans use meters for limit enforcement
 - [Billing](/plans/billing) — end-of-period usage billing

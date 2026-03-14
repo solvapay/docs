@@ -104,6 +104,7 @@
               "sdks/typescript/guides/error-handling",
               "sdks/typescript/guides/testing",
               "sdks/typescript/guides/performance",
+              "sdks/typescript/guides/usage-events",
               "sdks/typescript/guides/webhooks",
               "sdks/typescript/examples/overview",
               "sdks/typescript/publishing"

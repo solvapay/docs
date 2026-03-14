@@ -15,11 +15,12 @@
         "type": "object"
       },
       "CancelRenewalRequest": {
-        "properties": {},
-        "type": "object"
-      },
-      "ChangePassword": {
-        "properties": {},
+        "properties": {
+          "reason": {
+            "description": "Reason for cancelling renewal",
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "CheckLimitRequest": {
@@ -27,6 +28,11 @@
           "customerRef": {
             "description": "Customer reference identifier",
             "example": "cus_3C4D5E6F",
+            "type": "string"
+          },
+          "meterName": {
+            "description": "Canonical usage meter name used for limit checks (for example: requests, tokens).",
+            "example": "requests",
             "type": "string"
           },
           "planRef": {
@@ -38,16 +44,17 @@
             "description": "Product reference identifier",
             "example": "prd_1A2B3C4D",
             "type": "string"
+          },
+          "usageType": {
+            "description": "Usage type alias for meterName. If both are provided, meterName takes precedence.",
+            "example": "requests",
+            "type": "string"
           }
         },
         "required": [
           "customerRef",
           "productRef"
         ],
-        "type": "object"
-      },
-      "CheckName": {
-        "properties": {},
         "type": "object"
       },
       "CheckoutSessionResponse": {
@@ -146,6 +153,11 @@
             "description": "Customer reference identifier",
             "example": "cus_3c4d5e6f7g8h",
             "type": "string"
+          },
+          "productRef": {
+            "description": "Optional product reference or ID to scope the customer manage page to a single product.",
+            "example": "prd_1a2b3c4d5e6f",
+            "type": "string"
           }
         },
         "required": [
@@ -172,16 +184,53 @@
         ],
         "type": "object"
       },
+      "CreateMeterDto": {
+        "properties": {
+          "aggregation": {
+            "default": "count",
+            "description": "Aggregation method for events",
+            "enum": [
+              "count",
+              "sum",
+              "max",
+              "min",
+              "avg"
+            ],
+            "type": "string"
+          },
+          "description": {
+            "description": "Optional description",
+            "example": "Tracks API call volume",
+            "type": "string"
+          },
+          "displayName": {
+            "description": "Human-readable display name",
+            "example": "Requests",
+            "type": "string"
+          },
+          "name": {
+            "description": "Unique meter name (per provider)",
+            "example": "requests",
+            "type": "string"
+          },
+          "unit": {
+            "default": "requests",
+            "description": "Unit label",
+            "example": "requests",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "displayName"
+        ],
+        "type": "object"
+      },
       "CreatePlanRequest": {
         "properties": {
           "accessExpiryDays": {
             "description": "Access expiry in days",
             "example": 30,
-            "type": "number"
-          },
-          "basePrice": {
-            "description": "Base price for hybrid plans",
-            "example": 29.99,
             "type": "number"
           },
           "billingCycle": {
@@ -194,15 +243,6 @@
               "custom"
             ],
             "example": "monthly",
-            "type": "string"
-          },
-          "billingModel": {
-            "description": "Billing model for usage-based plans",
-            "enum": [
-              "pre-paid",
-              "post-paid"
-            ],
-            "example": "pre-paid",
             "type": "string"
           },
           "currency": {
@@ -313,12 +353,8 @@
             "example": false,
             "type": "boolean"
           },
-          "description": {
-            "description": "Plan description",
-            "example": "Basic recurring plan with monthly billing",
-            "type": "string"
-          },
           "features": {
+            "additionalProperties": true,
             "description": "Plan features (generic key/value, shape is provider-defined)",
             "example": {
               "apiAccess": true,
@@ -336,7 +372,13 @@
             "example": false,
             "type": "boolean"
           },
+          "limit": {
+            "description": "Usage limit for the meter",
+            "example": 10000,
+            "type": "number"
+          },
           "limits": {
+            "additionalProperties": true,
             "description": "Usage limits (shape varies by plan type)",
             "example": {
               "maxTransactions": 1000
@@ -349,12 +391,13 @@
             "type": "number"
           },
           "metadata": {
+            "additionalProperties": true,
             "description": "Additional metadata",
             "type": "object"
           },
-          "name": {
-            "description": "Plan name",
-            "example": "Basic Plan",
+          "meterId": {
+            "description": "Meter ID (ObjectId) for free usage metering",
+            "example": "507f1f77bcf86cd799439011",
             "type": "string"
           },
           "price": {
@@ -362,30 +405,10 @@
             "example": 29.99,
             "type": "number"
           },
-          "pricePerUnit": {
-            "description": "Price per unit for usage-based plans",
-            "example": 0.01,
-            "type": "number"
-          },
-          "quota": {
-            "description": "Usage quota for usage-based plans",
-            "example": 10000,
-            "type": "number"
-          },
           "requiresPayment": {
             "description": "Whether payment is required",
             "example": true,
             "type": "boolean"
-          },
-          "rolloverUnusedUnits": {
-            "description": "Whether to rollover unused units",
-            "example": false,
-            "type": "boolean"
-          },
-          "setupFee": {
-            "description": "Setup fee",
-            "example": 0,
-            "type": "number"
           },
           "status": {
             "description": "Plan status",
@@ -397,31 +420,16 @@
             "example": "active",
             "type": "string"
           },
-          "trialDays": {
-            "description": "Trial days",
-            "example": 7,
-            "type": "number"
-          },
           "type": {
-            "description": "Plan type",
+            "description": "Plan type exposed in SDK",
             "enum": [
               "recurring",
-              "usage-based",
-              "hybrid",
               "one-time"
             ],
             "example": "recurring",
             "type": "string"
-          },
-          "unit": {
-            "description": "Unit name for usage-based plans",
-            "example": "request",
-            "type": "string"
           }
         },
-        "required": [
-          "name"
-        ],
         "type": "object"
       },
       "CreatePreregistrationDto": {
@@ -464,8 +472,12 @@
       "CreateProductRequest": {
         "properties": {
           "config": {
-            "description": "Product-specific configuration",
-            "type": "object"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductConfigDto"
+              }
+            ],
+            "description": "Product-specific configuration"
           },
           "description": {
             "description": "Product description",
@@ -482,6 +494,7 @@
             "type": "boolean"
           },
           "metadata": {
+            "additionalProperties": true,
             "description": "Arbitrary key-value metadata",
             "type": "object"
           },
@@ -510,7 +523,21 @@
         "type": "object"
       },
       "CreateWebhookEndpointDto": {
-        "properties": {},
+        "properties": {
+          "description": {
+            "description": "Webhook endpoint description",
+            "example": "Production webhook",
+            "type": "string"
+          },
+          "url": {
+            "description": "Webhook endpoint URL",
+            "example": "https://example.com/webhook",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
         "type": "object"
       },
       "CustomerResponse": {
@@ -727,8 +754,51 @@
         "properties": {},
         "type": "object"
       },
-      "ForgotPassword": {
-        "properties": {},
+      "ExternalAccount": {
+        "properties": {
+          "accountHolderName": {
+            "description": "Account holder name",
+            "example": "John Doe",
+            "type": "string"
+          },
+          "accountHolderType": {
+            "description": "Account holder type",
+            "enum": [
+              "individual",
+              "company"
+            ],
+            "example": "individual",
+            "type": "string"
+          },
+          "accountNumber": {
+            "description": "Account number",
+            "example": "000123456789",
+            "type": "string"
+          },
+          "country": {
+            "description": "Country code",
+            "example": "US",
+            "type": "string"
+          },
+          "currency": {
+            "description": "Currency code",
+            "example": "usd",
+            "type": "string"
+          },
+          "routingNumber": {
+            "description": "Routing number",
+            "example": "110000000",
+            "type": "string"
+          }
+        },
+        "required": [
+          "country",
+          "currency",
+          "accountHolderName",
+          "accountHolderType",
+          "routingNumber",
+          "accountNumber"
+        ],
         "type": "object"
       },
       "GetCustomerSessionResponse": {
@@ -844,6 +914,11 @@
             "example": "https://solvapay.com/customer/checkout?id=e3f1c2d4b6a89f001122334455667788",
             "type": "string"
           },
+          "meterName": {
+            "description": "The meter name to use when tracking usage events",
+            "example": "requests",
+            "type": "string"
+          },
           "remaining": {
             "description": "Remaining usage units before hitting the limit",
             "example": 997,
@@ -862,7 +937,357 @@
         "type": "object"
       },
       "Login": {
-        "properties": {},
+        "properties": {
+          "email": {
+            "description": "Email to send a 6-digit login code to",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "type": "object"
+      },
+      "McpServerDto": {
+        "properties": {
+          "authHeaderName": {
+            "description": "Custom auth header name for origin requests",
+            "example": "X-API-Key",
+            "type": "string"
+          },
+          "avatarUrl": {
+            "description": "Avatar image URL",
+            "example": "https://example.com/avatar.png",
+            "type": "string"
+          },
+          "balance": {
+            "description": "Current balance in cents",
+            "example": 1500,
+            "type": "number"
+          },
+          "defaultPlanId": {
+            "description": "Default plan ID for tool access gating",
+            "example": "pln_default",
+            "type": "string"
+          },
+          "hasAuthApiKey": {
+            "description": "Whether an auth API key is configured",
+            "example": true,
+            "type": "boolean"
+          },
+          "id": {
+            "description": "Server ID",
+            "example": "507f1f77bcf86cd799439011",
+            "type": "string"
+          },
+          "mcpProxyUrl": {
+            "description": "SolvaPay proxy URL that MCP clients connect to",
+            "example": "https://mytelescope.mcp.solvapay.com/mcp",
+            "type": "string"
+          },
+          "name": {
+            "description": "Domain slug used to derive the MCP endpoint subdomain",
+            "example": "my-mcp-server",
+            "type": "string"
+          },
+          "productId": {
+            "description": "Associated product ID",
+            "example": "507f1f77bcf86cd799439011",
+            "type": "string"
+          },
+          "providerId": {
+            "description": "Provider ID that owns this server",
+            "example": "507f1f77bcf86cd799439011",
+            "type": "string"
+          },
+          "reference": {
+            "description": "Unique server reference",
+            "example": "mcp_abc123",
+            "type": "string"
+          },
+          "status": {
+            "description": "Server status",
+            "enum": [
+              "active",
+              "inactive",
+              "suspended"
+            ],
+            "example": "active",
+            "type": "string"
+          },
+          "subdomain": {
+            "description": "URL-safe subdomain derived from name",
+            "example": "my-mcp-server",
+            "type": "string"
+          },
+          "tools": {
+            "description": "Registered tools for this server",
+            "items": {
+              "$ref": "#/components/schemas/McpToolDto"
+            },
+            "type": "array"
+          },
+          "totalTransactions": {
+            "description": "Total number of tool-call transactions",
+            "example": 42,
+            "type": "number"
+          },
+          "url": {
+            "description": "Origin URL of the actual MCP server",
+            "example": "https://origin.example.com/mcp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "subdomain",
+          "url",
+          "providerId"
+        ],
+        "type": "object"
+      },
+      "McpToolDto": {
+        "properties": {
+          "description": {
+            "description": "Human-readable tool description",
+            "example": "Search indexed documents",
+            "type": "string"
+          },
+          "isVirtual": {
+            "description": "Whether this is a virtual platform tool handled by SolvaPay",
+            "example": false,
+            "type": "boolean"
+          },
+          "name": {
+            "description": "Tool name",
+            "example": "search_documents",
+            "type": "string"
+          },
+          "noPlan": {
+            "description": "If true, the tool is unprotected (no purchase check or usage tracking)",
+            "example": false,
+            "type": "boolean"
+          },
+          "planIds": {
+            "description": "Plan IDs that grant access to this tool",
+            "example": [
+              "pln_abc123"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "Plan": {
+        "properties": {
+          "accessExpiryDays": {
+            "description": "Access expiry in days",
+            "type": "number"
+          },
+          "billingCycle": {
+            "description": "Billing cycle",
+            "example": "monthly",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "Creation timestamp",
+            "type": "string"
+          },
+          "currency": {
+            "description": "Currency code (ISO 4217)",
+            "example": "USD",
+            "type": "string"
+          },
+          "currencySymbol": {
+            "description": "Currency symbol (derived from currency)",
+            "example": "$",
+            "type": "string"
+          },
+          "features": {
+            "additionalProperties": true,
+            "description": "Plan features",
+            "type": "object"
+          },
+          "freeUnits": {
+            "description": "Number of free units included",
+            "example": 100,
+            "type": "number"
+          },
+          "id": {
+            "description": "Plan ID",
+            "example": "507f1f77bcf86cd799439011",
+            "type": "string"
+          },
+          "isActive": {
+            "description": "Whether the plan is active (derived from status)",
+            "example": true,
+            "type": "boolean"
+          },
+          "isFreeTier": {
+            "description": "Whether this is a free tier plan",
+            "example": false,
+            "type": "boolean"
+          },
+          "limit": {
+            "description": "Usage limit for the meter",
+            "example": 10000,
+            "type": "number"
+          },
+          "limits": {
+            "additionalProperties": true,
+            "description": "Usage limits",
+            "type": "object"
+          },
+          "maxActiveUsers": {
+            "description": "Maximum number of active users",
+            "type": "number"
+          },
+          "meterId": {
+            "description": "Meter ID (ObjectId)",
+            "example": "507f1f77bcf86cd799439011",
+            "type": "string"
+          },
+          "price": {
+            "description": "Plan price",
+            "example": 29.99,
+            "type": "number"
+          },
+          "reference": {
+            "description": "Plan reference",
+            "example": "pln_1A2B3C4D",
+            "type": "string"
+          },
+          "requiresPayment": {
+            "description": "Whether payment is required",
+            "example": true,
+            "type": "boolean"
+          },
+          "status": {
+            "description": "Plan status",
+            "example": "active",
+            "type": "string"
+          },
+          "type": {
+            "description": "Plan type exposed in SDK",
+            "enum": [
+              "recurring",
+              "one-time"
+            ],
+            "example": "recurring",
+            "type": "string"
+          },
+          "updatedAt": {
+            "description": "Last update timestamp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "reference",
+          "price",
+          "currency",
+          "isFreeTier",
+          "requiresPayment",
+          "isActive",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "PlanSnapshotDto": {
+        "properties": {
+          "billingCycle": {
+            "description": "Billing cycle",
+            "example": "monthly",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "description": "Currency code",
+            "example": "USD",
+            "type": "string"
+          },
+          "features": {
+            "additionalProperties": true,
+            "description": "Plan features",
+            "nullable": true,
+            "type": "object"
+          },
+          "freeUnits": {
+            "description": "Number of free units included",
+            "example": 100,
+            "type": "number"
+          },
+          "limit": {
+            "description": "Usage limit for the meter",
+            "example": 5000,
+            "type": "number"
+          },
+          "limits": {
+            "additionalProperties": true,
+            "description": "Usage limits",
+            "nullable": true,
+            "type": "object"
+          },
+          "meterId": {
+            "description": "Meter ObjectId reference",
+            "example": "507f1f77bcf86cd799439011",
+            "type": "string"
+          },
+          "planType": {
+            "description": "Plan type",
+            "example": "recurring",
+            "type": "string"
+          },
+          "price": {
+            "description": "Plan price in cents",
+            "example": 2999,
+            "type": "number"
+          },
+          "pricePerUnit": {
+            "description": "Price per usage unit in cents",
+            "example": 10,
+            "type": "number"
+          },
+          "reference": {
+            "description": "Plan reference",
+            "example": "pln_1A2B3C4D",
+            "type": "string"
+          }
+        },
+        "required": [
+          "price",
+          "currency",
+          "planType"
+        ],
+        "type": "object"
+      },
+      "ProductConfigDto": {
+        "properties": {
+          "deliveryMethod": {
+            "description": "Delivery method",
+            "example": "api",
+            "type": "string"
+          },
+          "fulfillmentType": {
+            "description": "Fulfillment type",
+            "example": "digital",
+            "type": "string"
+          },
+          "validityPeriod": {
+            "description": "Validity period in days",
+            "example": 30,
+            "type": "number"
+          }
+        },
         "type": "object"
       },
       "PurchaseInfo": {
@@ -892,9 +1317,13 @@
             "example": "2025-11-27T10:00:00Z",
             "type": "string"
           },
-          "planName": {
-            "description": "Plan name",
-            "example": "Pro Plan",
+          "planSnapshot": {
+            "description": "Snapshot of the plan at time of purchase",
+            "type": "object"
+          },
+          "productName": {
+            "description": "Product name",
+            "example": "API Gateway Manager",
             "type": "string"
           },
           "productReference": {
@@ -904,7 +1333,7 @@
           },
           "reference": {
             "description": "Purchase reference",
-            "example": "sub_abc123",
+            "example": "pur_1A2B3C4D",
             "type": "string"
           },
           "startDate": {
@@ -920,7 +1349,7 @@
         },
         "required": [
           "reference",
-          "planName",
+          "productName",
           "status",
           "startDate",
           "amount",
@@ -928,12 +1357,314 @@
         ],
         "type": "object"
       },
-      "RequestEmailChange": {
-        "properties": {},
+      "PurchaseResponse": {
+        "properties": {
+          "amount": {
+            "description": "Amount in cents",
+            "example": 9900,
+            "type": "number"
+          },
+          "autoRenew": {
+            "description": "Auto-renew enabled",
+            "type": "boolean"
+          },
+          "billingCycle": {
+            "description": "Billing cycle",
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "yearly"
+            ],
+            "type": "string"
+          },
+          "cancellationReason": {
+            "description": "Cancellation reason",
+            "type": "string"
+          },
+          "cancelledAt": {
+            "description": "Cancelled at",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "Created at",
+            "type": "string"
+          },
+          "currency": {
+            "description": "Currency code",
+            "example": "USD",
+            "type": "string"
+          },
+          "customerEmail": {
+            "description": "Customer email",
+            "example": "customer@example.com",
+            "type": "string"
+          },
+          "customerRef": {
+            "description": "Customer reference",
+            "example": "cus_3C4D5E6F",
+            "type": "string"
+          },
+          "endDate": {
+            "description": "End date",
+            "type": "string"
+          },
+          "id": {
+            "description": "Purchase ID",
+            "example": "507f1f77bcf86cd799439011",
+            "type": "string"
+          },
+          "isFreeTier": {
+            "description": "Whether this is a free tier purchase",
+            "type": "boolean"
+          },
+          "isRecurring": {
+            "description": "Is recurring",
+            "example": true,
+            "type": "boolean"
+          },
+          "nextBillingDate": {
+            "description": "Next billing date",
+            "type": "string"
+          },
+          "paidAt": {
+            "description": "Paid at timestamp",
+            "type": "string"
+          },
+          "planSnapshot": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlanSnapshotDto"
+              }
+            ],
+            "description": "Plan snapshot at time of purchase"
+          },
+          "productId": {
+            "description": "Product ID",
+            "example": "507f1f77bcf86cd799439012",
+            "type": "string"
+          },
+          "productName": {
+            "description": "Product name",
+            "example": "API Gateway Manager",
+            "type": "string"
+          },
+          "productRef": {
+            "description": "Product reference",
+            "example": "prd_1A2B3C4D",
+            "type": "string"
+          },
+          "reference": {
+            "description": "Purchase reference",
+            "example": "pur_1A2B3C4D",
+            "type": "string"
+          },
+          "startDate": {
+            "description": "Start date",
+            "type": "string"
+          },
+          "status": {
+            "description": "Purchase status",
+            "example": "active",
+            "type": "string"
+          },
+          "usage": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UsageBillingDto"
+              }
+            ],
+            "description": "Usage billing state for usage-based plans"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "customerRef",
+          "customerEmail",
+          "productRef",
+          "planSnapshot",
+          "status",
+          "amount",
+          "currency",
+          "startDate",
+          "isRecurring",
+          "createdAt"
+        ],
         "type": "object"
       },
-      "ResetPassword": {
-        "properties": {},
+      "RecordBulkMeterEventsDto": {
+        "properties": {
+          "events": {
+            "description": "Array of events to record",
+            "items": {
+              "$ref": "#/components/schemas/RecordMeterEventDto"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "events"
+        ],
+        "type": "object"
+      },
+      "RecordMeterEventDto": {
+        "properties": {
+          "customerId": {
+            "description": "Customer reference",
+            "example": "cus_ABC123",
+            "type": "string"
+          },
+          "meterName": {
+            "description": "Meter name to record against",
+            "example": "requests",
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": true,
+            "description": "Arbitrary key-value tags",
+            "example": {
+              "endpoint": "/api/v1/search",
+              "region": "us-east-1"
+            },
+            "type": "object"
+          },
+          "timestamp": {
+            "description": "ISO 8601 timestamp (defaults to now)",
+            "type": "string"
+          },
+          "value": {
+            "default": 1,
+            "description": "Numeric value (default 1)",
+            "example": 1,
+            "type": "number"
+          }
+        },
+        "required": [
+          "meterName",
+          "customerId"
+        ],
+        "type": "object"
+      },
+      "RequestEmailChange": {
+        "properties": {
+          "newEmail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "newEmail"
+        ],
+        "type": "object"
+      },
+      "SdkPlanResponse": {
+        "properties": {
+          "billingCycle": {
+            "description": "Billing cycle",
+            "example": "monthly",
+            "type": "string"
+          },
+          "billingModel": {
+            "description": "Billing model",
+            "example": "pre-paid",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "Creation timestamp",
+            "type": "string"
+          },
+          "currency": {
+            "description": "Currency code (ISO 4217)",
+            "example": "USD",
+            "type": "string"
+          },
+          "currencySymbol": {
+            "description": "Currency symbol",
+            "example": "$",
+            "type": "string"
+          },
+          "features": {
+            "additionalProperties": true,
+            "description": "Plan features",
+            "type": "object"
+          },
+          "freeUnits": {
+            "description": "Included free units",
+            "example": 1000,
+            "type": "number"
+          },
+          "id": {
+            "description": "Plan ID",
+            "example": "507f1f77bcf86cd799439011",
+            "type": "string"
+          },
+          "isActive": {
+            "description": "Whether the plan is active",
+            "example": true,
+            "type": "boolean"
+          },
+          "isFreeTier": {
+            "description": "Whether this is a free tier plan",
+            "example": false,
+            "type": "boolean"
+          },
+          "limit": {
+            "description": "Usage limit for the meter",
+            "example": 10000,
+            "type": "number"
+          },
+          "limits": {
+            "additionalProperties": true,
+            "description": "Usage limits",
+            "type": "object"
+          },
+          "meterId": {
+            "description": "Meter ID (ObjectId)",
+            "example": "507f1f77bcf86cd799439011",
+            "type": "string"
+          },
+          "price": {
+            "description": "Plan price",
+            "example": 29.99,
+            "type": "number"
+          },
+          "pricePerUnit": {
+            "description": "Price per unit",
+            "example": 0.01,
+            "type": "number"
+          },
+          "reference": {
+            "description": "Plan reference",
+            "example": "pln_1A2B3C4D",
+            "type": "string"
+          },
+          "requiresPayment": {
+            "description": "Whether payment is required",
+            "example": true,
+            "type": "boolean"
+          },
+          "status": {
+            "description": "Plan status",
+            "example": "active",
+            "type": "string"
+          },
+          "updatedAt": {
+            "description": "Last update timestamp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "price",
+          "currency",
+          "isFreeTier",
+          "requiresPayment",
+          "isActive",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
         "type": "object"
       },
       "SdkProductResponse": {
@@ -944,8 +1675,12 @@
             "type": "number"
           },
           "config": {
-            "description": "Product-specific configuration",
-            "type": "object"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductConfigDto"
+              }
+            ],
+            "description": "Product-specific configuration"
           },
           "createdAt": {
             "description": "Creation timestamp",
@@ -970,6 +1705,7 @@
             "type": "boolean"
           },
           "metadata": {
+            "additionalProperties": true,
             "description": "Arbitrary key-value metadata",
             "type": "object"
           },
@@ -981,7 +1717,7 @@
           "plans": {
             "description": "Plans associated with this product",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/SdkPlanResponse"
             },
             "type": "array"
           },
@@ -1022,8 +1758,40 @@
         ],
         "type": "object"
       },
+      "SelectCustomerSessionProductRequest": {
+        "properties": {
+          "productRef": {
+            "description": "Product reference or ID to scope the customer manage session",
+            "example": "prd_1a2b3c4d5e6f",
+            "type": "string"
+          }
+        },
+        "required": [
+          "productRef"
+        ],
+        "type": "object"
+      },
       "Signup": {
-        "properties": {},
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "provider",
+              "admin",
+              "super_admin"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "email"
+        ],
         "type": "object"
       },
       "ThemeModeColorsDto": {
@@ -1072,6 +1840,19 @@
         },
         "type": "object"
       },
+      "TosAcceptance": {
+        "properties": {
+          "ip": {
+            "description": "IP address of user accepting ToS",
+            "example": "192.168.1.1",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ip"
+        ],
+        "type": "object"
+      },
       "UpdateBrandThemeDto": {
         "properties": {
           "brandName": {
@@ -1089,6 +1870,11 @@
             "default": "16px",
             "description": "Base font size",
             "example": "16px",
+            "type": "string"
+          },
+          "logo": {
+            "description": "Logo image URL displayed in hosted page headers",
+            "example": "/ui/files/download/provider-assets/provider-123/logos/logo.png",
             "type": "string"
           },
           "primaryColor": {
@@ -1112,11 +1898,148 @@
         "type": "object"
       },
       "UpdateConnectedAccount": {
-        "properties": {},
+        "properties": {
+          "externalAccount": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ExternalAccount"
+              }
+            ],
+            "description": "External bank account"
+          },
+          "tosAcceptance": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TosAcceptance"
+              }
+            ],
+            "description": "Terms of Service acceptance"
+          },
+          "website": {
+            "description": "Business website URL",
+            "example": "https://example.com",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateMeterDto": {
+        "properties": {
+          "description": {
+            "example": "Updated description",
+            "type": "string"
+          },
+          "displayName": {
+            "example": "API Requests v2",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "archived"
+            ],
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "UpdatePlanRequest": {
-        "properties": {},
+        "properties": {
+          "accessExpiryDays": {
+            "description": "Access expiry in days",
+            "example": 30,
+            "type": "number"
+          },
+          "billingCycle": {
+            "description": "Billing cycle",
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "yearly",
+              "custom"
+            ],
+            "example": "monthly",
+            "type": "string"
+          },
+          "currency": {
+            "description": "Currency code (ISO 4217)",
+            "example": "USD",
+            "type": "string"
+          },
+          "default": {
+            "description": "Whether this is the default plan",
+            "example": false,
+            "type": "boolean"
+          },
+          "features": {
+            "additionalProperties": true,
+            "description": "Plan features (generic key/value, shape is provider-defined)",
+            "example": {
+              "apiAccess": true,
+              "prioritySupport": false
+            },
+            "type": "object"
+          },
+          "freeUnits": {
+            "description": "Number of free units included",
+            "example": 100,
+            "type": "number"
+          },
+          "isFreeTier": {
+            "description": "Whether this is a free tier plan",
+            "example": false,
+            "type": "boolean"
+          },
+          "limit": {
+            "description": "Usage limit for the meter",
+            "example": 10000,
+            "type": "number"
+          },
+          "limits": {
+            "additionalProperties": true,
+            "description": "Usage limits (shape varies by plan type)",
+            "example": {
+              "maxTransactions": 1000
+            },
+            "type": "object"
+          },
+          "maxActiveUsers": {
+            "description": "Maximum number of active users",
+            "example": 10,
+            "type": "number"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "description": "Additional metadata",
+            "type": "object"
+          },
+          "meterId": {
+            "description": "Meter ID (ObjectId) for free usage metering",
+            "example": "507f1f77bcf86cd799439011",
+            "type": "string"
+          },
+          "price": {
+            "description": "Plan price",
+            "example": 29.99,
+            "type": "number"
+          },
+          "requiresPayment": {
+            "description": "Whether payment is required",
+            "example": true,
+            "type": "boolean"
+          },
+          "status": {
+            "description": "Plan status",
+            "enum": [
+              "active",
+              "inactive",
+              "archived"
+            ],
+            "example": "active",
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "UpdatePreferences": {
@@ -1126,8 +2049,12 @@
       "UpdateProductRequest": {
         "properties": {
           "config": {
-            "description": "Product-specific configuration",
-            "type": "object"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductConfigDto"
+              }
+            ],
+            "description": "Product-specific configuration"
           },
           "description": {
             "description": "Product description",
@@ -1138,6 +2065,7 @@
             "type": "string"
           },
           "metadata": {
+            "additionalProperties": true,
             "description": "Arbitrary key-value metadata",
             "type": "object"
           },
@@ -1166,7 +2094,64 @@
         "type": "object"
       },
       "UpdateProviderDto": {
-        "properties": {},
+        "properties": {
+          "businessEmail": {
+            "description": "Business email address",
+            "example": "business@example.com",
+            "type": "string"
+          },
+          "businessType": {
+            "description": "Business type",
+            "enum": [
+              "individual",
+              "company"
+            ],
+            "example": "individual",
+            "type": "string"
+          },
+          "defaultCurrency": {
+            "description": "Default currency code",
+            "example": "usd",
+            "type": "string"
+          },
+          "description": {
+            "description": "Provider description",
+            "example": "My business",
+            "type": "string"
+          },
+          "legalEntity": {
+            "description": "Legal entity information",
+            "type": "object"
+          },
+          "metadata": {
+            "description": "Arbitrary metadata",
+            "type": "object"
+          },
+          "supportEmail": {
+            "description": "Support email address",
+            "example": "support@example.com",
+            "type": "string"
+          },
+          "supportTelephone": {
+            "description": "Support telephone number",
+            "example": "+1234567890",
+            "type": "string"
+          },
+          "telephone": {
+            "description": "Business telephone number",
+            "example": "+1234567890",
+            "type": "string"
+          },
+          "tosAcceptance": {
+            "description": "Terms of Service acceptance",
+            "type": "object"
+          },
+          "website": {
+            "description": "Business website URL",
+            "example": "https://example.com",
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "UpdateThemePreferenceDto": {
@@ -1191,11 +2176,282 @@
         "type": "object"
       },
       "UpdateWebhookEndpointDto": {
-        "properties": {},
+        "properties": {
+          "description": {
+            "description": "Webhook endpoint description",
+            "example": "Updated webhook",
+            "type": "string"
+          },
+          "url": {
+            "description": "Webhook endpoint URL",
+            "example": "https://example.com/webhook",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UsageBillingDto": {
+        "properties": {
+          "overageCost": {
+            "description": "Overage cost in cents",
+            "example": 0,
+            "type": "number"
+          },
+          "overageUnits": {
+            "description": "Units exceeding the plan limit",
+            "example": 0,
+            "type": "number"
+          },
+          "periodEnd": {
+            "description": "Period end date",
+            "example": "2025-11-01T00:00:00Z",
+            "type": "string"
+          },
+          "periodStart": {
+            "description": "Period start date",
+            "example": "2025-10-01T00:00:00Z",
+            "type": "string"
+          },
+          "used": {
+            "description": "Units consumed in current period",
+            "example": 150,
+            "type": "number"
+          }
+        },
+        "required": [
+          "used",
+          "overageUnits",
+          "overageCost"
+        ],
+        "type": "object"
+      },
+      "UserInfoPlanDto": {
+        "properties": {
+          "billingCycle": {
+            "example": "monthly",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "example": "USD",
+            "type": "string"
+          },
+          "features": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "limits": {
+            "additionalProperties": true,
+            "nullable": true,
+            "type": "object"
+          },
+          "price": {
+            "description": "Price in minor currency units (e.g. cents)",
+            "example": 2999,
+            "type": "number"
+          },
+          "reference": {
+            "example": "pln_2B3C4D5E",
+            "type": "string"
+          },
+          "type": {
+            "example": "recurring",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference",
+          "price",
+          "currency",
+          "type"
+        ],
+        "type": "object"
+      },
+      "UserInfoPurchaseDto": {
+        "properties": {
+          "endDate": {
+            "example": "2025-11-27T10:00:00Z",
+            "nullable": true,
+            "type": "string"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/UserInfoPlanDto"
+          },
+          "planType": {
+            "example": "recurring",
+            "type": "string"
+          },
+          "productName": {
+            "example": "My API Product",
+            "type": "string"
+          },
+          "reference": {
+            "example": "pur_1A2B3C4D",
+            "type": "string"
+          },
+          "startDate": {
+            "example": "2025-10-27T10:00:00Z",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "example": "active",
+            "type": "string"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/UserInfoUsageDto"
+          }
+        },
+        "required": [
+          "reference",
+          "status",
+          "productName",
+          "planType"
+        ],
+        "type": "object"
+      },
+      "UserInfoRequest": {
+        "properties": {
+          "customerRef": {
+            "description": "Customer reference",
+            "example": "cus_3C4D5E6F",
+            "type": "string"
+          },
+          "productRef": {
+            "description": "Product reference",
+            "example": "prd_1A2B3C4D",
+            "type": "string"
+          }
+        },
+        "required": [
+          "customerRef",
+          "productRef"
+        ],
+        "type": "object"
+      },
+      "UserInfoResponse": {
+        "properties": {
+          "purchase": {
+            "$ref": "#/components/schemas/UserInfoPurchaseDto"
+          },
+          "status": {
+            "description": "Human-readable status summary",
+            "example": "Active subscription: My API Product (25% usage consumed)",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserInfoUserDto"
+          },
+          "verifyUrl": {
+            "description": "Customer portal session URL",
+            "example": "https://solvapay.com/customer/manage?id=abc123",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "UserInfoUsageDto": {
+        "properties": {
+          "meterId": {
+            "description": "Meter ObjectId reference",
+            "example": "507f1f77bcf86cd799439011",
+            "type": "string"
+          },
+          "percentUsed": {
+            "example": 25,
+            "nullable": true,
+            "type": "number"
+          },
+          "remaining": {
+            "example": 750,
+            "type": "number"
+          },
+          "total": {
+            "example": 1000,
+            "type": "number"
+          },
+          "used": {
+            "example": 250,
+            "type": "number"
+          }
+        },
+        "required": [
+          "total",
+          "used",
+          "remaining"
+        ],
+        "type": "object"
+      },
+      "UserInfoUserDto": {
+        "properties": {
+          "email": {
+            "example": "john@example.com",
+            "type": "string"
+          },
+          "externalRef": {
+            "example": "auth_user_12345",
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "example": "John Doe",
+            "nullable": true,
+            "type": "string"
+          },
+          "reference": {
+            "example": "cus_3C4D5E6F",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference",
+          "email"
+        ],
         "type": "object"
       },
       "VerifyEmail": {
-        "properties": {},
+        "properties": {
+          "emailVerificationCode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "emailVerificationCode"
+        ],
+        "type": "object"
+      },
+      "VerifyEmailChange": {
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "type": "object"
+      },
+      "VerifyLoginCode": {
+        "properties": {
+          "code": {
+            "description": "6-digit login code sent to email",
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "code"
+        ],
         "type": "object"
       }
     },
@@ -1349,9 +2605,9 @@
                       "amount": 9900,
                       "currency": "USD",
                       "endDate": "2025-11-27T10:00:00Z",
-                      "planName": "Pro Plan",
+                      "productName": "API Gateway Manager",
                       "productReference": "prd_abc123",
-                      "reference": "sub_abc123",
+                      "reference": "pur_1A2B3C4D",
                       "startDate": "2025-10-27T10:00:00Z",
                       "status": "active"
                     }
@@ -1506,9 +2762,9 @@
                       "amount": 9900,
                       "currency": "USD",
                       "endDate": "2025-11-27T10:00:00Z",
-                      "planName": "Pro Plan",
+                      "productName": "API Gateway Manager",
                       "productReference": "prd_abc123",
-                      "reference": "sub_abc123",
+                      "reference": "pur_1A2B3C4D",
                       "startDate": "2025-10-27T10:00:00Z",
                       "status": "active"
                     }
@@ -1658,9 +2914,9 @@
                         "amount": 9900,
                         "currency": "USD",
                         "endDate": "2025-11-27T10:00:00Z",
-                        "planName": "Pro Plan",
+                        "productName": "API Gateway Manager",
                         "productReference": "prd_abc123",
-                        "reference": "sub_abc123",
+                        "reference": "pur_1A2B3C4D",
                         "startDate": "2025-10-27T10:00:00Z",
                         "status": "active"
                       }
@@ -1747,6 +3003,104 @@
         "summary": "Check usage limits for a customer and product",
         "tags": [
           "Limits"
+        ]
+      }
+    },
+    "/v1/sdk/meter-events": {
+      "post": {
+        "description": "Records a single usage event against a named meter.",
+        "operationId": "MeterSdkController_recordEvent",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordMeterEventDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Event recorded"
+          },
+          "400": {
+            "description": "Invalid meter name or meter is archived"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record a meter event",
+        "tags": [
+          "Meter Events"
+        ]
+      }
+    },
+    "/v1/sdk/meter-events/bulk": {
+      "post": {
+        "description": "Records multiple usage events in a single request for high throughput.",
+        "operationId": "MeterSdkController_recordBulkEvents",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordBulkMeterEventsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "inserted": {
+                      "example": 50,
+                      "type": "number"
+                    },
+                    "success": {
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Events recorded"
+          },
+          "400": {
+            "description": "Invalid meter name or meter is archived"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record meter events in bulk",
+        "tags": [
+          "Meter Events"
         ]
       }
     },
@@ -1922,12 +3276,11 @@
         "operationId": "PaymentIntentSdkController_getPaymentIntent",
         "parameters": [
           {
-            "description": "Payment intent ID",
+            "description": "Payment intent MongoDB ID",
             "in": "path",
             "name": "id",
             "required": true,
             "schema": {
-              "example": "pi_1a2b3c4d5e6f7g8h",
               "type": "string"
             }
           }
@@ -1947,6 +3300,20 @@
               }
             },
             "description": "Payment intent retrieved successfully"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "code": "PAYMENT_INTENT_NOT_FOUND",
+                    "error": "Payment intent not found",
+                    "success": false
+                  }
+                }
+              }
+            },
+            "description": "Payment intent not found"
           }
         },
         "security": [
@@ -2076,7 +3443,7 @@
                 }
               }
             },
-            "description": "Payment not succeeded or invalid request"
+            "description": "Payment not succeeded, invalid request, or forbidden"
           }
         },
         "security": [
@@ -2238,7 +3605,7 @@
         ]
       },
       "get": {
-        "description": "Retrieves a product by its reference or ID, including associated plans.",
+        "description": "Retrieves a product by its reference or ID, including embedded plans.",
         "operationId": "ProductSdkController_getProduct",
         "parameters": [
           {
@@ -2328,6 +3695,47 @@
         ]
       }
     },
+    "/v1/sdk/products/{productRef}/clone": {
+      "post": {
+        "description": "Deep-copies a product including all its plans. Generates new references for the clone.",
+        "operationId": "ProductSdkController_cloneProduct",
+        "parameters": [
+          {
+            "description": "Product reference or ID to clone",
+            "in": "path",
+            "name": "productRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SdkProductResponse"
+                }
+              }
+            },
+            "description": "Product cloned successfully"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Clone a product",
+        "tags": [
+          "Products"
+        ]
+      }
+    },
     "/v1/sdk/products/{productRef}/plans": {
       "get": {
         "operationId": "PlanSdkController_listPlans",
@@ -2356,27 +3764,39 @@
             "schema": {
               "type": "number"
             }
-          },
-          {
-            "in": "query",
-            "name": "search",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "limit": {
+                      "type": "number"
+                    },
+                    "offset": {
+                      "type": "number"
+                    },
+                    "plans": {
+                      "items": {
+                        "$ref": "#/components/schemas/Plan"
+                      },
+                      "type": "array"
+                    },
+                    "total": {
+                      "description": "Total number of plans for the product",
+                      "type": "number"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Plans retrieved successfully"
+          },
+          "404": {
+            "description": "Product not found"
           }
         },
         "security": [
@@ -2414,7 +3834,17 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Plan"
+                }
+              }
+            },
+            "description": "Plan created successfully"
+          },
+          "404": {
+            "description": "Product not found"
           }
         },
         "security": [
@@ -2453,7 +3883,10 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Plan deleted successfully"
+          },
+          "404": {
+            "description": "Plan or product not found"
           }
         },
         "security": [
@@ -2490,7 +3923,17 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Plan"
+                }
+              }
+            },
+            "description": "Plan retrieved successfully"
+          },
+          "404": {
+            "description": "Plan or product not found"
           }
         },
         "security": [
@@ -2537,7 +3980,17 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Plan"
+                }
+              }
+            },
+            "description": "Plan updated successfully"
+          },
+          "404": {
+            "description": "Plan or product not found"
           }
         },
         "security": [
@@ -2596,6 +4049,20 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "purchases": {
+                      "items": {
+                        "$ref": "#/components/schemas/PurchaseResponse"
+                      },
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            },
             "description": "Purchases retrieved successfully"
           }
         },
@@ -2628,6 +4095,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseResponse"
+                }
+              }
+            },
             "description": "Purchase retrieved successfully"
           },
           "404": {
@@ -2673,6 +4147,20 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "purchase": {
+                      "$ref": "#/components/schemas/PurchaseResponse"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            },
             "description": "Purchase cancelled successfully"
           },
           "404": {
@@ -2708,6 +4196,20 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "purchases": {
+                      "items": {
+                        "$ref": "#/components/schemas/PurchaseResponse"
+                      },
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            },
             "description": "Customer purchases retrieved successfully"
           },
           "404": {
@@ -2743,6 +4245,20 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "purchases": {
+                      "items": {
+                        "$ref": "#/components/schemas/PurchaseResponse"
+                      },
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            },
             "description": "Product purchases retrieved successfully"
           },
           "404": {
@@ -2762,7 +4278,7 @@
     },
     "/v1/sdk/usages": {
       "post": {
-        "description": "Records a usage event for a customer against a product. Atomically increments usage counters on the active purchase and appends an event to the usage log.",
+        "description": "Records a usage event against a named meter. Events are stored in a high-performance timeseries collection.",
         "operationId": "UsageSdkController_recordUsage",
         "parameters": [],
         "requestBody": {
@@ -2770,43 +4286,23 @@
             "application/json": {
               "schema": {
                 "properties": {
-                  "action": {
-                    "description": "Action type",
-                    "enum": [
-                      "transaction",
-                      "api_call",
-                      "hour",
-                      "email",
-                      "storage",
-                      "custom"
-                    ],
-                    "example": "api_call",
-                    "type": "string"
-                  },
-                  "customActionKey": {
-                    "description": "Custom action key for custom action types",
-                    "type": "string"
-                  },
                   "customerRef": {
-                    "description": "Customer reference",
+                    "description": "Customer reference (userId for the meter event)",
                     "example": "cus_3C4D5E6F",
                     "type": "string"
                   },
-                  "description": {
-                    "description": "Human-readable description of the event",
+                  "meterName": {
+                    "description": "Meter name to record against",
+                    "example": "requests",
                     "type": "string"
                   },
-                  "metadata": {
-                    "description": "Arbitrary metadata",
+                  "properties": {
+                    "additionalProperties": true,
+                    "description": "Arbitrary event properties",
                     "type": "object"
                   },
-                  "productRef": {
-                    "description": "Product reference",
-                    "example": "prd_1A2B3C4D",
-                    "type": "string"
-                  },
-                  "toolName": {
-                    "description": "Tool or feature name",
+                  "timestamp": {
+                    "description": "ISO 8601 timestamp (defaults to now)",
                     "type": "string"
                   },
                   "units": {
@@ -2817,7 +4313,7 @@
                 },
                 "required": [
                   "customerRef",
-                  "productRef"
+                  "meterName"
                 ],
                 "type": "object"
               }
@@ -2831,14 +4327,6 @@
               "application/json": {
                 "schema": {
                   "properties": {
-                    "outcome": {
-                      "enum": [
-                        "success",
-                        "paywall"
-                      ],
-                      "example": "success",
-                      "type": "string"
-                    },
                     "success": {
                       "example": true,
                       "type": "boolean"
@@ -2855,10 +4343,7 @@
             "description": "Usage recorded successfully"
           },
           "400": {
-            "description": "Missing customerRef or productRef"
-          },
-          "404": {
-            "description": "Customer or product not found"
+            "description": "Missing customerRef or meterName"
           }
         },
         "security": [
@@ -2874,7 +4359,7 @@
     },
     "/v1/sdk/usages/bulk": {
       "post": {
-        "description": "Records multiple usage events in a single request. Each event is processed independently.",
+        "description": "Records multiple meter events in a single request.",
         "operationId": "UsageSdkController_recordBulkUsage",
         "parameters": [],
         "requestBody": {
@@ -2885,13 +4370,17 @@
                   "events": {
                     "items": {
                       "properties": {
-                        "action": {
-                          "type": "string"
-                        },
                         "customerRef": {
                           "type": "string"
                         },
-                        "productRef": {
+                        "meterName": {
+                          "type": "string"
+                        },
+                        "properties": {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        "timestamp": {
                           "type": "string"
                         },
                         "units": {
@@ -2900,7 +4389,7 @@
                       },
                       "required": [
                         "customerRef",
-                        "productRef"
+                        "meterName"
                       ],
                       "type": "object"
                     },
@@ -2932,6 +4421,50 @@
         "summary": "Record bulk usage events",
         "tags": [
           "Usage"
+        ]
+      }
+    },
+    "/v1/sdk/user-info": {
+      "post": {
+        "description": "Returns customer profile, active purchase details including usage and plan info, and a customer portal URL.",
+        "operationId": "UserInfoSdkController_getUserInfo",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInfoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfoResponse"
+                }
+              }
+            },
+            "description": "User info with purchase status"
+          },
+          "400": {
+            "description": "Missing customerRef or productRef"
+          },
+          "404": {
+            "description": "Customer or product not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user info and purchase status",
+        "tags": [
+          "User Info"
         ]
       }
     }

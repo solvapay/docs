@@ -1,0 +1,204 @@
+---
+title: "Usage Events"
+description: "Publish usage events from your application to track consumption, enforce limits, and power analytics."
+---
+
+## Table of Contents
+
+- [What are Usage Events?](#what-are-usage-events)
+- [Publishing a Usage Event](#publishing-a-usage-event)
+- [Event Fields](#event-fields)
+- [Event Types](#event-types)
+- [Examples](#examples)
+- [Relationship to Meters](#relationship-to-meters)
+
+## What are Usage Events?
+
+A **Usage Event** represents a unit of consumption in your application — an API call made, a document generated, storage consumed, a message sent. Publishing usage events lets SolvaPay track what your customers are consuming, enforce plan limits, and provide usage analytics.
+
+Usage events are distinct from [meter events](/meters/events). Meters are for precise billing counters. Usage events are broader — they capture consumption context (which customer, which product, how many units) and feed into the event system for analytics, alerting, and operational visibility.
+
+## Publishing a Usage Event
+
+Use `createEvent()` to publish a usage event:
+
+```typescript
+import { createSolvaPay } from '@solvapay/server'
+
+const solvaPay = createSolvaPay({
+  apiKey: process.env.SOLVAPAY_SECRET_KEY,
+})
+
+await solvaPay.createEvent({
+  type: 'usage.api_call',
+  customerRef: 'cus_3C4D5E6F',
+  units: 1,
+})
+```
+
+The SDK authenticates the request using your API key. The backend validates the event, scopes it to your provider and environment, and publishes it through the event system.
+
+### Response
+
+```typescript
+const { eventId } = await solvaPay.createEvent({
+  type: 'usage.api_call',
+  customerRef: 'cus_3C4D5E6F',
+  units: 1,
+})
+
+console.log(eventId) // "evt_a1b2c3d4..."
+```
+
+The returned `eventId` is a unique identifier for the published event.
+
+## Event Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `type` | `string` | Yes | Dot-notation event type (e.g. `usage.api_call`) |
+| `customerRef` | `string` | Yes | The customer reference this event belongs to |
+| `productRef` | `string` | No | The product reference, if the event is scoped to a specific product |
+| `units` | `number` | Yes | Quantity consumed (must be non-negative) |
+
+### `type`
+
+A dot-notation string that categorises the event. Convention is `usage.<action>`, for example:
+
+- `usage.api_call`
+- `usage.document_generated`
+- `usage.message_sent`
+- `usage.storage`
+- `usage.token`
+- `usage.search`
+
+You define your own types. There are no restrictions on what comes after `usage.`.
+
+### `customerRef`
+
+The customer reference (`cus_...`) identifying who consumed the resource. This must be a valid customer reference in your SolvaPay account.
+
+### `productRef`
+
+Optional. The product reference (`prd_...`) to scope the event to a specific product. Useful when a customer has purchases across multiple products and you want usage attributed to the correct one.
+
+### `units`
+
+The quantity consumed. Must be a non-negative number. The meaning depends on your `type`:
+
+- For `usage.api_call`: typically `1` per call
+- For `usage.token`: the number of tokens consumed
+- For `usage.storage`: bytes or megabytes used
+
+## Event Types
+
+You define your own event types using dot-notation. Here are common patterns:
+
+| Type | Use Case |
+|------|----------|
+| `usage.api_call` | REST or GraphQL API requests |
+| `usage.token` | LLM token consumption |
+| `usage.message_sent` | Chat or notification messages |
+| `usage.document_generated` | PDF, report, or file generation |
+| `usage.search` | Search queries executed |
+| `usage.storage` | File or data storage consumption |
+| `usage.compute` | Compute time or processing units |
+
+## Examples
+
+### Track API calls in Express
+
+```typescript
+import express from 'express'
+import { createSolvaPay } from '@solvapay/server'
+
+const app = express()
+const solvaPay = createSolvaPay({
+  apiKey: process.env.SOLVAPAY_SECRET_KEY,
+})
+
+app.post('/api/generate', async (req, res) => {
+  const customerRef = req.headers['x-customer-ref'] as string
+  const result = await generateContent(req.body)
+
+  await solvaPay.createEvent({
+    type: 'usage.api_call',
+    customerRef,
+    productRef: 'prd_content_api',
+    units: 1,
+  })
+
+  res.json(result)
+})
+```
+
+### Track token consumption in an AI app
+
+```typescript
+const response = await openai.chat.completions.create({
+  model: 'gpt-4',
+  messages,
+})
+
+const tokensUsed = response.usage?.total_tokens ?? 0
+
+await solvaPay.createEvent({
+  type: 'usage.token',
+  customerRef,
+  productRef: 'prd_ai_assistant',
+  units: tokensUsed,
+})
+```
+
+### Track document generation
+
+```typescript
+async function generateReport(customerRef: string, data: ReportData) {
+  const pdf = await renderPdf(data)
+
+  await solvaPay.createEvent({
+    type: 'usage.document_generated',
+    customerRef,
+    units: 1,
+  })
+
+  return pdf
+}
+```
+
+### Track storage usage
+
+```typescript
+async function uploadFile(customerRef: string, file: Buffer) {
+  const result = await storage.upload(file)
+  const megabytes = Math.ceil(file.byteLength / (1024 * 1024))
+
+  await solvaPay.createEvent({
+    type: 'usage.storage',
+    customerRef,
+    units: megabytes,
+  })
+
+  return result
+}
+```
+
+## Relationship to Meters
+
+Usage events and [meter events](/meters/events) serve different purposes:
+
+| | Usage Events | Meter Events |
+|---|---|---|
+| **Purpose** | Operational visibility and analytics | Billing and limit enforcement |
+| **Method** | `solvaPay.createEvent()` | `solvaPay.trackUsage()` |
+| **Enforces limits** | No | Yes |
+| **Triggers paywalls** | No | Yes |
+| **Visible in ops dashboard** | Yes | No |
+
+If you need to both track usage for analytics **and** enforce billing limits, publish a usage event and record a meter event for the same action.
+
+## Next Steps
+
+- [Core Concepts](../getting-started/core-concepts.mdx) - Understand products, plans, and the paywall flow
+- [Meters](/meters/overview) - Set up meters for billing and limit enforcement
+- [Webhook Handling](./webhooks.mdx) - React to purchase and payment events

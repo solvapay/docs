@@ -3,7 +3,7 @@ title: "Billing"
 description: "How SolvaPay handles billing cycles, usage-based billing, and end-of-period processing."
 ---
 
-SolvaPay automates billing through a combination of purchase lifecycle management and scheduled jobs. Recurring and usage-based plans are billed automatically, with usage costs calculated from meter event data.
+SolvaPay automates billing through a combination of purchase lifecycle management and scheduled jobs. Recurring and usage-based plans are billed automatically, with usage costs calculated from the Usage timeseries.
 
 ## Billing Cycles
 
@@ -53,17 +53,17 @@ For usage-based and hybrid plans, each purchase maintains a `usage` subdocument 
 }
 ```
 
-The **actual usage count comes from the meter event timeseries**, not from the `usage.used` field. The timeseries is the source of truth — limit checks query `MeterEventService.sum()` from `periodStart` to the current time.
+The **actual usage count comes from the Usage timeseries**, not from the `usage.used` field. The timeseries is the source of truth — limit checks query `UsageService.sumForMeter()` from `periodStart` to the current time.
 
 ## Limit Checking Flow
 
 When a customer makes a request to a protected endpoint, access is determined by:
 
 1. **Find the active purchase** for the customer and product
-2. **Look up the plan** to get `meterId` and `limit`
-3. If no `meterId` or `limit` is `0` — **unlimited access**, allow immediately
-4. **Resolve the meter name** from the `meterId`
-5. **Query the timeseries** — `sum(providerId, meterName, customerId, periodStart, now)`
+2. **Look up the plan** to get the `limit`
+3. If `limit` is `0` — **unlimited access**, allow immediately
+4. **Resolve the plan's auto-assigned requests meter**
+5. **Query the Usage timeseries** — `UsageService.sumForMeter(providerId, meterName, customerRef, periodStart, now)`
 6. **Compare against the hard cap** — if `used >= limit`, deny with a paywall response
 
 The response includes:
@@ -76,7 +76,7 @@ The response includes:
   "limit": 1000,
   "freeUnits": 100,
   "isExceeded": false,
-  "meterName": "api_requests"
+  "meterName": "requests"
 }
 ```
 
@@ -88,7 +88,7 @@ A daily cron job (11:00 AM UTC) processes end-of-period billing for usage-based 
 
 ### Usage-Based Plans
 
-1. Query the meter timeseries for total usage in the period
+1. Query the Usage timeseries for total usage in the period
 2. Subtract `freeUnits` from the total
 3. Apply the `pricePerUnit` to the billable amount
 4. Respect the `limit` as a hard cap (usage beyond the cap is not billed unless overage is allowed)
@@ -98,7 +98,7 @@ A daily cron job (11:00 AM UTC) processes end-of-period billing for usage-based 
 
 ```
 Plan: 100 free units, $0.01/unit, 10,000 limit
-Usage: 5,250 events in the period
+Usage: 5,250 records in the period
 
 Billable = max(0, min(5250, 10000) - 100) = 5,150 units
 Cost = 5,150 × $0.01 = $51.50
@@ -124,7 +124,7 @@ Tiers:
   2,001+:    $0.01/unit
 Overage: allowed, rate $0.08/unit, max 5,000
 
-Usage: 3,500 events
+Usage: 3,500 records
 
 Included: 1,000 (covered by base price)
 Billable: 2,500 units
@@ -159,7 +159,7 @@ A periodic job (every 30 minutes) resets usage counters on purchases whose reset
 2. Advance `periodStart` and `periodEnd` to the next period
 3. Calculate the next `resetDate`
 
-Since the actual usage is derived from the meter event timeseries using the `periodStart` window, advancing `periodStart` effectively "resets" visible usage without deleting any events.
+Since the actual usage is derived from the Usage timeseries using the `periodStart` window, advancing `periodStart` effectively "resets" visible usage without deleting any usage records.
 
 ## Billing Strategies (Hybrid Plans)
 
@@ -185,4 +185,4 @@ When a customer upgrades or downgrades mid-cycle, proration policies determine h
 
 - [Plans](/plans/overview) — plan types and configuration
 - [Meters](/meters/overview) — meter definitions
-- [Meter Events](/meters/events) — how usage data is recorded
+- [Usage Records](/meters/events) — how usage data is recorded

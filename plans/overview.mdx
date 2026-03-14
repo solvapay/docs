@@ -45,7 +45,7 @@ Pay-per-use plans where customers are billed based on actual consumption tracked
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `meterId` | `ObjectId` | Reference to the meter that tracks usage |
+| `measures` | `string` | What the plan measures for usage tracking (value: `'requests'`) |
 | `billingModel` | `enum` | `pre-paid` (pay upfront for a quota) or `post-paid` (pay after usage) |
 | `pricePerUnit` | `number` | Cost per metered unit |
 | `limit` | `number` | Hard usage cap per period (`0` = unlimited) |
@@ -61,7 +61,7 @@ Pay-per-use plans where customers are billed based on actual consumption tracked
   "currency": "USD",
   "billingModel": "post-paid",
   "billingCycle": "monthly",
-  "meterId": "60f7b2...",
+  "measures": "requests",
   "pricePerUnit": 10,
   "freeUnits": 100,
   "limit": 10000
@@ -69,7 +69,7 @@ Pay-per-use plans where customers are billed based on actual consumption tracked
 ```
 
 <Note>
-The `meterId` links the plan to a specific meter. When checking limits, SolvaPay queries the meter's event timeseries for the customer's total usage in the current billing period and compares it against the plan's `limit`.
+Each usage-based plan is automatically linked to the provider's `requests` meter. When checking limits, SolvaPay queries the Usage timeseries for the customer's total usage in the current billing period and compares it against the plan's `limit`.
 </Note>
 
 ### Hybrid
@@ -80,7 +80,7 @@ Combines a recurring base price with usage-based overage billing. Best for enter
 |-------|------|-------------|
 | `basePrice` | `number` | Fixed recurring portion |
 | `billingCycle` | `enum` | Same options as recurring plans |
-| `meterId` | `ObjectId` | Reference to the meter that tracks usage |
+| `measures` | `string` | What the plan measures for usage tracking (value: `'requests'`) |
 | `limit` | `number` | Included units in the base price |
 | `freeUnits` | `number` | Additional free units beyond the base |
 | `pricePerUnit` | `number` | Flat per-unit rate (fallback if no tiers) |
@@ -94,7 +94,7 @@ Combines a recurring base price with usage-based overage billing. Best for enter
   "basePrice": 4900,
   "currency": "USD",
   "billingCycle": "monthly",
-  "meterId": "60f7b2...",
+  "measures": "requests",
   "limit": 1000,
   "freeUnits": 0,
   "pricePerUnit": 5,
@@ -226,4 +226,4 @@ This ensures billing is deterministic — changing a plan's price or limits does
 
 - [Billing](/plans/billing) — billing cycles, usage billing, and end-of-period processing
 - [Meters](/meters/overview) — meter definitions linked to usage-based plans
-- [Meter Events](/meters/events) — how usage data is recorded and queried
+- [Usage Records](/meters/events) — how usage data is recorded and queried

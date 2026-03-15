@@ -60,6 +60,23 @@ flowchart LR
 | **Meter** | A [metric definition](/meters/overview) that tracks usage (e.g. `tool:search_documents`). Auto-created for each discovered MCP tool. |
 | **Meter event** | A [timestamped data point](/meters/events) recorded each time a tool is called. Powers quota enforcement and billing. |
 
+## Tool-to-plan mapping semantics
+
+Hosted MCP access uses a clear precedence model:
+
+- `noPlan: true` on a tool means the tool is public
+- otherwise, access is allowed when the customer's purchase plan matches:
+  - the tool's `planIds`, or
+  - the MCP server `defaultPlanId`
+
+This means `defaultPlanId` is always an additional fallback allowlist for protected tools.
+
+For API-first setup, the `POST /v1/sdk/products/mcp/bootstrap` endpoint lets you define:
+- product
+- plans (for example `free` and `pro`)
+- origin URL
+- tool mapping in one request
+
 ## Next Steps
 
 - [Quick Start](/mcp-pay/quick-start) - Set up hosted MCP monetization

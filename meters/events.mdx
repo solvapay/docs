@@ -29,8 +29,8 @@ Usage is recorded via `UsageService.recordUsage()`, which writes to the Usage ti
 Record usage directly from your backend using the SDK API:
 
 ```bash
-# Record a single usage record
-POST /sdk/usages
+# Record a single event
+POST /v1/sdk/meter-events
 {
   "customerRef": "cus_abc123",
   "value": 1,
@@ -42,8 +42,8 @@ POST /sdk/usages
 ```
 
 ```bash
-# Record usage in bulk
-POST /sdk/usages/bulk
+# Record events in bulk
+POST /v1/sdk/meter-events/bulk
 {
   "records": [
     { "customerRef": "cus_abc123", "value": 1 },
@@ -51,6 +51,23 @@ POST /sdk/usages/bulk
   ]
 }
 ```
+
+### Via Usage Endpoint
+
+The usage endpoint records generic usage events (not direct meter-name events):
+
+```bash
+POST /v1/sdk/usages
+{
+  "customerId": "cus_abc123",
+  "actionType": "api_call",
+  "units": 1,
+  "outcome": "success",
+  "productReference": "prd_P9Q0R1S2"
+}
+```
+
+Use `/v1/sdk/meter-events` when you need explicit `meterName` + `value` semantics.
 
 ### Via NATS Event Bus
 

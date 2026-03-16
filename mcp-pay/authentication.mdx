@@ -51,6 +51,10 @@ MCP Pay supports **Dynamic Client Registration**, allowing MCP clients to automa
 4. Client receives client credentials
 5. Client proceeds with standard OAuth flow
 
+For API-driven MCP setup, you can provision product, plans, origin URL, and tool mapping through
+`POST /v1/sdk/products/mcp/bootstrap`. That endpoint returns MCP server identity fields including the
+proxy URL and the resolved default plan.
+
 The DCR endpoint is available at your proxy URL and follows the **OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591)**.
 
 ### Benefits of DCR

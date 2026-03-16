@@ -295,12 +295,15 @@ No parameters required. Returns aggregated wallet statistics.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `customerRef` | string | Yes | Customer reference |
-| `productRef` | string | Yes | Product reference |
-| `outcome` | string | Yes | Outcome (e.g. `success`, `failure`) |
-| `action` | string | No | Action name |
-| `requestId` | string | No | Correlation ID for tracing |
-| `actionDuration` | number | No | Duration in milliseconds |
+| `customerId` | string | Yes | Customer reference |
+| `actionType` | string | No | Action type (`api_call` by default) |
+| `units` | number | No | Usage units (default: `1`) |
+| `outcome` | string | No | Outcome (`success`, `paywall`, `fail`) |
+| `productReference` | string | No | Product reference |
+| `purchaseReference` | string | No | Purchase reference |
+| `metadata` | object | No | Arbitrary event metadata |
+| `timestamp` | string | No | ISO 8601 timestamp |
+| `idempotencyKey` | string | No | Idempotency key to deduplicate events |
 
 ### record_bulk_usage
 

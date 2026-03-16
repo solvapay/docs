@@ -28,7 +28,7 @@ Record events directly from your backend using the SDK API:
 
 ```bash
 # Record a single event
-POST /sdk/meter-events
+POST /v1/sdk/meter-events
 {
   "meterName": "api_requests",
   "customerId": "cus_abc123",
@@ -42,7 +42,7 @@ POST /sdk/meter-events
 
 ```bash
 # Record events in bulk
-POST /sdk/meter-events/bulk
+POST /v1/sdk/meter-events/bulk
 {
   "events": [
     { "meterName": "api_requests", "customerId": "cus_abc123", "value": 1 },
@@ -54,18 +54,20 @@ POST /sdk/meter-events/bulk
 
 ### Via Usage Endpoint
 
-The usage endpoint provides a higher-level interface with automatic meter resolution:
+The usage endpoint records generic usage events (not direct meter-name events):
 
 ```bash
-POST /sdk/usages
+POST /v1/sdk/usages
 {
-  "toolName": "search_documents",
   "customerId": "cus_abc123",
-  "value": 1
+  "actionType": "api_call",
+  "units": 1,
+  "outcome": "success",
+  "productReference": "prd_P9Q0R1S2"
 }
 ```
 
-When `toolName` is provided, the meter name is automatically resolved to `tool:{toolName}`. If no `toolName` or explicit `meterName` is given, events default to the `api_requests` meter.
+Use `/v1/sdk/meter-events` when you need explicit `meterName` + `value` semantics.
 
 ### Via NATS Event Bus
 

@@ -57,13 +57,15 @@ If you want the same setup flow through API, use the SDK bootstrap route:
 
 This creates in one call:
 - MCP-enabled product
-- pricing plans (for example `free` and `pro`)
+- free plan settings
+- paid plans (for example `pro`)
 - origin URL configuration
 - tool-to-plan mapping
 
 Canonical request fields are:
 - `originUrl`
-- `defaultPlanId` (or `defaultPlanRef` / `defaultPlanKey` during bootstrap)
+- `freePlan`
+- `paidPlans`
 - `tools[].noPlan`
 - `tools[].planIds` (or `planRefs` / `planKeys` during bootstrap)
 
@@ -74,11 +76,13 @@ curl -X POST "https://api.solvapay.com/v1/sdk/products/mcp/bootstrap" \
   -d '{
     "name": "Docs Assistant",
     "originUrl": "https://origin.example.com/mcp",
-    "plans": [
-      { "key": "free", "name": "Free", "price": 0, "isFreeTier": true, "requiresPayment": false },
-      { "key": "pro", "name": "Pro", "price": 20, "billingCycle": "monthly", "requiresPayment": true }
+    "freePlan": {
+      "name": "Free",
+      "freeUnits": 1000
+    },
+    "paidPlans": [
+      { "key": "pro", "name": "Pro", "price": 2000, "currency": "USD", "billingCycle": "monthly" }
     ],
-    "defaultPlanKey": "free",
     "tools": [
       { "name": "list_docs", "planKeys": ["free"] },
       { "name": "deep_research", "planKeys": ["pro"] },
@@ -99,20 +103,14 @@ When SolvaPay evaluates access for a tool:
    - `tools[].planIds`, or
    - the MCP server `defaultPlanId`.
 
-During bootstrap, default plan resolution uses this order:
-1. `defaultPlanId`
-2. `defaultPlanRef`
-3. `defaultPlanKey`
-4. implicit `free`
-
 ## Troubleshooting bootstrap errors
 
 Common validation failures for `POST /v1/sdk/products/mcp/bootstrap`:
 
 - `UNKNOWN_PLAN_KEY`  
-  A tool references a `planKeys` value not declared in `plans[].key`.
+  A tool references a `planKeys` value not declared in `paidPlans[].key` (or `free`).
 - `UNKNOWN_PLAN_REFERENCE`  
-  `defaultPlanRef` or `tools[].planRefs` points to a plan not created by the same bootstrap request.
+  `tools[].planRefs` points to a plan not created by the same bootstrap request.
 - `PLAN_PRODUCT_MISMATCH`  
   `tools[].planIds` includes a plan ID outside the plans created in this bootstrap call.
 - `DUPLICATE_TOOL_NAME`  

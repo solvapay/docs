@@ -298,9 +298,11 @@ Record events directly for custom metrics:
 // Track custom usage via SDK
 await solvaPay.trackUsage({
   customerRef: 'user_123',
-  meterName: 'api_requests',
-  value: 1,
-  properties: {
+  actionType: 'api_call',
+  units: 1,
+  outcome: 'success',
+  productReference: 'prd_P9Q0R1S2',
+  metadata: {
     endpoint: '/api/v1/search',
   },
 })

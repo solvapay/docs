@@ -3676,6 +3676,11 @@
       }
     }
   },
-  "servers": [],
+  "servers": [
+    {
+      "url": "https://api.solvapay.com",
+      "description": "SolvaPay API"
+    }
+  ],
   "tags": []
 }

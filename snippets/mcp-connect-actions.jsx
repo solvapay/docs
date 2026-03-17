@@ -75,106 +75,76 @@ export const McpConnectActions = () => {
 
   const addMcpCommand = `npx add-mcp ${endpoint} --header "X-API-Key: YOUR_API_KEY_HERE"`
 
-  const triggerStyle = {
-    border: '1px solid rgba(255, 255, 255, 0.18)',
-    background: 'rgba(255, 255, 255, 0.02)',
-    color: 'inherit',
-  }
-
-  const panelStyle = {
-    border: '1px solid rgba(255, 255, 255, 0.14)',
-    background: 'rgba(255, 255, 255, 0.02)',
-  }
-
-  const actionStyle = {
-    width: '100%',
-    padding: '12px',
-    textAlign: 'left',
-    borderRadius: '12px',
-    border: '1px solid rgba(255, 255, 255, 0.14)',
-    background: 'rgba(255, 255, 255, 0.04)',
-    color: 'inherit',
-    transition: 'filter 120ms ease',
-  }
-
-  const dividerStyle = {
-    height: '1px',
-    background: 'rgba(255, 255, 255, 0.12)',
-  }
-
-  const titleStyle = {
-    display: 'block',
-    fontSize: '14px',
-    fontWeight: 600,
-    lineHeight: 1.2,
-  }
-
-  const subtitleStyle = {
-    display: 'block',
-    marginTop: '6px',
-    fontSize: '12px',
-    color: 'var(--color-muted)',
-    lineHeight: 1.35,
-  }
-
   return (
     <div className="not-prose">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition"
-        style={triggerStyle}
+        className="inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50 dark:border-white/20 dark:bg-white/[0.03] dark:text-zinc-100 dark:hover:bg-white/[0.06]"
       >
         Connect SolvaPay MCP
         <span aria-hidden>{isOpen ? '▴' : '▾'}</span>
       </button>
 
       {isOpen && (
-        <div className="mt-3 max-w-[560px] rounded-2xl p-3" style={panelStyle}>
-          <button type="button" style={actionStyle} onClick={openCursorInstall}>
-            <span style={titleStyle}>Install in Cursor</span>
-            <span style={subtitleStyle}>One-click deeplink install with SolvaPay endpoint</span>
+        <div className="mt-3 max-w-[560px] rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm dark:border-white/15 dark:bg-white/[0.03]">
+          <button
+            type="button"
+            className="w-full rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-left text-zinc-900 transition-colors hover:bg-zinc-100 dark:border-white/15 dark:bg-white/[0.04] dark:text-zinc-100 dark:hover:bg-white/[0.08]"
+            onClick={openCursorInstall}
+          >
+            <span className="block text-sm font-semibold leading-tight">Install in Cursor</span>
+            <span className="mt-1.5 block text-xs leading-snug text-zinc-600 dark:text-zinc-400">
+              One-click deeplink install with SolvaPay endpoint
+            </span>
           </button>
 
-          <div className="my-2" style={dividerStyle} />
+          <div className="my-2 h-px bg-zinc-200 dark:bg-white/10" />
 
           <button
             type="button"
-            style={actionStyle}
+            className="w-full rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-left text-zinc-900 transition-colors hover:bg-zinc-100 dark:border-white/15 dark:bg-white/[0.04] dark:text-zinc-100 dark:hover:bg-white/[0.08]"
             onClick={() => copyText(vscodeConfig, 'VS Code config')}
           >
-            <span style={titleStyle}>Copy VS Code config</span>
-            <span style={subtitleStyle}>Paste into `.vscode/mcp.json` or user `mcp.json`</span>
+            <span className="block text-sm font-semibold leading-tight">Copy VS Code config</span>
+            <span className="mt-1.5 block text-xs leading-snug text-zinc-600 dark:text-zinc-400">
+              Paste into `.vscode/mcp.json` or user `mcp.json`
+            </span>
           </button>
 
           <button
             type="button"
-            className="mt-2"
-            style={actionStyle}
+            className="mt-2 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-left text-zinc-900 transition-colors hover:bg-zinc-100 dark:border-white/15 dark:bg-white/[0.04] dark:text-zinc-100 dark:hover:bg-white/[0.08]"
             onClick={() => copyText(claudeDesktopConfig, 'Claude Desktop config')}
           >
-            <span style={titleStyle}>Copy Claude Desktop config</span>
-            <span style={subtitleStyle}>Paste into `claude_desktop_config.json`</span>
+            <span className="block text-sm font-semibold leading-tight">
+              Copy Claude Desktop config
+            </span>
+            <span className="mt-1.5 block text-xs leading-snug text-zinc-600 dark:text-zinc-400">
+              Paste into `claude_desktop_config.json`
+            </span>
           </button>
 
           <button
             type="button"
-            className="mt-2"
-            style={actionStyle}
+            className="mt-2 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-left text-zinc-900 transition-colors hover:bg-zinc-100 dark:border-white/15 dark:bg-white/[0.04] dark:text-zinc-100 dark:hover:bg-white/[0.08]"
             onClick={() => copyText(endpoint, 'MCP endpoint')}
           >
-            <span style={titleStyle}>Copy MCP endpoint</span>
-            <span style={subtitleStyle}>Use this URL in any Streamable HTTP MCP client</span>
+            <span className="block text-sm font-semibold leading-tight">Copy MCP endpoint</span>
+            <span className="mt-1.5 block text-xs leading-snug text-zinc-600 dark:text-zinc-400">
+              Use this URL in any Streamable HTTP MCP client
+            </span>
           </button>
 
           <button
             type="button"
-            className="mt-2"
-            style={actionStyle}
+            className="mt-2 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-left text-zinc-900 transition-colors hover:bg-zinc-100 dark:border-white/15 dark:bg-white/[0.04] dark:text-zinc-100 dark:hover:bg-white/[0.08]"
             onClick={() => copyText(addMcpCommand, 'add-mcp command')}
           >
-            <span style={titleStyle}>Copy add-mcp command</span>
-            <span style={subtitleStyle}>CLI shortcut for custom setup flows</span>
+            <span className="block text-sm font-semibold leading-tight">Copy add-mcp command</span>
+            <span className="mt-1.5 block text-xs leading-snug text-zinc-600 dark:text-zinc-400">
+              CLI shortcut for custom setup flows
+            </span>
           </button>
 
           <div className="mt-2 min-h-5 text-xs font-medium text-zinc-600 dark:text-zinc-400">

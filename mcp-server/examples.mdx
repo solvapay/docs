@@ -34,38 +34,21 @@ The `ensure_customer` tool is idempotent — it's safe to call repeatedly with t
 
 ---
 
-## Setting Up a Product with Pricing
+## Setting Up a Product
 
-**You:** Create a product called "support-bot" for handling customer support, then set up a free starter plan and a $49/month pro plan
+**You:** Create a product called "support-bot" for handling customer support
 
 **Assistant:**
 
 *Calls `create_product` with `name: "support-bot"`, `description: "Customer support automation"`*
 
-*Calls `create_plan` with `productRef: "prd_P9Q0R1S2"`, `type: "usage-based"`, `price: 0`, `features: ["100 free requests/month", "Community support"]`*
-
-*Calls `create_plan` with `productRef: "prd_P9Q0R1S2"`, `type: "recurring"`, `price: 4900`, `currency: "USD"`, `billingCycle: "monthly"`, `features: ["Unlimited requests", "Priority support", "Custom integrations"]`*
-
-> I've created the product and both plans:
+> I've created the product:
 >
 > **Product:** support-bot (`prd_P9Q0R1S2`)
->
-> | Plan | Reference | Price | Type |
-> |---|---|---|---|
-> | Starter | `pln_F1G2H3J4` | Free | Usage-based |
-> | Pro | `pln_K5L6M7N8` | $49/month | Recurring |
 
 ---
 
 ## Checking Revenue and Statistics
-
-**You:** What's my current wallet balance?
-
-*Calls `get_wallet_balance`*
-
-> Your wallet balance is **$1,245.00 USD**.
-
----
 
 **You:** Show me transaction stats for the last 30 days
 

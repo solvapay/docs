@@ -395,14 +395,24 @@
             "description": "Additional metadata",
             "type": "object"
           },
-          "meterId": {
-            "description": "Meter ID (ObjectId) for free usage metering",
-            "example": "507f1f77bcf86cd799439011",
+          "name": {
+            "description": "Plan name",
+            "example": "Basic Plan",
             "type": "string"
           },
           "price": {
             "description": "Plan price",
             "example": 29.99,
+            "type": "number"
+          },
+          "pricePerUnit": {
+            "description": "Price per unit for usage-based plans",
+            "example": 0.01,
+            "type": "number"
+          },
+          "quota": {
+            "description": "Usage quota for usage-based plans",
+            "example": 10000,
             "type": "number"
           },
           "requiresPayment": {
@@ -937,357 +947,7 @@
         "type": "object"
       },
       "Login": {
-        "properties": {
-          "email": {
-            "description": "Email to send a 6-digit login code to",
-            "type": "string"
-          }
-        },
-        "required": [
-          "email"
-        ],
-        "type": "object"
-      },
-      "McpServerDto": {
-        "properties": {
-          "authHeaderName": {
-            "description": "Custom auth header name for origin requests",
-            "example": "X-API-Key",
-            "type": "string"
-          },
-          "avatarUrl": {
-            "description": "Avatar image URL",
-            "example": "https://example.com/avatar.png",
-            "type": "string"
-          },
-          "balance": {
-            "description": "Current balance in cents",
-            "example": 1500,
-            "type": "number"
-          },
-          "defaultPlanId": {
-            "description": "Default plan ID for tool access gating",
-            "example": "pln_default",
-            "type": "string"
-          },
-          "hasAuthApiKey": {
-            "description": "Whether an auth API key is configured",
-            "example": true,
-            "type": "boolean"
-          },
-          "id": {
-            "description": "Server ID",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "mcpProxyUrl": {
-            "description": "SolvaPay proxy URL that MCP clients connect to",
-            "example": "https://mytelescope.mcp.solvapay.com/mcp",
-            "type": "string"
-          },
-          "name": {
-            "description": "Domain slug used to derive the MCP endpoint subdomain",
-            "example": "my-mcp-server",
-            "type": "string"
-          },
-          "productId": {
-            "description": "Associated product ID",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "providerId": {
-            "description": "Provider ID that owns this server",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "reference": {
-            "description": "Unique server reference",
-            "example": "mcp_abc123",
-            "type": "string"
-          },
-          "status": {
-            "description": "Server status",
-            "enum": [
-              "active",
-              "inactive",
-              "suspended"
-            ],
-            "example": "active",
-            "type": "string"
-          },
-          "subdomain": {
-            "description": "URL-safe subdomain derived from name",
-            "example": "my-mcp-server",
-            "type": "string"
-          },
-          "tools": {
-            "description": "Registered tools for this server",
-            "items": {
-              "$ref": "#/components/schemas/McpToolDto"
-            },
-            "type": "array"
-          },
-          "totalTransactions": {
-            "description": "Total number of tool-call transactions",
-            "example": 42,
-            "type": "number"
-          },
-          "url": {
-            "description": "Origin URL of the actual MCP server",
-            "example": "https://origin.example.com/mcp",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "subdomain",
-          "url",
-          "providerId"
-        ],
-        "type": "object"
-      },
-      "McpToolDto": {
-        "properties": {
-          "description": {
-            "description": "Human-readable tool description",
-            "example": "Search indexed documents",
-            "type": "string"
-          },
-          "isVirtual": {
-            "description": "Whether this is a virtual platform tool handled by SolvaPay",
-            "example": false,
-            "type": "boolean"
-          },
-          "name": {
-            "description": "Tool name",
-            "example": "search_documents",
-            "type": "string"
-          },
-          "noPlan": {
-            "description": "If true, the tool is unprotected (no purchase check or usage tracking)",
-            "example": false,
-            "type": "boolean"
-          },
-          "planIds": {
-            "description": "Plan IDs that grant access to this tool",
-            "example": [
-              "pln_abc123"
-            ],
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          }
-        },
-        "required": [
-          "name"
-        ],
-        "type": "object"
-      },
-      "Plan": {
-        "properties": {
-          "accessExpiryDays": {
-            "description": "Access expiry in days",
-            "type": "number"
-          },
-          "billingCycle": {
-            "description": "Billing cycle",
-            "example": "monthly",
-            "type": "string"
-          },
-          "createdAt": {
-            "description": "Creation timestamp",
-            "type": "string"
-          },
-          "currency": {
-            "description": "Currency code (ISO 4217)",
-            "example": "USD",
-            "type": "string"
-          },
-          "currencySymbol": {
-            "description": "Currency symbol (derived from currency)",
-            "example": "$",
-            "type": "string"
-          },
-          "features": {
-            "additionalProperties": true,
-            "description": "Plan features",
-            "type": "object"
-          },
-          "freeUnits": {
-            "description": "Number of free units included",
-            "example": 100,
-            "type": "number"
-          },
-          "id": {
-            "description": "Plan ID",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "isActive": {
-            "description": "Whether the plan is active (derived from status)",
-            "example": true,
-            "type": "boolean"
-          },
-          "isFreeTier": {
-            "description": "Whether this is a free tier plan",
-            "example": false,
-            "type": "boolean"
-          },
-          "limit": {
-            "description": "Usage limit for the meter",
-            "example": 10000,
-            "type": "number"
-          },
-          "limits": {
-            "additionalProperties": true,
-            "description": "Usage limits",
-            "type": "object"
-          },
-          "maxActiveUsers": {
-            "description": "Maximum number of active users",
-            "type": "number"
-          },
-          "meterId": {
-            "description": "Meter ID (ObjectId)",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "price": {
-            "description": "Plan price",
-            "example": 29.99,
-            "type": "number"
-          },
-          "reference": {
-            "description": "Plan reference",
-            "example": "pln_1A2B3C4D",
-            "type": "string"
-          },
-          "requiresPayment": {
-            "description": "Whether payment is required",
-            "example": true,
-            "type": "boolean"
-          },
-          "status": {
-            "description": "Plan status",
-            "example": "active",
-            "type": "string"
-          },
-          "type": {
-            "description": "Plan type exposed in SDK",
-            "enum": [
-              "recurring",
-              "one-time"
-            ],
-            "example": "recurring",
-            "type": "string"
-          },
-          "updatedAt": {
-            "description": "Last update timestamp",
-            "type": "string"
-          }
-        },
-        "required": [
-          "type",
-          "id",
-          "reference",
-          "price",
-          "currency",
-          "isFreeTier",
-          "requiresPayment",
-          "isActive",
-          "status",
-          "createdAt",
-          "updatedAt"
-        ],
-        "type": "object"
-      },
-      "PlanSnapshotDto": {
-        "properties": {
-          "billingCycle": {
-            "description": "Billing cycle",
-            "example": "monthly",
-            "nullable": true,
-            "type": "string"
-          },
-          "currency": {
-            "description": "Currency code",
-            "example": "USD",
-            "type": "string"
-          },
-          "features": {
-            "additionalProperties": true,
-            "description": "Plan features",
-            "nullable": true,
-            "type": "object"
-          },
-          "freeUnits": {
-            "description": "Number of free units included",
-            "example": 100,
-            "type": "number"
-          },
-          "limit": {
-            "description": "Usage limit for the meter",
-            "example": 5000,
-            "type": "number"
-          },
-          "limits": {
-            "additionalProperties": true,
-            "description": "Usage limits",
-            "nullable": true,
-            "type": "object"
-          },
-          "meterId": {
-            "description": "Meter ObjectId reference",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "planType": {
-            "description": "Plan type",
-            "example": "recurring",
-            "type": "string"
-          },
-          "price": {
-            "description": "Plan price in cents",
-            "example": 2999,
-            "type": "number"
-          },
-          "pricePerUnit": {
-            "description": "Price per usage unit in cents",
-            "example": 10,
-            "type": "number"
-          },
-          "reference": {
-            "description": "Plan reference",
-            "example": "pln_1A2B3C4D",
-            "type": "string"
-          }
-        },
-        "required": [
-          "price",
-          "currency",
-          "planType"
-        ],
-        "type": "object"
-      },
-      "ProductConfigDto": {
-        "properties": {
-          "deliveryMethod": {
-            "description": "Delivery method",
-            "example": "api",
-            "type": "string"
-          },
-          "fulfillmentType": {
-            "description": "Fulfillment type",
-            "example": "digital",
-            "type": "string"
-          },
-          "validityPeriod": {
-            "description": "Validity period in days",
-            "example": 30,
-            "type": "number"
-          }
-        },
+        "properties": {},
         "type": "object"
       },
       "PurchaseInfo": {
@@ -1357,195 +1017,6 @@
         ],
         "type": "object"
       },
-      "PurchaseResponse": {
-        "properties": {
-          "amount": {
-            "description": "Amount in cents",
-            "example": 9900,
-            "type": "number"
-          },
-          "autoRenew": {
-            "description": "Auto-renew enabled",
-            "type": "boolean"
-          },
-          "billingCycle": {
-            "description": "Billing cycle",
-            "enum": [
-              "weekly",
-              "monthly",
-              "quarterly",
-              "yearly"
-            ],
-            "type": "string"
-          },
-          "cancellationReason": {
-            "description": "Cancellation reason",
-            "type": "string"
-          },
-          "cancelledAt": {
-            "description": "Cancelled at",
-            "type": "string"
-          },
-          "createdAt": {
-            "description": "Created at",
-            "type": "string"
-          },
-          "currency": {
-            "description": "Currency code",
-            "example": "USD",
-            "type": "string"
-          },
-          "customerEmail": {
-            "description": "Customer email",
-            "example": "customer@example.com",
-            "type": "string"
-          },
-          "customerRef": {
-            "description": "Customer reference",
-            "example": "cus_3C4D5E6F",
-            "type": "string"
-          },
-          "endDate": {
-            "description": "End date",
-            "type": "string"
-          },
-          "id": {
-            "description": "Purchase ID",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "isFreeTier": {
-            "description": "Whether this is a free tier purchase",
-            "type": "boolean"
-          },
-          "isRecurring": {
-            "description": "Is recurring",
-            "example": true,
-            "type": "boolean"
-          },
-          "nextBillingDate": {
-            "description": "Next billing date",
-            "type": "string"
-          },
-          "paidAt": {
-            "description": "Paid at timestamp",
-            "type": "string"
-          },
-          "planSnapshot": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PlanSnapshotDto"
-              }
-            ],
-            "description": "Plan snapshot at time of purchase"
-          },
-          "productId": {
-            "description": "Product ID",
-            "example": "507f1f77bcf86cd799439012",
-            "type": "string"
-          },
-          "productName": {
-            "description": "Product name",
-            "example": "API Gateway Manager",
-            "type": "string"
-          },
-          "productRef": {
-            "description": "Product reference",
-            "example": "prd_1A2B3C4D",
-            "type": "string"
-          },
-          "reference": {
-            "description": "Purchase reference",
-            "example": "pur_1A2B3C4D",
-            "type": "string"
-          },
-          "startDate": {
-            "description": "Start date",
-            "type": "string"
-          },
-          "status": {
-            "description": "Purchase status",
-            "example": "active",
-            "type": "string"
-          },
-          "usage": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/UsageBillingDto"
-              }
-            ],
-            "description": "Usage billing state for usage-based plans"
-          }
-        },
-        "required": [
-          "id",
-          "reference",
-          "customerRef",
-          "customerEmail",
-          "productRef",
-          "planSnapshot",
-          "status",
-          "amount",
-          "currency",
-          "startDate",
-          "isRecurring",
-          "createdAt"
-        ],
-        "type": "object"
-      },
-      "RecordBulkMeterEventsDto": {
-        "properties": {
-          "events": {
-            "description": "Array of events to record",
-            "items": {
-              "$ref": "#/components/schemas/RecordMeterEventDto"
-            },
-            "type": "array"
-          }
-        },
-        "required": [
-          "events"
-        ],
-        "type": "object"
-      },
-      "RecordMeterEventDto": {
-        "properties": {
-          "customerId": {
-            "description": "Customer reference",
-            "example": "cus_ABC123",
-            "type": "string"
-          },
-          "meterName": {
-            "description": "Meter name to record against",
-            "example": "requests",
-            "type": "string"
-          },
-          "properties": {
-            "additionalProperties": true,
-            "description": "Arbitrary key-value tags",
-            "example": {
-              "endpoint": "/api/v1/search",
-              "region": "us-east-1"
-            },
-            "type": "object"
-          },
-          "timestamp": {
-            "description": "ISO 8601 timestamp (defaults to now)",
-            "type": "string"
-          },
-          "value": {
-            "default": 1,
-            "description": "Numeric value (default 1)",
-            "example": 1,
-            "type": "number"
-          }
-        },
-        "required": [
-          "meterName",
-          "customerId"
-        ],
-        "type": "object"
-      },
       "RequestEmailChange": {
         "properties": {
           "newEmail": {
@@ -1557,114 +1028,8 @@
         ],
         "type": "object"
       },
-      "SdkPlanResponse": {
-        "properties": {
-          "billingCycle": {
-            "description": "Billing cycle",
-            "example": "monthly",
-            "type": "string"
-          },
-          "billingModel": {
-            "description": "Billing model",
-            "example": "pre-paid",
-            "type": "string"
-          },
-          "createdAt": {
-            "description": "Creation timestamp",
-            "type": "string"
-          },
-          "currency": {
-            "description": "Currency code (ISO 4217)",
-            "example": "USD",
-            "type": "string"
-          },
-          "currencySymbol": {
-            "description": "Currency symbol",
-            "example": "$",
-            "type": "string"
-          },
-          "features": {
-            "additionalProperties": true,
-            "description": "Plan features",
-            "type": "object"
-          },
-          "freeUnits": {
-            "description": "Included free units",
-            "example": 1000,
-            "type": "number"
-          },
-          "id": {
-            "description": "Plan ID",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "isActive": {
-            "description": "Whether the plan is active",
-            "example": true,
-            "type": "boolean"
-          },
-          "isFreeTier": {
-            "description": "Whether this is a free tier plan",
-            "example": false,
-            "type": "boolean"
-          },
-          "limit": {
-            "description": "Usage limit for the meter",
-            "example": 10000,
-            "type": "number"
-          },
-          "limits": {
-            "additionalProperties": true,
-            "description": "Usage limits",
-            "type": "object"
-          },
-          "meterId": {
-            "description": "Meter ID (ObjectId)",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "price": {
-            "description": "Plan price",
-            "example": 29.99,
-            "type": "number"
-          },
-          "pricePerUnit": {
-            "description": "Price per unit",
-            "example": 0.01,
-            "type": "number"
-          },
-          "reference": {
-            "description": "Plan reference",
-            "example": "pln_1A2B3C4D",
-            "type": "string"
-          },
-          "requiresPayment": {
-            "description": "Whether payment is required",
-            "example": true,
-            "type": "boolean"
-          },
-          "status": {
-            "description": "Plan status",
-            "example": "active",
-            "type": "string"
-          },
-          "updatedAt": {
-            "description": "Last update timestamp",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "reference",
-          "price",
-          "currency",
-          "isFreeTier",
-          "requiresPayment",
-          "isActive",
-          "status",
-          "createdAt",
-          "updatedAt"
-        ],
+      "ResetPassword": {
+        "properties": {},
         "type": "object"
       },
       "SdkProductResponse": {
@@ -1703,6 +1068,19 @@
             "description": "Whether this product uses MCP Pay proxy",
             "example": false,
             "type": "boolean"
+          },
+          "mcp": {
+            "additionalProperties": true,
+            "description": "MCP linkage details for MCP-enabled products",
+            "example": {
+              "defaultPlanId": "67f90f1f1b1c9c0b8df0f001",
+              "mcpProxyUrl": "https://acme-docs.mcp.solvapay.com/mcp",
+              "mcpServerId": "67f90f1f1b1c9c0b8df0f111",
+              "mcpServerReference": "mcp_ABC123",
+              "mcpSubdomain": "acme-docs",
+              "originUrl": "https://origin.example.com/mcp"
+            },
+            "type": "object"
           },
           "metadata": {
             "additionalProperties": true,
@@ -1898,148 +1276,11 @@
         "type": "object"
       },
       "UpdateConnectedAccount": {
-        "properties": {
-          "externalAccount": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ExternalAccount"
-              }
-            ],
-            "description": "External bank account"
-          },
-          "tosAcceptance": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TosAcceptance"
-              }
-            ],
-            "description": "Terms of Service acceptance"
-          },
-          "website": {
-            "description": "Business website URL",
-            "example": "https://example.com",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "UpdateMeterDto": {
-        "properties": {
-          "description": {
-            "example": "Updated description",
-            "type": "string"
-          },
-          "displayName": {
-            "example": "API Requests v2",
-            "type": "string"
-          },
-          "status": {
-            "enum": [
-              "active",
-              "archived"
-            ],
-            "type": "string"
-          }
-        },
+        "properties": {},
         "type": "object"
       },
       "UpdatePlanRequest": {
-        "properties": {
-          "accessExpiryDays": {
-            "description": "Access expiry in days",
-            "example": 30,
-            "type": "number"
-          },
-          "billingCycle": {
-            "description": "Billing cycle",
-            "enum": [
-              "weekly",
-              "monthly",
-              "quarterly",
-              "yearly",
-              "custom"
-            ],
-            "example": "monthly",
-            "type": "string"
-          },
-          "currency": {
-            "description": "Currency code (ISO 4217)",
-            "example": "USD",
-            "type": "string"
-          },
-          "default": {
-            "description": "Whether this is the default plan",
-            "example": false,
-            "type": "boolean"
-          },
-          "features": {
-            "additionalProperties": true,
-            "description": "Plan features (generic key/value, shape is provider-defined)",
-            "example": {
-              "apiAccess": true,
-              "prioritySupport": false
-            },
-            "type": "object"
-          },
-          "freeUnits": {
-            "description": "Number of free units included",
-            "example": 100,
-            "type": "number"
-          },
-          "isFreeTier": {
-            "description": "Whether this is a free tier plan",
-            "example": false,
-            "type": "boolean"
-          },
-          "limit": {
-            "description": "Usage limit for the meter",
-            "example": 10000,
-            "type": "number"
-          },
-          "limits": {
-            "additionalProperties": true,
-            "description": "Usage limits (shape varies by plan type)",
-            "example": {
-              "maxTransactions": 1000
-            },
-            "type": "object"
-          },
-          "maxActiveUsers": {
-            "description": "Maximum number of active users",
-            "example": 10,
-            "type": "number"
-          },
-          "metadata": {
-            "additionalProperties": true,
-            "description": "Additional metadata",
-            "type": "object"
-          },
-          "meterId": {
-            "description": "Meter ID (ObjectId) for free usage metering",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "price": {
-            "description": "Plan price",
-            "example": 29.99,
-            "type": "number"
-          },
-          "requiresPayment": {
-            "description": "Whether payment is required",
-            "example": true,
-            "type": "boolean"
-          },
-          "status": {
-            "description": "Plan status",
-            "enum": [
-              "active",
-              "inactive",
-              "archived"
-            ],
-            "example": "active",
-            "type": "string"
-          }
-        },
+        "properties": {},
         "type": "object"
       },
       "UpdatePreferences": {
@@ -3006,104 +2247,6 @@
         ]
       }
     },
-    "/v1/sdk/meter-events": {
-      "post": {
-        "description": "Records a single usage event against a named meter.",
-        "operationId": "MeterSdkController_recordEvent",
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RecordMeterEventDto"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "success": {
-                      "example": true,
-                      "type": "boolean"
-                    }
-                  },
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Event recorded"
-          },
-          "400": {
-            "description": "Invalid meter name or meter is archived"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Record a meter event",
-        "tags": [
-          "Meter Events"
-        ]
-      }
-    },
-    "/v1/sdk/meter-events/bulk": {
-      "post": {
-        "description": "Records multiple usage events in a single request for high throughput.",
-        "operationId": "MeterSdkController_recordBulkEvents",
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RecordBulkMeterEventsDto"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "inserted": {
-                      "example": 50,
-                      "type": "number"
-                    },
-                    "success": {
-                      "example": true,
-                      "type": "boolean"
-                    }
-                  },
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Events recorded"
-          },
-          "400": {
-            "description": "Invalid meter name or meter is archived"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Record meter events in bulk",
-        "tags": [
-          "Meter Events"
-        ]
-      }
-    },
     "/v1/sdk/payment-intents": {
       "get": {
         "description": "Retrieves a paginated list of all payment intents created by the authenticated provider. Supports pagination through limit and offset query parameters.",
@@ -4004,6 +3147,47 @@
         ]
       }
     },
+    "/v1/sdk/products/mcp/bootstrap": {
+      "post": {
+        "description": "Creates an MCP-enabled product, provisions plans, configures origin URL, and maps tools to plans in one request.",
+        "operationId": "ProductSdkController_bootstrapMcpProduct",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/McpBootstrapRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpBootstrapResult"
+                }
+              }
+            },
+            "description": "MCP product bootstrapped successfully"
+          },
+          "400": {
+            "description": "Invalid bootstrap request"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Bootstrap MCP product integration",
+        "tags": [
+          "Products"
+        ]
+      }
+    },
     "/v1/sdk/purchases": {
       "get": {
         "description": "Retrieves all purchases for the authenticated provider with optional filtering by status, product, or customer.",
@@ -4278,7 +3462,7 @@
     },
     "/v1/sdk/usages": {
       "post": {
-        "description": "Records a usage event against a named meter. Events are stored in a high-performance timeseries collection.",
+        "description": "Records a usage event for a customer against a product. Atomically increments usage counters on the active purchase and appends an event to the usage log.",
         "operationId": "UsageSdkController_recordUsage",
         "parameters": [],
         "requestBody": {
@@ -4286,23 +3470,43 @@
             "application/json": {
               "schema": {
                 "properties": {
+                  "action": {
+                    "description": "Action type",
+                    "enum": [
+                      "transaction",
+                      "api_call",
+                      "hour",
+                      "email",
+                      "storage",
+                      "custom"
+                    ],
+                    "example": "api_call",
+                    "type": "string"
+                  },
+                  "customActionKey": {
+                    "description": "Custom action key for custom action types",
+                    "type": "string"
+                  },
                   "customerRef": {
-                    "description": "Customer reference (userId for the meter event)",
+                    "description": "Customer reference",
                     "example": "cus_3C4D5E6F",
                     "type": "string"
                   },
-                  "meterName": {
-                    "description": "Meter name to record against",
-                    "example": "requests",
+                  "description": {
+                    "description": "Human-readable description of the event",
                     "type": "string"
                   },
-                  "properties": {
-                    "additionalProperties": true,
-                    "description": "Arbitrary event properties",
+                  "metadata": {
+                    "description": "Arbitrary metadata",
                     "type": "object"
                   },
-                  "timestamp": {
-                    "description": "ISO 8601 timestamp (defaults to now)",
+                  "productRef": {
+                    "description": "Product reference",
+                    "example": "prd_1A2B3C4D",
+                    "type": "string"
+                  },
+                  "toolName": {
+                    "description": "Tool or feature name",
                     "type": "string"
                   },
                   "units": {
@@ -4313,7 +3517,7 @@
                 },
                 "required": [
                   "customerRef",
-                  "meterName"
+                  "productRef"
                 ],
                 "type": "object"
               }
@@ -4327,13 +3531,17 @@
               "application/json": {
                 "schema": {
                   "properties": {
+                    "outcome": {
+                      "enum": [
+                        "success",
+                        "paywall"
+                      ],
+                      "example": "success",
+                      "type": "string"
+                    },
                     "success": {
                       "example": true,
                       "type": "boolean"
-                    },
-                    "units": {
-                      "example": 1,
-                      "type": "number"
                     }
                   },
                   "type": "object"
@@ -4343,7 +3551,10 @@
             "description": "Usage recorded successfully"
           },
           "400": {
-            "description": "Missing customerRef or meterName"
+            "description": "Missing customerRef or productRef"
+          },
+          "404": {
+            "description": "Customer or product not found"
           }
         },
         "security": [
@@ -4359,7 +3570,7 @@
     },
     "/v1/sdk/usages/bulk": {
       "post": {
-        "description": "Records multiple meter events in a single request.",
+        "description": "Records multiple usage events in a single request. Each event is processed independently.",
         "operationId": "UsageSdkController_recordBulkUsage",
         "parameters": [],
         "requestBody": {
@@ -4370,17 +3581,13 @@
                   "events": {
                     "items": {
                       "properties": {
+                        "action": {
+                          "type": "string"
+                        },
                         "customerRef": {
                           "type": "string"
                         },
-                        "meterName": {
-                          "type": "string"
-                        },
-                        "properties": {
-                          "additionalProperties": true,
-                          "type": "object"
-                        },
-                        "timestamp": {
+                        "productRef": {
                           "type": "string"
                         },
                         "units": {
@@ -4389,7 +3596,7 @@
                       },
                       "required": [
                         "customerRef",
-                        "meterName"
+                        "productRef"
                       ],
                       "type": "object"
                     },
@@ -4410,7 +3617,7 @@
             "description": "Bulk usage events processed"
           },
           "400": {
-            "description": "Events array is required and must not be empty"
+            "description": "Validation failed"
           }
         },
         "security": [
@@ -4469,6 +3676,11 @@
       }
     }
   },
-  "servers": [],
+  "servers": [
+    {
+      "url": "https://api.solvapay.com",
+      "description": "SolvaPay API"
+    }
+  ],
   "tags": []
 }

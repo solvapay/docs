@@ -3,96 +3,62 @@ title: "Installation"
 description: "Connect the SolvaPay MCP Server to your AI assistant."
 ---
 
+import { McpConnectActions } from "/snippets/mcp-connect-actions.jsx"
+
+## Connect from this page
+
+Use the action button below to connect SolvaPay MCP with the correct endpoint.
+
+<McpConnectActions />
+
+Before connecting, make sure you have your SolvaPay API key from **SolvaPay Console > Settings > API Keys**.
+
 ## Cursor IDE
 
-Add the following to your Cursor MCP settings file (`~/.cursor/mcp.json`):
+1. Open **Connect SolvaPay MCP** and select **Install in Cursor**.
+2. Enter your API key when prompted, or continue with `YOUR_API_KEY_HERE`.
+3. Confirm the install prompt in Cursor.
+4. If you installed with the placeholder key, update `X-API-Key` in Cursor MCP settings.
+5. Reload or toggle the SolvaPay MCP server in Cursor settings.
 
-```json
-{
-  "mcpServers": {
-    "solvapay": {
-      "url": "https://mcp.solvapay.com/mcp",
-      "headers": {
-        "X-API-Key": "YOUR_API_KEY_HERE"
-      }
-    }
-  }
-}
-```
+After setup, you should see SolvaPay tools available in Cursor chat.
 
-After saving, restart Cursor or toggle the SolvaPay server off and on in the MCP settings panel. You should see 27 tools become available.
+## VS Code
+
+1. Open **Connect SolvaPay MCP** and select **Copy VS Code config**.
+2. Paste into `.vscode/mcp.json` (workspace) or your user `mcp.json`.
+3. Replace `YOUR_API_KEY_HERE` with your SolvaPay API key.
+4. Run **MCP: List Servers** and start the `solvapay` server if needed.
+5. Reload VS Code if tools do not appear immediately.
+
+After setup, SolvaPay tools are available in Copilot Chat.
 
 ## Claude Desktop
 
-Add the following to your Claude Desktop configuration file:
+Use **Connect SolvaPay MCP** and select **Copy Claude Desktop config**.
+
+Paste it into:
 
 - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
-```json
-{
-  "mcpServers": {
-    "solvapay": {
-      "url": "https://mcp.solvapay.com/mcp",
-      "headers": {
-        "X-API-Key": "YOUR_API_KEY_HERE"
-      }
-    }
-  }
-}
-```
+Then replace `YOUR_API_KEY_HERE` with your SolvaPay API key.
 
-Restart Claude Desktop to activate the connection.
+Restart Claude Desktop after saving.
 
 ## OpenClaw Gateway
 
 Use the `@solvapay/openclaw` plugin to add payment tools to your OpenClaw gateway. Your AI agent can then manage SolvaPay through WhatsApp, Telegram, Discord, and any other connected channel.
 
-**1. Install the plugin:**
-
-```bash
-openclaw plugins install @solvapay/openclaw
-```
-
-**2. Add the config to `~/.openclaw/openclaw.json`:**
-
-```json5
-{
-  plugins: {
-    entries: {
-      solvapay: {
-        enabled: true,
-        config: {
-          apiKey: "${SOLVAPAY_API_KEY}",
-        },
-      },
-    },
-  },
-  tools: {
-    allow: ["solvapay"],
-  },
-}
-```
-
-**3. Set the API key in `~/.openclaw/.env`:**
-
-```bash
-SOLVAPAY_API_KEY=sk_sandbox_your_key_here
-```
-
-**4. Restart the gateway:**
-
-```bash
-openclaw gateway restart
-```
-
-Check the logs with `openclaw gateway logs | grep SolvaPay` — you should see the plugin connect and discover 27 tools.
+Install and configure it with the plugin README:
 
 See the [plugin README](https://github.com/solvapay/solvapay-openclaw) for full configuration options, troubleshooting, and development setup.
 
 ## Other MCP Clients
 
-The SolvaPay MCP Server uses the **Streamable HTTP** transport. Any MCP client that supports this transport can connect using:
+The SolvaPay MCP Server uses **Streamable HTTP**. Any MCP client that supports this transport can connect.
+
+Use **Connect SolvaPay MCP** and select **Copy MCP endpoint**, then configure your client with:
 
 | Property | Value |
 |---|---|
@@ -102,26 +68,10 @@ The SolvaPay MCP Server uses the **Streamable HTTP** transport. Any MCP client t
 
 ## Using Multiple Environments
 
-You can configure separate entries for sandbox and production:
+Create separate MCP server entries in your client:
 
-```json
-{
-  "mcpServers": {
-    "solvapay-sandbox": {
-      "url": "https://mcp.solvapay.com/mcp",
-      "headers": {
-        "X-API-Key": "sk_sandbox_..."
-      }
-    },
-    "solvapay-production": {
-      "url": "https://mcp.solvapay.com/mcp",
-      "headers": {
-        "X-API-Key": "sk_live_..."
-      }
-    }
-  }
-}
-```
+- `solvapay-sandbox` with your sandbox API key
+- `solvapay-production` with your production API key
 
 Both use the same endpoint — the environment is determined by your API key prefix:
 
@@ -132,22 +82,22 @@ Both use the same endpoint — the environment is determined by your API key pre
 
 ## Verifying the Connection
 
-After configuration, ask your AI assistant something simple like:
+After connecting, ask your AI assistant something simple like:
 
 > "List my SolvaPay customers"
 
-If the connection is working, you'll see a response from the `list_customers` tool. If you're on a fresh account, you'll see an empty list — that's expected.
+If the connection is working, you'll see a response from the `list_customers` tool. If your account is new, an empty list is expected.
 
 ## Troubleshooting
 
 **"Authentication required" error**
 
-Your API key is missing or not being sent. Double-check that the `X-API-Key` header is set correctly in your MCP config.
+Your API key is missing or not being sent. Confirm the `X-API-Key` header is set in your MCP client configuration.
 
 **"Invalid or expired secret key" error**
 
-The API key is being sent but is not valid. Verify the key in your SolvaPay dashboard under **Settings > API Keys**. Make sure you copied the full key including any trailing `=` characters.
+The API key is being sent but is not valid. Verify it in **SolvaPay Console > Settings > API Keys**. Make sure you copied the full key.
 
 **Tools not appearing**
 
-Restart your AI assistant after saving the configuration. Some clients require a full restart rather than just a config reload.
+Re-open your AI assistant or reload MCP settings. Some clients require a full restart.

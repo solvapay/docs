@@ -1,6 +1,6 @@
 ---
 title: "Go Live"
-description: "Once you've tested your integration in sandbox mode, you're ready to switch to production and start accepting real payments."
+description: "Once you've tested your integration in sandbox mode, you're ready to switch to Live mode and start accepting real payments."
 ---
 
 ## Onboarding Checklist
@@ -37,7 +37,7 @@ That's it. Your integration is now processing real payments.
 |--------|---------|------|
 | Payments | Test mode (no real charges) | Real charges processed |
 | Stripe credentials | Test keys | Live keys |
-| Customer data | Test data | Production data |
+| Customer data | Test data | Live data |
 | Webhooks | Test events | Real events |
 
 Your proxy URLs and API endpoints remain the same. The mode switch happens at the account level.
@@ -47,7 +47,7 @@ Your proxy URLs and API endpoints remain the same. The mode switch happens at th
 You can switch back to sandbox mode at any time to:
 
 - Test new features or plans
-- Debug issues without affecting production
+- Debug issues without affecting Live mode usage
 - Train team members
 
 Your sandbox and live data are kept separate. Switching modes doesn't affect existing customers or purchases in either environment.

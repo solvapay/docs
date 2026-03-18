@@ -127,7 +127,7 @@ For a full refund, simply omit the `amount` parameter.
 
 **You:** Record that customer cus_X7Y8Z9W0 made a successful API call to product prd_P9Q0R1S2
 
-*Calls `record_usage` with `customerRef: "cus_X7Y8Z9W0"`, `productRef: "prd_P9Q0R1S2"`, `outcome: "success"`, `action: "api_call"`*
+*Calls `record_usage` with `customerId: "cus_X7Y8Z9W0"`, `productReference: "prd_P9Q0R1S2"`, `actionType: "api_call"`, `units: 1`, `outcome: "success"`*
 
 > Usage event recorded successfully.
 
@@ -147,7 +147,8 @@ For a full refund, simply omit the `amount` parameter.
 
 > 5 usage events recorded successfully.
 
-The `record_bulk_usage` tool accepts an array of events, each with `customerRef`, `productRef`, and `outcome`. Use this for batch processing instead of making individual calls.
+The `record_bulk_usage` tool accepts an array of events using the same payload shape as `record_usage` (`customerId`, `actionType`, `units`, optional `productReference`, and `outcome`).
+Use this for batch processing instead of making individual calls.
 
 ---
 

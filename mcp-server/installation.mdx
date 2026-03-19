@@ -11,7 +11,7 @@ Use the action button below to connect SolvaPay MCP with the correct endpoint.
 
 <McpConnectActions />
 
-Before connecting, make sure you have your SolvaPay API key from **SolvaPay Console > Settings > API Keys**.
+OAuth-capable clients (Claude.ai, Claude Desktop) handle authentication automatically — just log in with your SolvaPay account. Config-based clients (Cursor, VS Code) require an API key from **SolvaPay Console > Settings > API Keys**.
 
 ## Cursor IDE
 
@@ -33,6 +33,22 @@ After setup, you should see SolvaPay tools available in Cursor chat.
 
 After setup, SolvaPay tools are available in Copilot Chat.
 
+## Claude.ai (Web & Mobile)
+
+SolvaPay can be added as a connector directly inside Claude.ai — no local configuration or API keys needed.
+
+1. Go to **Settings > Connectors** in Claude.ai.
+2. Click **Add** and enter the MCP server URL:
+   ```
+   https://mcp.solvapay.com/mcp
+   ```
+3. Click **Add custom connector**. Claude will redirect you to the SolvaPay login page.
+4. Sign in with your SolvaPay provider account (email code, Google, or GitHub).
+5. Review the permissions and click **Authorize**.
+6. The connector is now active. Enable it in any conversation via the **+** button > **Connectors**.
+
+OAuth is handled automatically — Claude securely stores the access token so you don't need to re-authorize each session. Only existing SolvaPay providers can connect; no new account is created during this flow.
+
 ## Claude Desktop
 
 Use **Connect SolvaPay MCP** and select **Copy Claude Desktop config**.
@@ -45,6 +61,31 @@ Paste it into:
 Then replace `YOUR_API_KEY_HERE` with your SolvaPay API key.
 
 Restart Claude Desktop after saving.
+
+## Claude API (Messages API)
+
+When using Claude's Messages API with the MCP connector beta, pass your SolvaPay API key or a provider JWT as the `authorization_token`:
+
+```json
+{
+  "mcp_servers": [
+    {
+      "type": "url",
+      "url": "https://mcp.solvapay.com/mcp",
+      "name": "solvapay",
+      "authorization_token": "sk_sandbox_your_key_here"
+    }
+  ],
+  "tools": [
+    {
+      "type": "mcp_toolset",
+      "mcp_server_name": "solvapay"
+    }
+  ]
+}
+```
+
+This requires the beta header `anthropic-beta: mcp-client-2025-11-20`. The API does not use the browser-based OAuth flow — pass the token directly.
 
 ## OpenClaw Gateway
 
@@ -64,7 +105,7 @@ Use **Connect SolvaPay MCP** and select **Copy MCP endpoint**, then configure yo
 |---|---|
 | **Endpoint** | `https://mcp.solvapay.com/mcp` |
 | **Transport** | Streamable HTTP (stateless) |
-| **Authentication** | `X-API-Key` header |
+| **Authentication** | OAuth 2.0 (browser-based clients) or `X-API-Key` header (config-based clients) |
 
 ## Using Multiple Environments
 
@@ -92,11 +133,15 @@ If the connection is working, you'll see a response from the `list_customers` to
 
 **"Authentication required" error**
 
-Your API key is missing or not being sent. Confirm the `X-API-Key` header is set in your MCP client configuration.
+For config-based clients (Cursor, VS Code): confirm the `X-API-Key` header is set in your MCP client configuration. For OAuth clients (Claude.ai): try removing and re-adding the connector to re-authenticate.
 
 **"Invalid or expired secret key" error**
 
 The API key is being sent but is not valid. Verify it in **SolvaPay Console > Settings > API Keys**. Make sure you copied the full key.
+
+**"Invalid or expired provider token" error**
+
+Your OAuth session has expired. Remove the connector and re-add it — you'll be prompted to sign in again.
 
 **Tools not appearing**
 

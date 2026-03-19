@@ -14,20 +14,17 @@ The Model Context Protocol is an open standard that allows AI assistants (like C
 ## Prerequisites
 
 - A SolvaPay account — [sign up here](/get-started/create-account) if you don't have one
-- An AI assistant that supports MCP (Cursor, Claude Desktop, Windsurf, etc.)
-- An API key from your SolvaPay dashboard
+- An AI assistant that supports MCP (Claude.ai, Cursor, Claude Desktop, Windsurf, etc.)
 
-## Getting Your API Key
+## Authentication
 
-1. Sign up or log in at [SolvaPay Console](https://app.solvapay.com).
-2. Navigate to **Settings > API Keys** in your dashboard.
-3. Create a new API key. You'll receive a secret key that looks like:
-   ```
-   sk_sandbox_abc123...
-   ```
-4. Copy this key — you'll need it for the [installation](/mcp-server/installation) step.
+How you authenticate depends on your MCP client:
 
-Keys prefixed with `sk_sandbox_` operate in sandbox mode (test data). Keys prefixed with `sk_live_` operate in production mode. Use sandbox keys during development and testing.
+- **OAuth-capable clients** (Claude.ai, Claude Desktop) — You log in with your SolvaPay dashboard credentials directly. No API key required. The MCP server redirects you to the SolvaPay login page, and after you sign in and authorize, the client receives a token automatically.
+
+- **Config-based clients** (Cursor, VS Code, other editors) — These clients don't support OAuth for MCP. You'll need an API key from **Settings > API Keys** in your [SolvaPay dashboard](https://app.solvapay.com) and add it to your client configuration.
+
+API keys are prefixed with `sk_sandbox_` (sandbox / test data) or `sk_live_` (production). Use sandbox keys during development and testing.
 
 ## What Can You Do?
 
@@ -39,6 +36,10 @@ Once connected, you can manage your entire SolvaPay account through natural conv
 - **"Check if customer cus_A1B2C3D4 has hit their usage limits"** — checks billing limits
 
 See the full list of [available tools](/mcp-server/tools) and [detailed examples](/mcp-server/examples).
+
+## Claude.ai Connector
+
+SolvaPay works as a native Claude.ai connector. Add it in **Settings > Connectors** — no local setup, config files, or API keys required. Claude handles the OAuth flow automatically and redirects you to the SolvaPay login page to sign in. See the [installation guide](/mcp-server/installation#claudeai-web--mobile) for details.
 
 ## MCP Server vs MCP Pay
 

@@ -36,7 +36,7 @@ export const McpConnectActions = () => {
 
   const openCursorInstall = () => {
     const enteredKey = window.prompt(
-      'Enter your SolvaPay API key. Leave empty to install with YOUR_API_KEY_HERE.',
+      'Enter your SolvaPay API key (from Settings > API Keys). Leave empty to add the placeholder and update it later.',
     )
     const deeplink = createCursorDeepLink(enteredKey?.trim())
     window.location.href = deeplink
@@ -96,6 +96,17 @@ export const McpConnectActions = () => {
             <span className="block text-sm font-semibold leading-tight">Install in Cursor</span>
             <span className="mt-1.5 block text-xs leading-snug text-zinc-600 dark:text-zinc-400">
               One-click deeplink install with SolvaPay endpoint
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className="mt-2 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-left text-zinc-900 transition-colors hover:bg-zinc-100 dark:border-white/15 dark:bg-white/[0.04] dark:text-zinc-100 dark:hover:bg-white/[0.08]"
+            onClick={() => copyText(endpoint, 'Claude.ai connector URL')}
+          >
+            <span className="block text-sm font-semibold leading-tight">Copy Claude.ai connector URL</span>
+            <span className="mt-1.5 block text-xs leading-snug text-zinc-600 dark:text-zinc-400">
+              Paste into Claude.ai Settings &gt; Connectors — sign in with your SolvaPay account
             </span>
           </button>
 

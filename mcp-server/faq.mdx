@@ -15,13 +15,20 @@ Any assistant that supports the Model Context Protocol with Streamable HTTP tran
 
 **Is my data isolated?**
 
-Yes. Every tool call is scoped to the provider account associated with your API key. You cannot access another provider's data.
+Yes. Every tool call is scoped to the provider account associated with your credentials. You cannot access another provider's data.
 
 ## Authentication
 
 **What authentication methods are supported?**
 
-The MCP server accepts an API key via the `X-API-Key` header, or a Bearer token via the `Authorization` header. API keys are the recommended approach.
+The MCP server supports two authentication methods:
+
+- **OAuth login** — For clients that support OAuth (Claude.ai, Claude Desktop). You sign in with your SolvaPay dashboard credentials (email code, Google, or GitHub) and authorize the connection. No API key needed.
+- **API key** — For config-based clients (Cursor, VS Code). Pass your API key via the `X-API-Key` header or the `Authorization: Bearer` header.
+
+**Can only existing providers connect?**
+
+Yes. The OAuth flow only allows sign-in — it does not create new accounts. You must already have a SolvaPay provider account to connect.
 
 **Can I use both sandbox and production keys?**
 
@@ -30,6 +37,10 @@ Yes. Configure separate MCP server entries in your client — one with a sandbox
 **What happens if my API key is compromised?**
 
 Revoke the key immediately in your SolvaPay dashboard under **Settings > API Keys**, then generate a new one and update your MCP configuration.
+
+**What happens if my OAuth session expires?**
+
+Remove the connector from your client and re-add it. You'll be redirected to the SolvaPay login page to sign in again.
 
 ## Technical
 
@@ -71,5 +82,5 @@ Failed tool calls return a JSON error:
 |---|---|
 | `NOT_FOUND` | The requested resource does not exist |
 | `VALIDATION_ERROR` | Invalid or missing parameters |
-| `UNAUTHORIZED` | Invalid or expired API key |
+| `UNAUTHORIZED` | Invalid or expired credentials (API key or OAuth token) |
 | `INTERNAL_ERROR` | Server-side error — retry or contact support |

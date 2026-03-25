@@ -42,18 +42,6 @@
             ]
           },
           {
-            "group": "Wallet",
-            "icon": "wallet",
-            "pages": [
-              "wallet/overview",
-              "wallet/how-it-works",
-              "wallet/sdk-integration",
-              "wallet/provider-integration",
-              "wallet/vouchers",
-              "wallet/security"
-            ]
-          },
-          {
             "group": "Plans",
             "icon": "tags",
             "pages": [

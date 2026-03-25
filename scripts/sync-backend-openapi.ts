@@ -11,7 +11,7 @@ const SOURCE_URL =
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
-const assertOpenApiShape = (value: unknown): asserts value is Record<string, unknown> => {
+const assertOpenApiShape: (value: unknown) => asserts value is Record<string, unknown> = value => {
   if (!isRecord(value)) {
     throw new Error('Invalid OpenAPI document: expected a JSON object at root')
   }
@@ -46,13 +46,15 @@ const sortDeep = (value: unknown): unknown => {
     }, {})
 }
 
-const fetchOpenApi = async (url: string): Promise<unknown> => {
+const fetchOpenApi = async (url: string): Promise<Record<string, unknown>> => {
   const response = await fetch(url)
   if (!response.ok) {
     throw new Error(`Failed to fetch OpenAPI spec (${response.status} ${response.statusText})`)
   }
 
-  return response.json()
+  const payload: unknown = await response.json()
+  assertOpenApiShape(payload)
+  return payload
 }
 
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'trace'] as const
@@ -239,9 +241,47 @@ const filterDeprecatedOperations = (
   return { removedOperations, removedPaths: pruneEmptyPaths(spec) }
 }
 
+const PUBLIC_OAUTH_URL_REWRITES: Record<string, string> = {
+  'https://api-dev.solvapay.com/v1/oauth/authorize': 'https://api.solvapay.com/v1/oauth/authorize',
+  'https://api-dev.solvapay.com/v1/oauth/token': 'https://api.solvapay.com/v1/oauth/token',
+}
+
+const rewritePublicOauthUrls = (value: unknown): { next: unknown; rewrites: number } => {
+  if (Array.isArray(value)) {
+    let rewrites = 0
+    const next = value.map(item => {
+      const result = rewritePublicOauthUrls(item)
+      rewrites += result.rewrites
+      return result.next
+    })
+    return { next, rewrites }
+  }
+
+  if (typeof value === 'string') {
+    const rewritten = PUBLIC_OAUTH_URL_REWRITES[value]
+    if (rewritten) {
+      return { next: rewritten, rewrites: 1 }
+    }
+    return { next: value, rewrites: 0 }
+  }
+
+  if (!isRecord(value)) {
+    return { next: value, rewrites: 0 }
+  }
+
+  let rewrites = 0
+  const next = Object.entries(value).reduce<Record<string, unknown>>((acc, [key, child]) => {
+    const result = rewritePublicOauthUrls(child)
+    acc[key] = result.next
+    rewrites += result.rewrites
+    return acc
+  }, {})
+
+  return { next, rewrites }
+}
+
 const main = async (): Promise<void> => {
   const source = await fetchOpenApi(SOURCE_URL)
-  assertOpenApiShape(source)
   const {
     keptOperations: keptExternalOperations,
     removedOperations: removedNonExternalOperations,
@@ -252,8 +292,12 @@ const main = async (): Promise<void> => {
     removedPaths: removedDeprecatedPaths,
   } = filterDeprecatedOperations(source)
   const removedIncompatibleResponses = sanitizeMintlifyIncompatibleResponses(source)
+  const { next: rewrittenPublicUrls, rewrites: rewrittenPublicUrlCount } = rewritePublicOauthUrls(
+    source,
+  )
+  assertOpenApiShape(rewrittenPublicUrls)
 
-  const stable = sortDeep(source)
+  const stable = sortDeep(rewrittenPublicUrls)
   await fs.mkdir(path.dirname(TARGET_FILE), { recursive: true })
   await fs.writeFile(TARGET_FILE, `${JSON.stringify(stable, null, 2)}\n`, 'utf-8')
 
@@ -264,6 +308,7 @@ const main = async (): Promise<void> => {
   console.log(`Filtered deprecated operations: ${removedDeprecatedOperations}`)
   console.log(`Removed empty paths after deprecated filter: ${removedDeprecatedPaths}`)
   console.log(`Sanitized response-level examples: ${removedIncompatibleResponses}`)
+  console.log(`Rewritten OAuth public URLs: ${rewrittenPublicUrlCount}`)
   console.log(`Updated: ${TARGET_FILE}`)
 }
 

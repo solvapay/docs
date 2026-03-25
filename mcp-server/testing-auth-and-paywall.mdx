@@ -1,0 +1,73 @@
+---
+title: "Test MCP server auth and paywall"
+description: "Validate OAuth authentication and paywall behavior in Claude or Cursor with one shared live-testing flow."
+---
+
+Use this guide to validate your MCP Server in **Live** mode after setup. This flow is shared across
+Hosted MCP Pay and SDK integration.
+
+## Prerequisites
+
+Before testing, make sure you have:
+
+- An active product with Hosted MCP Pay or SDK paywall configuration complete
+- An MCP server URL ready to connect
+- Access to Claude or Cursor
+
+## Connect your MCP Server
+
+The chat test prompts and expected outcomes are the same for both integration paths. Only the
+connection method differs.
+
+### Hosted MCP Pay
+
+In SolvaPay Console, open your product overview and click **Connect**.
+
+Use one of these options:
+
+- **Copy MCP URL** and paste it into your MCP client
+- **Connect to Claude** for direct Claude connection flow
+- **Connect to Cursor** for direct Cursor connection flow
+
+### SDK integration
+
+Connect your MCP Server directly in Claude or Cursor using your own MCP server URL.
+
+You do not need to use the SolvaPay Console **Connect** action for this path.
+
+## Run live chat tests
+
+After connecting and authenticating, run these prompts:
+
+1. `Use <insert mcp name> to show my user info`
+2. `Use <insert mcp name> and show my account page`
+3. `Use <insert mcp name> and upgrade`
+
+## Expected results
+
+- **Show my user info** returns information for the currently authenticated user
+- **Show my account page** returns a link to the hosted account page
+- **Upgrade** returns a hosted checkout link for plan upgrade
+
+## Validation checklist
+
+- OAuth completes successfully in your MCP client
+- Authenticated user identity matches the expected account
+- Account page link opens and resolves to the correct customer context
+- Upgrade link opens checkout and shows valid plan options
+- Protected tools are allowed or blocked based on the user's plan
+
+## Troubleshooting
+
+If results are not as expected:
+
+- Confirm you connected the correct MCP server URL
+- Confirm your product is active and tool-to-plan mapping is configured
+- Re-run the OAuth flow and sign in with the expected account
+- Confirm you are testing in **Live** mode with live credentials
+
+## Related guides
+
+- [Create a Hosted MCP Pay Product](/mcp-pay/create-hosted-mcp-pay-product)
+- [MCP Server Integration Guide](/sdks/typescript/guides/mcp)
+- [Test in Sandbox](/get-started/test-in-sandbox)

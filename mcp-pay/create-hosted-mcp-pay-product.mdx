@@ -10,11 +10,13 @@ without building billing/auth infrastructure.
 
 - SolvaPay provider account
 - Origin MCP server URL available over HTTPS
-- At least one plan to assign during product setup
+- Pricing plan decisions ready for product setup (you will configure plans during product creation)
 
 ## Step 1: Create Product and Select Plans
 
 Start in **Products**, complete product details, then select at least one plan in the Plans step.
+
+If you are in onboarding, this can be your guided first product flow.
 
 
 ## Step 2: Enable Hosted MCP Pay Configuration
@@ -34,6 +36,19 @@ After creating the product, open the product details page and confirm:
 - Hosted MCP integration is enabled
 - Generated MCP server URL is present and copyable
 
+## Step 4: Use Connect for quick client testing
+
+From the product overview, click **Connect** to test your configured MCP Server product without
+manual setup.
+
+Use the menu option that matches your workflow:
+
+- **Copy MCP URL** to paste into any MCP client manually
+- **Connect to Claude** to open the Claude connection flow
+- **Connect to Cursor** to open the Cursor connection flow
+
+If you do not use a listed client, copy the MCP URL and connect in your preferred MCP client.
+
 
 ## User Onboarding Behavior
 
@@ -45,7 +60,9 @@ When users connect to the hosted MCP server URL:
 
 ## What to Do Next
 
-- Test the MCP URL with a sandbox account in your MCP client
+- Follow [Test MCP server auth and paywall](/mcp-server/testing-auth-and-paywall) for live client
+  testing prompts and expected outcomes
+- Use **Connect** in product overview to start the live connection flow in Claude or Cursor
 - Review [Authentication](/mcp-pay/authentication) for OAuth behavior
 - Configure [Hosted Pages](/mcp-pay/hosted-pages) for branded customer flows
 

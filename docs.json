@@ -74,6 +74,7 @@
             "icon": "server",
             "pages": [
               "mcp-server/getting-started",
+              "mcp-server/testing-auth-and-paywall",
               "mcp-server/installation",
               "mcp-server/tools",
               "mcp-server/examples",

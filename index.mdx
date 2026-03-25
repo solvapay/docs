@@ -5,11 +5,14 @@ description: "Learn how to launch SolvaPay for MCP Pay, wallet features, MCP Ser
 mode: "wide"
 ---
 
-<div id="welcome-home" style={{ margin: '3rem auto 2.5rem auto', maxWidth: '980px', textAlign: 'center' }}>
+<div
+  id="welcome-home"
+  style={{ margin: '2rem auto 2.5rem auto', maxWidth: '980px', textAlign: 'center' }}
+>
   <div
     style={{
       margin: '0 auto',
-      padding: '4.5rem 2rem 3.5rem',
+      padding: 'clamp(2.25rem, 6vw, 4.5rem) clamp(1rem, 4vw, 2rem) clamp(2rem, 4vw, 3.5rem)',
       borderRadius: '1.25rem',
       background:
         'radial-gradient(circle at top center, color-mix(in srgb, var(--color-primary) 10%, transparent) 0%, transparent 65%)',
@@ -17,21 +20,33 @@ mode: "wide"
   >
     <h1
       style={{
-        fontSize: '3.35rem',
-        lineHeight: 1.05,
+        fontSize: 'clamp(2rem, 8vw, 3.35rem)',
+        lineHeight: 1.1,
         margin: '0 auto 1rem',
         letterSpacing: '-0.02em',
         textAlign: 'center',
-        maxWidth: '18ch',
+        maxWidth: '14ch',
+        textWrap: 'balance',
       }}
     >
       SolvaPay documentation
     </h1>
-    <p style={{ fontSize: '1.32rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem' }}>
+    <p
+      style={{
+        fontSize: 'clamp(1.05rem, 3.7vw, 1.32rem)',
+        color: 'var(--color-text-secondary)',
+        marginBottom: '0.75rem',
+      }}
+    >
       Monetize AI agents, MCP tools, and APIs from a single platform.
     </p>
-    <p style={{ fontSize: '1.05rem', color: 'var(--color-text-secondary)' }}>
-      Choose hosted MCP Pay for a fast launch, or use the TypeScript SDK for full control across MCP servers and agents.
+    <p
+      style={{
+        fontSize: 'clamp(0.98rem, 3.2vw, 1.05rem)',
+        color: 'var(--color-text-secondary)',
+      }}
+    >
+      Complete onboarding with company details, create your first product with pricing, then launch with Hosted MCP Pay or the TypeScript SDK.
     </p>
   </div>
 </div>
@@ -39,7 +54,7 @@ mode: "wide"
 <div style={{ margin: '0 auto 3rem', maxWidth: '1240px' }}>
   <Columns cols={2}>
     <Card title="Get started" icon="rocket" href="/get-started/create-account">
-      Create your account, choose your integration path, and go live.
+      Sign up, complete onboarding, create your first product with pricing, then go live.
     </Card>
     <Card title="MCP Pay" icon="plug" href="/mcp-pay/overview">
       Set up hosted monetization flows with authentication and billing.

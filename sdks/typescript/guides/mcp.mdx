@@ -249,7 +249,7 @@ MCP Client                       Your MCP Server                  SolvaPay Backe
     │◀── Access token ─────────────────────────────────────────────────│
     │                                  │                                │
     │─── POST /mcp (Bearer token) ───▶│                                │
-    │                                  │─── GET /v1/oauth/userinfo ───▶│
+    │                                  │─── GET /v1/customer/auth/userinfo ───▶│
     │                                  │◀── { customerRef } ───────────│
     │                                  │                                │
     │                                  │ inject _auth.customer_ref      │
@@ -280,9 +280,9 @@ The `resource` and `authorization_servers` values should be your server's public
 ```json
 {
   "issuer": "https://api.solvapay.com",
-  "authorization_endpoint": "https://api.solvapay.com/v1/oauth/authorize",
-  "token_endpoint": "https://api.solvapay.com/v1/oauth/token",
-  "registration_endpoint": "https://api.solvapay.com/v1/oauth/register?product_ref=YOUR_PRODUCT_REF",
+  "authorization_endpoint": "https://api.solvapay.com/v1/customer/auth/authorize",
+  "token_endpoint": "https://api.solvapay.com/v1/customer/auth/token",
+  "registration_endpoint": "https://api.solvapay.com/v1/customer/auth/register?product_ref=YOUR_PRODUCT_REF",
   "token_endpoint_auth_methods_supported": ["client_secret_basic", "client_secret_post"],
   "response_types_supported": ["code"],
   "grant_types_supported": ["authorization_code", "refresh_token"],
@@ -301,7 +301,7 @@ When a tool call arrives with a bearer token, validate it by calling SolvaPay's 
 async function resolveCustomerRef(authHeader?: string): Promise<string | null> {
   if (!authHeader?.startsWith('Bearer ')) return null
 
-  const response = await fetch(`${process.env.SOLVAPAY_OAUTH_BASE_URL}/v1/oauth/userinfo`, {
+  const response = await fetch(`${process.env.SOLVAPAY_OAUTH_BASE_URL}/v1/customer/auth/userinfo`, {
     headers: { Authorization: authHeader },
   })
 
@@ -433,7 +433,7 @@ function createMCPServer() {
 
 async function resolveCustomerRef(authHeader?: string): Promise<string | null> {
   if (!authHeader?.startsWith('Bearer ')) return null
-  const res = await fetch(`${oauthBaseUrl}/v1/oauth/userinfo`, {
+  const res = await fetch(`${oauthBaseUrl}/v1/customer/auth/userinfo`, {
     headers: { Authorization: authHeader },
   })
   if (!res.ok) return null
@@ -459,9 +459,9 @@ app.get('/.well-known/oauth-protected-resource', (_req, res) => {
 app.get('/.well-known/oauth-authorization-server', (_req, res) => {
   res.json({
     issuer: oauthBaseUrl,
-    authorization_endpoint: `${oauthBaseUrl}/v1/oauth/authorize`,
-    token_endpoint: `${oauthBaseUrl}/v1/oauth/token`,
-    registration_endpoint: `${oauthBaseUrl}/v1/oauth/register?product_ref=${encodeURIComponent(productRef)}`,
+    authorization_endpoint: `${oauthBaseUrl}/v1/customer/auth/authorize`,
+    token_endpoint: `${oauthBaseUrl}/v1/customer/auth/token`,
+    registration_endpoint: `${oauthBaseUrl}/v1/customer/auth/register?product_ref=${encodeURIComponent(productRef)}`,
     token_endpoint_auth_methods_supported: ['client_secret_basic', 'client_secret_post'],
     response_types_supported: ['code'],
     grant_types_supported: ['authorization_code', 'refresh_token'],

@@ -1700,13 +1700,13 @@
       "OAuth2": {
         "flows": {
           "authorizationCode": {
-            "authorizationUrl": "https://api-dev.solvapay.com/v1/oauth/authorize",
+            "authorizationUrl": "https://api-dev.solvapay.com/v1/customer/auth/authorize",
             "scopes": {
               "email": "Email address",
               "openid": "OpenID Connect scope",
               "profile": "Profile information"
             },
-            "tokenUrl": "https://api-dev.solvapay.com/v1/oauth/token"
+            "tokenUrl": "https://api-dev.solvapay.com/v1/customer/auth/token"
           }
         },
         "type": "oauth2"

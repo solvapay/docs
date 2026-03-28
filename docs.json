@@ -70,6 +70,13 @@
             ]
           },
           {
+            "group": "Webhooks",
+            "icon": "bell",
+            "pages": [
+              "webhooks"
+            ]
+          },
+          {
             "group": "MCP Server",
             "icon": "server",
             "pages": [

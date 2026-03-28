@@ -1,0 +1,635 @@
+---
+title: "Webhooks"
+description: "Receive real-time notifications when important business events happen in your SolvaPay account."
+---
+
+## Overview
+
+SolvaPay webhooks push event notifications to your application via HTTP POST requests whenever
+significant business events occur — a payment succeeds, a purchase is cancelled, a customer
+is created, and so on.
+
+Instead of polling the API, you register an endpoint URL and SolvaPay delivers a signed JSON
+payload for each event. Your server verifies the signature, processes the event, and returns
+a `2xx` response.
+
+### How it works
+
+```
+SolvaPay Backend
+    ↓  event occurs (payment, purchase, customer)
+Enqueue WebhookEvent + WebhookDelivery
+    ↓  cron every 30 s, up to 20 per batch
+POST to your endpoint
+    ↓
+Your server verifies SV-Signature
+    ↓
+Process event
+    ↓
+Return 2xx
+```
+
+---
+
+## Quick Start
+
+### 1. Install the SDK
+
+```bash
+npm install @solvapay/server
+```
+
+### 2. Create a webhook endpoint
+
+In the SolvaPay dashboard, go to **Settings → Webhooks** and add your endpoint URL:
+
+```
+https://your-app.com/api/webhooks/solvapay
+```
+
+Copy the signing secret (`whsec_…`) — you will need it to verify signatures.
+
+### 3. Handle incoming webhooks
+
+<CodeGroup>
+
+```typescript Next.js (App Router)
+// app/api/webhooks/solvapay/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { verifyWebhook } from '@solvapay/server'
+
+export async function POST(request: NextRequest) {
+  const body = await request.text()
+  const signature = request.headers.get('sv-signature')
+
+  if (!signature) {
+    return NextResponse.json({ error: 'Missing signature' }, { status: 401 })
+  }
+
+  try {
+    const event = verifyWebhook({
+      body,
+      signature,
+      secret: process.env.SOLVAPAY_WEBHOOK_SECRET!,
+    })
+
+    switch (event.type) {
+      case 'payment.succeeded':
+        // fulfil the order
+        break
+      case 'purchase.cancelled':
+        // revoke access
+        break
+      default:
+        console.log('Unhandled event:', event.type)
+    }
+
+    return NextResponse.json({ received: true })
+  } catch (error) {
+    console.error('Webhook verification failed:', error)
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+  }
+}
+```
+
+```typescript Express.js
+// routes/webhooks.ts
+import express from 'express'
+import { verifyWebhook } from '@solvapay/server'
+
+const router = express.Router()
+
+router.post(
+  '/solvapay',
+  express.raw({ type: 'application/json' }),
+  async (req, res) => {
+    const signature = req.headers['sv-signature'] as string
+
+    if (!signature) {
+      return res.status(401).json({ error: 'Missing signature' })
+    }
+
+    try {
+      const event = verifyWebhook({
+        body: req.body.toString(),
+        signature,
+        secret: process.env.SOLVAPAY_WEBHOOK_SECRET!,
+      })
+
+      switch (event.type) {
+        case 'payment.succeeded':
+          break
+        case 'purchase.cancelled':
+          break
+        default:
+          console.log('Unhandled event:', event.type)
+      }
+
+      res.json({ received: true })
+    } catch (error) {
+      console.error('Webhook verification failed:', error)
+      res.status(401).json({ error: 'Invalid signature' })
+    }
+  },
+)
+
+export default router
+```
+
+</CodeGroup>
+
+<Warning>
+Always use `request.text()` (Next.js) or `express.raw()` (Express) so the body is available
+as a raw string. If the body has been JSON-parsed before verification, the signature check
+will fail.
+</Warning>
+
+---
+
+## Payload Format
+
+Every webhook POST contains a JSON body with this structure:
+
+```json
+{
+  "id": "evt_abc123def456",
+  "type": "payment.succeeded",
+  "created": 1740000000,
+  "api_version": "2025-10-01",
+  "data": {
+    "object": { ... },
+    "previous_attributes": null
+  },
+  "livemode": false,
+  "request": {
+    "id": null,
+    "idempotency_key": null
+  }
+}
+```
+
+### HTTP Headers
+
+| Header | Example | Description |
+|---|---|---|
+| `SV-Signature` | `t=1740000000,v1=a1b2c3…` | HMAC signature for verification |
+| `SV-Event-Id` | `evt_abc123def456` | Unique event identifier |
+| `SV-Delivery` | `dlv_xyz789` | Unique delivery attempt ID (use for idempotency) |
+| `Content-Type` | `application/json` | Always JSON |
+| `User-Agent` | `SolvaPay/1.0 (+webhooks)` | Identifies the sender |
+
+---
+
+## Signature Verification
+
+Every webhook includes an `SV-Signature` header. You **must** verify it to confirm the
+request genuinely came from SolvaPay and has not been tampered with.
+
+### How the signature is computed
+
+1. SolvaPay takes the current Unix timestamp and the raw JSON body.
+2. It concatenates them as `"{timestamp}.{rawBody}"`.
+3. It computes an HMAC-SHA256 of that string using your signing secret (including the
+   `whsec_` prefix) as the key.
+4. The result is sent as `t={timestamp},v1={hex_digest}`.
+
+### Using the SDK
+
+`verifyWebhook` returns a typed `WebhookEvent` object with full IntelliSense for event
+types and payload fields:
+
+```typescript
+import { verifyWebhook, type WebhookEvent } from '@solvapay/server'
+
+const event: WebhookEvent = verifyWebhook({
+  body: rawBodyString,
+  signature: svSignatureHeader,
+  secret: process.env.SOLVAPAY_WEBHOOK_SECRET!,
+})
+
+// event.type is typed as WebhookEventType — autocomplete for all 12 event names
+// event.data.object contains the event-specific payload
+```
+
+`verifyWebhook` throws a `SolvaPayError` if the signature is invalid or older than 5 minutes.
+
+### Edge Runtimes
+
+For Vercel Edge Functions, Cloudflare Workers, or Deno Deploy, import from the edge entry point. It uses the Web Crypto API and returns a `Promise`:
+
+```typescript
+import { verifyWebhook } from '@solvapay/server/edge'
+
+const event = await verifyWebhook({
+  body: rawBodyString,
+  signature: svSignatureHeader,
+  secret: process.env.SOLVAPAY_WEBHOOK_SECRET!,
+})
+```
+
+### Manual verification (without the SDK)
+
+```typescript
+import crypto from 'node:crypto'
+
+function verify(body: string, header: string, secret: string): boolean {
+  const parts = header.split(',')
+  const tPart = parts.find(p => p.startsWith('t='))
+  const v1Part = parts.find(p => p.startsWith('v1='))
+  if (!tPart || !v1Part) return false
+
+  const timestamp = tPart.slice(2)
+  const signature = v1Part.slice(3)
+
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(`${timestamp}.${body}`)
+    .digest('hex')
+
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expected),
+  )
+}
+```
+
+---
+
+## Event Types
+
+SolvaPay emits the following business events. Only meaningful outcome events are sent — you will not receive events for internal CRUD operations on products, plans, or other configuration entities.
+
+### Payment Events
+
+| Event | Trigger | Description |
+|---|---|---|
+| `payment.succeeded` | Stripe confirms payment | A payment has been successfully processed. |
+| `payment.failed` | Stripe reports failure | A payment attempt has failed. |
+| `payment.refunded` | Refund completed | A refund has been successfully processed. |
+| `payment.refund_failed` | Refund rejected | A refund attempt has failed. |
+
+### Purchase Events
+
+| Event | Trigger | Description |
+|---|---|---|
+| `purchase.created` | Purchase record created | A new purchase (subscription or one-time) has been created. |
+| `purchase.updated` | Status or fields change | A purchase has been modified (e.g. plan change, renewal). |
+| `purchase.cancelled` | Explicit cancel or period end | A purchase has been cancelled. |
+| `purchase.expired` | End date reached | A purchase has expired naturally. |
+| `purchase.suspended` | Payment overdue / trial expired | A purchase has been suspended due to non-payment. |
+
+### Customer Events
+
+| Event | Trigger | Description |
+|---|---|---|
+| `customer.created` | Customer created via API or checkout | A new customer record has been created. |
+| `customer.updated` | Customer details changed | A customer record has been updated. |
+| `customer.deleted` | Customer removed | A customer record has been deleted. |
+
+---
+
+## Event Payloads
+
+### payment.succeeded
+
+```json
+{
+  "type": "payment.succeeded",
+  "data": {
+    "object": {
+      "id": "pi_abc123",
+      "amount": 2999,
+      "currency": "usd",
+      "customer": "cust_ref_001",
+      "product": "prod_ref_001",
+      "plan": "plan_ref_001",
+      "stripe_payment_intent": "pi_3abc...",
+      "transaction_reference": "txn_ref_001",
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+### payment.failed
+
+```json
+{
+  "type": "payment.failed",
+  "data": {
+    "object": {
+      "id": "pi_abc123",
+      "amount": 2999,
+      "currency": "usd",
+      "customer": "cust_ref_001",
+      "product": "prod_ref_001",
+      "plan": "plan_ref_001",
+      "stripe_payment_intent": "pi_3abc...",
+      "transaction_reference": "txn_ref_001",
+      "failure_reason": "Your card was declined.",
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+### payment.refunded
+
+```json
+{
+  "type": "payment.refunded",
+  "data": {
+    "object": {
+      "id": "txn_abc123",
+      "amount": 2999,
+      "currency": "usd",
+      "stripe_refund": "re_3abc...",
+      "reason": "requested_by_customer",
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+### payment.refund_failed
+
+```json
+{
+  "type": "payment.refund_failed",
+  "data": {
+    "object": {
+      "id": "txn_abc123",
+      "amount": 2999,
+      "currency": "usd",
+      "stripe_refund": "re_3abc...",
+      "reason": "requested_by_customer",
+      "failure_reason": "charge_for_pending_refund_disputed",
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+### purchase.created
+
+```json
+{
+  "type": "purchase.created",
+  "data": {
+    "object": {
+      "id": "pur_abc123",
+      "reference": "purchase_abc123",
+      "status": "active",
+      "customer": "cust_ref_001",
+      "plan": "plan_ref_001",
+      "product": "prod_ref_001",
+      "amount": 2999,
+      "currency": "usd",
+      "billingCycle": "monthly",
+      "isRecurring": true,
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+### purchase.updated
+
+```json
+{
+  "type": "purchase.updated",
+  "data": {
+    "object": {
+      "id": "pur_abc123",
+      "reference": "purchase_abc123",
+      "status": "active",
+      "customer": "cust_ref_001",
+      "plan": "plan_ref_001",
+      "product": "prod_ref_001",
+      "amount": 2999,
+      "currency": "usd",
+      "billingCycle": "monthly",
+      "isRecurring": true,
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+### purchase.cancelled
+
+```json
+{
+  "type": "purchase.cancelled",
+  "data": {
+    "object": {
+      "id": "pur_abc123",
+      "reference": "purchase_abc123",
+      "status": "cancelled",
+      "customer": "cust_ref_001",
+      "plan": "plan_ref_001",
+      "product": "prod_ref_001",
+      "amount": 2999,
+      "currency": "usd",
+      "billingCycle": "monthly",
+      "isRecurring": true,
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+### purchase.expired
+
+```json
+{
+  "type": "purchase.expired",
+  "data": {
+    "object": {
+      "id": "pur_abc123",
+      "reference": "purchase_abc123",
+      "status": "expired",
+      "customer": "cust_ref_001",
+      "plan": "plan_ref_001",
+      "product": "prod_ref_001",
+      "amount": 2999,
+      "currency": "usd",
+      "billingCycle": "monthly",
+      "isRecurring": true,
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+### purchase.suspended
+
+```json
+{
+  "type": "purchase.suspended",
+  "data": {
+    "object": {
+      "id": "pur_abc123",
+      "reference": "purchase_abc123",
+      "status": "suspended",
+      "customer": "cust_ref_001",
+      "plan": "plan_ref_001",
+      "product": "prod_ref_001",
+      "amount": 2999,
+      "currency": "usd",
+      "billingCycle": "monthly",
+      "isRecurring": true,
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+### customer.created
+
+```json
+{
+  "type": "customer.created",
+  "data": {
+    "object": {
+      "id": "cust_abc123",
+      "reference": "customer_abc123",
+      "name": "Jane Doe",
+      "email": "jane@example.com",
+      "telephone": "+1234567890",
+      "status": "active",
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+### customer.updated
+
+```json
+{
+  "type": "customer.updated",
+  "data": {
+    "object": {
+      "id": "cust_abc123",
+      "reference": "customer_abc123",
+      "name": "Jane Smith",
+      "email": "jane.smith@example.com",
+      "telephone": "+1234567890",
+      "status": "active",
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+### customer.deleted
+
+The `customer.deleted` payload contains only the customer `id` and a `created` timestamp.
+Other fields are not included since the record has been removed.
+
+```json
+{
+  "type": "customer.deleted",
+  "data": {
+    "object": {
+      "id": "cust_abc123",
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+
+<Accordion title="Always verify signatures">
+Never process a webhook without checking `SV-Signature`. Without verification, any
+third party could forge requests to your endpoint.
+</Accordion>
+
+<Accordion title="Use the delivery ID for idempotency">
+The `SV-Delivery` header is unique per delivery attempt. Store processed delivery IDs
+and skip duplicates to avoid processing the same event twice.
+</Accordion>
+
+<Accordion title="Respond within 10 seconds">
+Return a `2xx` as quickly as possible. If your handler needs to do heavy processing
+(e.g. sending emails, updating external systems), acknowledge the webhook immediately
+and move the work to a background queue.
+</Accordion>
+
+<Accordion title="Handle unknown events gracefully">
+Log and return `200` for event types you don't recognise. This way the delivery is
+marked successful and SolvaPay won't retry it.
+</Accordion>
+
+<Accordion title="Keep the raw body intact">
+Signature verification requires the exact body bytes. Always read the body as a raw
+string (`request.text()` or `express.raw()`) before parsing it as JSON.
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+## Retry Schedule
+
+If your endpoint returns a non-2xx status code or times out, SolvaPay retries delivery with
+exponential backoff:
+
+| Retry | Delay after previous |
+|---|---|
+| 1 | 5 minutes |
+| 2 | 15 minutes |
+| 3 | 1 hour |
+| 4 | 6 hours |
+| 5 | 24 hours |
+| 6 | 48 hours |
+| 7+ | 72 hours |
+
+After **12 failed attempts** the endpoint is automatically disabled. You can re-enable it
+from the dashboard.
+
+---
+
+## Testing Locally
+
+### Using ngrok
+
+```bash
+# Start your local server
+npm run dev
+
+# In another terminal
+ngrok http 3000
+
+# Copy the HTTPS URL and add it as a webhook endpoint in the dashboard
+```
+
+### Sending a test event
+
+Use the dashboard test button, or call the API directly:
+
+```bash
+curl -X POST https://api.solvapay.com/v1/ui/webhooks/{endpointId}/test \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+This sends a `payment.succeeded` test event to the endpoint so you can verify your handler
+and signature verification are working correctly.

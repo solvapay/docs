@@ -91,8 +91,104 @@ curl -X POST "https://api.solvapay.com/v1/sdk/products/mcp/bootstrap" \
   }'
 ```
 
+Free-only bootstrap is also valid. This is useful when you want to launch with a free tier first and
+add paid plans later:
+
+```bash
+curl -X POST "https://api.solvapay.com/v1/sdk/products/mcp/bootstrap" \
+  -H "Authorization: Bearer $SOLVAPAY_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Docs Assistant",
+    "originUrl": "https://origin.example.com/mcp",
+    "freePlan": {
+      "name": "Free",
+      "freeUnits": 0
+    }
+  }'
+```
+
+`freeUnits: 0` on the free tier means unlimited free access for authenticated users.
+
 Use this for the fastest onboarding. If you need fine-grained lifecycle control, use the granular
 product, plan, and MCP server endpoints.
+
+## Configure plans after bootstrap
+
+After the product exists, use:
+
+`PUT /v1/sdk/products/:productRef/mcp/plans`
+
+This endpoint lets you update free-plan settings, replace paid plans, and remap tool access.
+
+Request fields:
+- `freePlan` (required) -- updates the existing default free plan
+- `paidPlans` (optional) -- replace paid plans, remove all paid plans (`[]`), or leave unchanged (omit)
+- `toolMapping` (optional) -- explicit tool-to-plan mapping by plan keys
+
+Response fields:
+- `product`
+- `mcpServer`
+- `planMap`
+
+### Mode 1: add or replace paid plans
+
+```bash
+curl -X PUT "https://api.solvapay.com/v1/sdk/products/prd_1A2B3C4D/mcp/plans" \
+  -H "Authorization: Bearer $SOLVAPAY_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "freePlan": {
+      "name": "Free",
+      "freeUnits": 100
+    },
+    "paidPlans": [
+      { "key": "pro", "name": "Pro", "price": 2000, "currency": "USD", "billingCycle": "monthly" },
+      { "key": "team", "name": "Team", "price": 6000, "currency": "USD", "billingCycle": "monthly" }
+    ],
+    "toolMapping": [
+      { "name": "list_docs", "planKeys": ["free", "pro", "team"] },
+      { "name": "deep_research", "planKeys": ["pro", "team"] }
+    ]
+  }'
+```
+
+### Mode 2: revert to free-only
+
+Set `paidPlans` to `[]` to remove all paid plans and remap protected tools to free:
+
+```bash
+curl -X PUT "https://api.solvapay.com/v1/sdk/products/prd_1A2B3C4D/mcp/plans" \
+  -H "Authorization: Bearer $SOLVAPAY_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "freePlan": {
+      "name": "Free",
+      "freeUnits": 0
+    },
+    "paidPlans": []
+  }'
+```
+
+### Mode 3: remap tools without changing plans
+
+Omit `paidPlans` and pass only `toolMapping`:
+
+```bash
+curl -X PUT "https://api.solvapay.com/v1/sdk/products/prd_1A2B3C4D/mcp/plans" \
+  -H "Authorization: Bearer $SOLVAPAY_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "freePlan": {
+      "name": "Free",
+      "freeUnits": 1000
+    },
+    "toolMapping": [
+      { "name": "deep_research", "planKeys": ["pro"] },
+      { "name": "list_docs", "planKeys": ["free", "pro"] }
+    ]
+  }'
+```
 
 ## Tool and default-plan precedence
 
@@ -117,3 +213,16 @@ Common validation failures for `POST /v1/sdk/products/mcp/bootstrap`:
   The same tool name appears more than once in `tools`.
 - origin URL validation error (`originUrl`)  
   `originUrl` must be a valid `https://` URL.
+
+Common validation failures for `PUT /v1/sdk/products/:productRef/mcp/plans`:
+
+- `MISSING_REQUIRED_FIELD`  
+  `freePlan` is required.
+- `NOT_MCP_PRODUCT`  
+  The product is not MCP-enabled.
+- `NO_MCP_SERVER`  
+  No MCP server is linked to the product.
+- `DEFAULT_FREE_PLAN_NOT_FOUND`  
+  The product is missing a default free plan.
+- `UNKNOWN_PLAN_KEY`  
+  A `toolMapping[].planKeys` entry does not match `free` or a paid plan key in the same request.

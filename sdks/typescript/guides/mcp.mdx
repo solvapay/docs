@@ -86,6 +86,61 @@ console.log(bootstrap.product.reference)
 console.log(bootstrap.mcpServer.mcpProxyUrl)
 ```
 
+You can also bootstrap free-only by omitting `paidPlans`:
+
+```typescript
+const freeOnly = await solvaPay.bootstrapMcpProduct({
+  name: 'Docs Assistant',
+  originUrl: 'https://origin.example.com/mcp',
+  freePlan: {
+    name: 'Free',
+    freeUnits: 0, // unlimited free usage
+  },
+})
+```
+
+After bootstrap, use `configureMcpPlans` to evolve pricing and tool access without recreating the
+product:
+
+```typescript
+const productRef = bootstrap.product.reference
+
+// 1) Add or replace paid plans
+await solvaPay.configureMcpPlans(productRef, {
+  freePlan: {
+    name: 'Free',
+    freeUnits: 100,
+  },
+  paidPlans: [
+    { key: 'pro', name: 'Pro', price: 2000, currency: 'USD', billingCycle: 'monthly' },
+  ],
+  toolMapping: [
+    { name: 'list_docs', planKeys: ['free', 'pro'] },
+    { name: 'deep_research', planKeys: ['pro'] },
+  ],
+})
+
+// 2) Revert to free-only
+await solvaPay.configureMcpPlans(productRef, {
+  freePlan: {
+    name: 'Free',
+    freeUnits: 0,
+  },
+  paidPlans: [],
+})
+
+// 3) Remap tools only (leave plans unchanged)
+await solvaPay.configureMcpPlans(productRef, {
+  freePlan: {
+    name: 'Free',
+    freeUnits: 1000,
+  },
+  toolMapping: [{ name: 'deep_research', planKeys: ['pro'] }],
+})
+```
+
+`freePlan` is required by the MCP plans API request body.
+
 For enterprise workflows, you can still use separate endpoints for product, plans, and MCP server
 management.
 

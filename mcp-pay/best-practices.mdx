@@ -15,6 +15,20 @@ Always configure a free/default plan that provides:
 
 A well-designed free tier converts trial users to paid customers.
 
+If your onboarding goal is frictionless adoption, you can start with an unlimited free tier by
+setting `freeUnits: 0` on the free plan. This keeps access auth-protected while removing usage
+caps for early users.
+
+### Start free, add paid plans later
+
+For new MCP servers, a practical rollout is:
+
+1. Bootstrap free-only with `POST /v1/sdk/products/mcp/bootstrap`
+2. Launch and validate tool quality with real usage
+3. Add paid plans later with `PUT /v1/sdk/products/:productRef/mcp/plans`
+
+This lets you avoid pricing lock-in before you understand usage patterns.
+
 ### Tool Tiering
 
 Structure your plans by tool access to create clear value differentiation:
@@ -72,6 +86,8 @@ Quotas are enforced through [meters](/meters/overview) — every MCP tool call a
 - **Free tier:** Hard limit to prevent abuse (e.g. `limit: 100`, `freeUnits: 100`)
 - **Paid tiers:** Usage-based with generous limits or hybrid with overage
 - **Enterprise:** `limit: 0` (unlimited) or very high limits
+- **Unlimited free tier option:** Set free-plan `freeUnits: 0` when you intentionally want unlimited
+  free usage
 
 ## Tool Assignment Patterns
 

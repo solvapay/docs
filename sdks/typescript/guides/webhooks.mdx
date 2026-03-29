@@ -21,11 +21,17 @@ switch (event.type) {
   case 'payment.succeeded':
     // handle payment
     break
+  case 'payment.failed':
+    // handle failed payment
+    break
   case 'purchase.created':
     // handle new purchase
     break
   case 'purchase.cancelled':
     // revoke access
+    break
+  case 'checkout_session.created':
+    // handle new checkout session
     break
 }
 ```

@@ -207,7 +207,7 @@ const event: WebhookEvent = verifyWebhook({
   secret: process.env.SOLVAPAY_WEBHOOK_SECRET!,
 })
 
-// event.type is typed as WebhookEventType — autocomplete for all 12 event names
+// event.type is typed as WebhookEventType — autocomplete for all 13 event names
 // event.data.object contains the event-specific payload
 ```
 
@@ -277,6 +277,12 @@ SolvaPay emits the following business events. Only meaningful outcome events are
 | `purchase.cancelled` | Explicit cancel or period end | A purchase has been cancelled. |
 | `purchase.expired` | End date reached | A purchase has expired naturally. |
 | `purchase.suspended` | Payment overdue / trial expired | A purchase has been suspended due to non-payment. |
+
+### Checkout Events
+
+| Event | Trigger | Description |
+|---|---|---|
+| `checkout_session.created` | Checkout session created via API or dashboard | A new checkout session has been created for a customer. |
 
 ### Customer Events
 
@@ -545,6 +551,30 @@ Other fields are not included since the record has been removed.
   "data": {
     "object": {
       "id": "cust_abc123",
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+### checkout_session.created
+
+```json
+{
+  "type": "checkout_session.created",
+  "data": {
+    "object": {
+      "id": "cs_abc123",
+      "session_id": "a1b2c3d4e5f6...",
+      "url": "https://solvapay.com/customer/checkout?id=a1b2c3d4e5f6...",
+      "status": "active",
+      "amount": 2999,
+      "currency": "usd",
+      "customer": "cust_ref_001",
+      "product": "prod_ref_001",
+      "plan": "plan_ref_001",
+      "expires_at": 1740000900,
       "created": 1740000000
     },
     "previous_attributes": null

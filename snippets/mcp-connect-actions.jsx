@@ -1,8 +1,6 @@
-import { useState } from 'react'
-
 export const McpConnectActions = () => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [copiedLabel, setCopiedLabel] = useState('')
+  const [isOpen, setIsOpen] = React.useState(false)
+  const [copiedLabel, setCopiedLabel] = React.useState('')
 
   const endpoint = 'https://mcp.solvapay.com/mcp'
   const serverName = 'solvapay'

@@ -257,6 +257,19 @@ const virtualTools = solvaPay.getVirtualTools({
 })
 ```
 
+## Test in MCP clients
+
+After your MCP Server is connected in Claude or Cursor, run live prompts that validate auth and
+paywall behavior.
+
+Use [Test MCP server auth and paywall](/mcp-server/testing-auth-and-paywall) for the full flow.
+
+The expected outcomes map to SDK virtual tools:
+
+- `show my user info` -> `get_user_info`
+- `show my account page` -> `manage_account`
+- `upgrade` -> `upgrade`
+
 ## Authentication via OAuth Bridge
 
 MCP clients (Cursor, Claude Desktop, etc.) authenticate via OAuth 2.0. Use the SDK helper to:
@@ -373,6 +386,8 @@ For the full working example with SSE streaming, session cleanup, and a test scr
 
 ## Next Steps
 
+- [Test MCP server auth and paywall](/mcp-server/testing-auth-and-paywall) -- Live prompt testing
+  for auth and paywall flows in Claude or Cursor
 - [Express.js Integration Guide](./express.mdx) -- Protect HTTP API endpoints with `payable.http()`
 - [Error Handling](./error-handling.mdx) -- Advanced error handling patterns
 - [Webhooks](./webhooks.mdx) -- Handle purchase and payment events

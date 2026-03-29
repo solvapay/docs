@@ -1,7 +1,18 @@
 ---
 title: "Test in Sandbox"
-description: "When you create a SolvaPay account, it starts in sandbox mode automatically."
+description: "Use sandbox mode to test your integration before or after live activation."
 ---
+
+## Prerequisites
+
+Before testing, make sure you have:
+
+- Created your first product
+- Configured pricing plans during product creation
+- Chosen your integration path (Hosted MCP Pay or SDK)
+- Completed Stripe activation for your live account by either:
+  - connecting an existing Stripe account, or
+  - completing setup details for a new Stripe account
 
 ## What Is Sandbox Mode?
 
@@ -12,7 +23,9 @@ In sandbox mode:
 - You can create test customers and purchases freely
 - All data is separate from production
 
-You can see your current mode in the console header. New accounts always start in sandbox.
+You can see your current mode in the console header.
+
+You can switch between **Live** and **sandbox** at any time. Many providers activate live first, then switch back to sandbox for safe testing and regression checks.
 
 ## Testing Your Integration
 
@@ -52,6 +65,11 @@ You can see your current mode in the console header. New accounts always start i
 
    Trigger a checkout and use Stripe test card numbers to complete the payment.
 
+## Live MCP client testing
+
+For live authentication and paywall validation in Claude or Cursor, use
+[Test MCP server auth and paywall](/mcp-server/testing-auth-and-paywall).
+
 ## Stripe Test Cards
 
 Use these card numbers for testing payments:
@@ -66,7 +84,7 @@ Use any future expiration date and any 3-digit CVC.
 
 ## Testing Checklist
 
-Before going live, verify:
+Before or after going live, verify:
 
 - [ ] Users can authenticate (OAuth for MCP Pay, your auth for SDK)
 - [ ] Free plan users can access free tools/endpoints

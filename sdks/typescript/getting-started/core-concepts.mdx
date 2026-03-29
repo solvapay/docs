@@ -27,6 +27,7 @@ A **Product** represents your API, service, or application that you want to mone
 
 Products are created in the SolvaPay dashboard and represent the service you're protecting. New
 products are available for SDK integration by default and are listed in the SolvaPay marketplace.
+During provider onboarding, your first product is created in a guided flow.
 
 ```typescript
 // All endpoints for this product share the same paywall rules
@@ -44,6 +45,8 @@ A **Plan** defines a pricing model and access tier for a product. Plans are embe
 - **Price** and **currency**
 - **Features** - Provider-defined feature flags
 - **Status** - `active`, `inactive`, or `archived`
+
+Plans are configured during product creation. They are not created in a separate setup step.
 
 ```typescript
 // Protect endpoints with a specific plan requirement

@@ -288,7 +288,7 @@ SolvaPay emits the following business events. Only meaningful outcome events are
 
 | Event | Trigger | Description |
 |---|---|---|
-| `customer.created` | Customer created via API or checkout | A new customer record has been created. |
+| `customer.created` | Customer created via hosted auth, API, or SDK sync | A new customer record has been created. |
 | `customer.updated` | Customer details changed | A customer record has been updated. |
 | `customer.deleted` | Customer removed | A customer record has been deleted. |
 
@@ -502,6 +502,14 @@ SolvaPay emits the following business events. Only meaningful outcome events are
 
 ### customer.created
 
+This payload can include a `product` field with a product `reference`.
+
+SolvaPay only populates `product` when the customer is created through MCP Pay hosted OAuth
+for a product-linked client.
+
+To learn more about SDK customer syncing, see
+[`/sdks/typescript/getting-started/core-concepts`](/sdks/typescript/getting-started/core-concepts).
+
 ```json
 {
   "type": "customer.created",
@@ -513,7 +521,10 @@ SolvaPay emits the following business events. Only meaningful outcome events are
       "email": "jane@example.com",
       "telephone": "+1234567890",
       "status": "active",
-      "created": 1740000000
+      "created": 1740000000,
+      "product": {
+        "reference": "prod_ref_001"
+      }
     },
     "previous_attributes": null
   }
@@ -557,6 +568,40 @@ Other fields are not included since the record has been removed.
   }
 }
 ```
+
+### Customer sync with the TypeScript SDK
+
+When you integrate with the TypeScript SDK (instead of MCP Pay hosted OAuth), sync your users
+with `ensureCustomer` or the Next.js `syncCustomer` helper.
+
+This flow is idempotent. SolvaPay first looks up a customer by `externalRef`, then creates one
+if none exists.
+
+When a new customer is created this way, SolvaPay sends a `customer.created` webhook event with
+`product` set to `null`.
+
+```typescript
+// Server SDK
+const customerRef = await solvaPay.ensureCustomer('user_123', 'user_123', {
+  email: 'user@example.com',
+  name: 'Jane Doe',
+})
+```
+
+```typescript
+// Next.js route handler
+import { NextRequest, NextResponse } from 'next/server'
+import { syncCustomer } from '@solvapay/next'
+
+export async function POST(request: NextRequest) {
+  const result = await syncCustomer(request)
+  return result instanceof NextResponse ? result : NextResponse.json(result)
+}
+```
+
+For implementation details, see
+[`/sdks/typescript/getting-started/core-concepts`](/sdks/typescript/getting-started/core-concepts)
+and [`/sdks/typescript/guides/nextjs`](/sdks/typescript/guides/nextjs).
 
 ### checkout_session.created
 

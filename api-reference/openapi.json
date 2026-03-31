@@ -203,7 +203,7 @@
           },
           "name": {
             "description": "Customer display name",
-            "example": "Tommy Berglind",
+            "example": "Test User",
             "type": "string"
           },
           "product": {

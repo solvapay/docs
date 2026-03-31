@@ -88,6 +88,7 @@
             "pages": [
               "sdks/typescript/intro",
               "sdks/typescript/getting-started/introduction",
+              "sdks/typescript/getting-started/cli",
               "sdks/typescript/getting-started/installation",
               "sdks/typescript/getting-started/quick-start",
               "sdks/typescript/getting-started/core-concepts",

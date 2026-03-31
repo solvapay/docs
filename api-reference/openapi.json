@@ -184,6 +184,65 @@
         ],
         "type": "object"
       },
+      "CustomerWebhookObject": {
+        "properties": {
+          "created": {
+            "description": "Unix timestamp when the customer event object was generated",
+            "example": 1774965198,
+            "type": "number"
+          },
+          "email": {
+            "description": "Customer email address",
+            "example": "customer@example.com",
+            "type": "string"
+          },
+          "id": {
+            "description": "Internal customer ID",
+            "example": "69cbd1cea27ee92fbe90413f",
+            "type": "string"
+          },
+          "name": {
+            "description": "Customer display name",
+            "example": "Tommy Berglind",
+            "type": "string"
+          },
+          "product": {
+            "description": "Product reference captured during OAuth bootstrap when available",
+            "nullable": true,
+            "properties": {
+              "reference": {
+                "description": "Product reference",
+                "example": "mcp_AJDHR12U",
+                "type": "string"
+              }
+            },
+            "required": [
+              "reference"
+            ],
+            "type": "object"
+          },
+          "reference": {
+            "description": "Public customer reference",
+            "example": "cus_0VXPU8NE",
+            "type": "string"
+          },
+          "status": {
+            "description": "Customer status",
+            "example": "active",
+            "type": "string"
+          },
+          "telephone": {
+            "description": "Customer telephone number",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created",
+          "product"
+        ],
+        "type": "object"
+      },
       "CreatePlanRequest": {
         "properties": {
           "accessExpiryDays": {
@@ -2812,6 +2871,102 @@
         "required": [
           "email",
           "code"
+        ],
+        "type": "object"
+      },
+      "WebhookEvent": {
+        "properties": {
+          "api_version": {
+            "description": "Webhook payload API version",
+            "example": "2025-10-01",
+            "type": "string"
+          },
+          "created": {
+            "description": "Unix timestamp when the event was created",
+            "example": 1774965198,
+            "type": "number"
+          },
+          "data": {
+            "properties": {
+              "object": {
+                "description": "Event payload object. Customer events include product.reference when present.",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/CustomerWebhookObject"
+                  },
+                  {
+                    "additionalProperties": true,
+                    "type": "object"
+                  }
+                ]
+              },
+              "previous_attributes": {
+                "additionalProperties": true,
+                "nullable": true,
+                "type": "object"
+              }
+            },
+            "required": [
+              "object",
+              "previous_attributes"
+            ],
+            "type": "object"
+          },
+          "id": {
+            "description": "Webhook event ID",
+            "example": "evt_cca9a84b5ab29ddc",
+            "type": "string"
+          },
+          "livemode": {
+            "description": "Whether the event was generated in live mode",
+            "example": false,
+            "type": "boolean"
+          },
+          "request": {
+            "properties": {
+              "id": {
+                "nullable": true,
+                "type": "string"
+              },
+              "idempotency_key": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "idempotency_key"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "description": "Webhook event type",
+            "enum": [
+              "payment.succeeded",
+              "payment.failed",
+              "payment.refunded",
+              "payment.refund_failed",
+              "purchase.created",
+              "purchase.updated",
+              "purchase.cancelled",
+              "purchase.expired",
+              "purchase.suspended",
+              "customer.created",
+              "customer.updated",
+              "customer.deleted",
+              "checkout_session.created"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "created",
+          "api_version",
+          "data",
+          "livemode",
+          "request"
         ],
         "type": "object"
       }

@@ -1,5 +1,5 @@
 ---
-title: "CLI Setup"
+title: "CLI setup"
 description: "Set up SolvaPay SDK in your project with a single command."
 ---
 
@@ -22,7 +22,7 @@ When you run `npx solvapay init`, the CLI:
 
 1. Checks for `package.json` and offers to create one if missing
 2. Detects your package manager (`npm`, `yarn`, or `pnpm`)
-3. Opens your browser so you can sign in to SolvaPay Console
+3. Opens your browser to sign in to SolvaPay Console
 4. Writes `SOLVAPAY_SECRET_KEY` to `.env`
 5. Ensures `.env` is listed in `.gitignore`
 6. Installs `@solvapay/server`, `@solvapay/core`, and `@solvapay/auth`
@@ -40,31 +40,31 @@ When you run `npx solvapay init`, the CLI:
 
 ## Add stack-specific packages
 
-`solvapay init` installs the base server packages. Add framework packages based on your stack:
+`solvapay init` installs base server packages. Add framework packages based on your stack:
 
 - Next.js: `@solvapay/next` and usually `@solvapay/react`
 - React: `@solvapay/react` (and `@solvapay/react-supabase` if using Supabase)
 - MCP Server: `@solvapay/server` is already installed by init
 
-Use the [Installation](./installation) page for exact package commands.
+Use [Installation](./installation) for exact package commands.
 
 ## Re-run setup safely
 
 You can run `npx solvapay init` again at any time.
 
-If `SOLVAPAY_SECRET_KEY` already exists, the CLI asks whether you want to overwrite it:
+If `SOLVAPAY_SECRET_KEY` already exists, the CLI asks whether to overwrite it:
 
 - Choose `y` to replace it with a new key
 - Choose `n` to keep your current key
 
 ## Scope
 
-This command is the recommended get-started path for **SDK integration**.
+This command is the recommended setup path for SDK integration.
 
-If you are using **Hosted MCP Pay (no-code)**, you do not need this CLI flow.
+If you are using Hosted MCP Pay (no-code), you do not need this CLI flow.
 
 ## Next steps
 
-- [Installation](./installation) for manual and framework-specific package setup
-- [Quick Start](./quick-start) to protect your first endpoint
-- [Core Concepts](./core-concepts) to understand products, plans, and paywall behavior
+- [Quick start](./quick-start) to protect your first endpoint
+- [Installation](./installation) for manual setup
+- [Core concepts](./core-concepts) for product, plan, and paywall behavior

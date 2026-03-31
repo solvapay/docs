@@ -38,19 +38,48 @@ View your local preview at `http://localhost:3000`.
 
 ## Syncing TypeScript SDK docs
 
-Run the sync script from the docs root:
+The `sdks/typescript/**` content is upstream-owned and synced from the SDK repository.
+Do not manually edit files under `sdks/typescript/**`.
+
+Run sync from the docs root:
 
 ```bash
-./scripts/sync-typescript-sdk-docs.sh
+npx --yes tsx scripts/sync-typescript-sdk-docs.ts
 ```
 
 If your SDK docs source is in a custom location, set:
 
 ```bash
-SDK_DOCS_SOURCE_DIR="/absolute/path/to/sdk/docs-site/sdks/typescript/docs" ./scripts/sync-typescript-sdk-docs.sh
+SDK_DOCS_SOURCE_DIR="/absolute/path/to/solvapay-sdk/docs" npx --yes tsx scripts/sync-typescript-sdk-docs.ts
 ```
 
-The script uses `scripts/typescript-sdk-pages.txt` as the curated page list.
+Helpful flags:
+
+```bash
+# Preview changes without writing files
+npx --yes tsx scripts/sync-typescript-sdk-docs.ts --dry-run
+```
+
+After syncing, run docs checks:
+
+```bash
+mint validate
+mint broken-links
+```
+
+The sync script reads the TypeScript SDK page list directly from `docs.json`.
+
+## Migration mapping
+
+`migration/page-mapping.csv` is generated from `migration/scraped/**` and should not be edited by hand.
+
+```bash
+# Regenerate mapping
+npx --yes tsx scripts/generate-migration-page-mapping.ts
+
+# Check if mapping is up to date (CI-safe)
+npx --yes tsx scripts/generate-migration-page-mapping.ts --check
+```
 
 ## Syncing backend OpenAPI docs
 

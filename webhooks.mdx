@@ -505,8 +505,7 @@ SolvaPay emits the following business events. Only meaningful outcome events are
 This payload can include a `product` field with a product `reference`.
 
 SolvaPay only populates `product` when the customer is created through MCP Pay hosted OAuth
-for a product-linked client. For customers created through the TypeScript SDK, such as
-`ensureCustomer` or `syncCustomer`, `product` is `null`.
+for a product-linked client.
 
 To learn more about SDK customer syncing, see
 [`/sdks/typescript/getting-started/core-concepts`](/sdks/typescript/getting-started/core-concepts).

@@ -1,23 +1,24 @@
 ---
-title: "Go Live"
+title: "Go live"
 description: "Once you've tested your integration in sandbox mode, you're ready to switch to Live mode and start accepting real payments."
 ---
 
-## Onboarding Checklist
+## Go-live checklist
 
 Before you can switch to live mode, complete these steps:
 
 ### Required
 
-- [ ] **First product created** - Complete the guided product creation flow in onboarding
-- [ ] **Pricing configured for your product** - Add plans during product creation
-- [ ] **Stripe account connected** - Connect an existing Stripe account in Settings > Payments, or create a new one
-- [ ] **Stripe account verified** - Complete Stripe's identity verification
+- [ ] **Account setup complete** - Provider profile completed in SolvaPay Console
+- [ ] **Product and plans ready** - Product created and pricing configured
+- [ ] **Integration path validated in sandbox** - MCP Pay or SDK flow tested end-to-end
+- [ ] **Stripe account connected** - Connect an existing Stripe account in **Settings > Payments**, or create a new one
+- [ ] **Stripe account verified** - Complete Stripe identity verification
 
 ### Recommended
 
-- [ ] **Branding configured** - Upload your logo and set colors in Settings > Pages
-- [ ] **Integration tested** - Verify your setup works in sandbox mode
+- [ ] **Branding configured** - Upload logo and set colors in **Settings > Pages**
+- [ ] **Webhook handling verified** - Confirm events are processed successfully
 
 You can check your onboarding progress in the console. Incomplete steps are highlighted.
 
@@ -26,18 +27,18 @@ If you have not finished Stripe setup yet, return to **Settings > Payments** and
 - **Connect existing Stripe account**
 - **Create new Stripe account** and finish onboarding details
 
-## Switch to Live Mode
+## Switch to live mode
 
-Once onboarding is complete:
+Once your checklist is complete:
 
 1. Open the SolvaPay console
-2. Find the **Sandbox/Live toggle** 
+2. Find the **Sandbox/Live toggle**
 3. Click to switch to **Live** mode
 4. Confirm the switch
 
 That's it. Your integration is now processing real payments.
 
-## What Changes in Live Mode
+## What changes in live mode
 
 | Aspect | Sandbox | Live |
 |--------|---------|------|
@@ -48,27 +49,27 @@ That's it. Your integration is now processing real payments.
 
 Your proxy URLs and API endpoints remain the same. The mode switch happens at the account level.
 
-## Switching Back to Sandbox
+## Switching back to sandbox
 
 You can switch back to sandbox mode at any time to:
 
 - Test new features or plans
-- Debug issues without affecting Live mode usage
+- Debug issues without affecting live mode usage
 - Train team members
 
 This is available after live activation, whether you activated by connecting an existing Stripe account or completing setup for a new Stripe account.
 
 Your sandbox and live data are kept separate. Switching modes doesn't affect existing customers or purchases in either environment.
 
-## After Going Live
+## After going live
 
-### Monitor Your First Transactions
+### Monitor your first transactions
 
-- Check the Dashboard for real-time usage and revenue
+- Check the dashboard for real-time usage and revenue
 - Verify webhook events are being received
 - Monitor Stripe for successful payments
 
-### Set Up Alerts (Optional)
+### Set up alerts (optional)
 
 Consider setting up alerts for:
 
@@ -76,13 +77,13 @@ Consider setting up alerts for:
 - Unusual usage patterns
 - Quota limit approaches
 
-## Need Help?
+## Need help?
 
 If you encounter issues going live:
 
 - Review the [testing checklist](/get-started/test-in-sandbox#testing-checklist)
 - Check Stripe's dashboard for payment issues
-- Contact support@solvapay.com
+- Contact contact@solvapay.com
 
 ---
 

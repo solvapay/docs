@@ -1,17 +1,17 @@
 ---
-title: "Create a Product"
+title: "Create a product"
 description: "Create a product to monetize your API, MCP server, or AI-powered service."
 ---
 
-Products are the core unit in SolvaPay. Each product represents a service you want to monetize — an API, an MCP server, a chat assistant, or any feature behind a paywall. Plans (pricing options) are created inside each product.
+Use this page for Console product configuration.
+
+For TypeScript SDK integration, the fastest project setup is
+[`npx solvapay init`](/sdks/typescript/setup/cli). You still need a product and plans in Console.
+
+Products are the core unit in SolvaPay. Each product represents a service you want to monetize.
+Plans (pricing options) are created inside each product.
 
 During new provider onboarding, this is the guided first action after you submit company details.
-
-This product flow is ideal for:
-
-- SDK-backed MCP server products
-- Chat-based AI service access
-- API access and app feature monetization
 
 ## Prerequisites
 
@@ -19,7 +19,7 @@ This product flow is ideal for:
 
 You do not need to create plans beforehand. Pricing plans are configured inside this product flow.
 
-## Step 1: Product Details
+## Step 1: Product details
 
 Go to **Products** in the sidebar and click **Create product**.
 
@@ -31,26 +31,19 @@ Fill in:
 
 ## Step 2: Pricing
 
-Add one or more pricing options (plans) for this product. Click **Add pricing option** to create each plan inline.
+Add one or more pricing options (plans) for this product.
+Click **Add pricing option** to create each plan inline.
 
-SolvaPay supports four plan types:
-
-| Type | Description |
-|------|-------------|
-| **Recurring** | Fixed price billed on a cycle (weekly, monthly, quarterly, yearly). Best for SaaS subscriptions. |
-| **Usage-Based** | Pay-per-use billing that automatically tracks requests. Set a `pricePerUnit`, `limit`, and `freeUnits`. Best for APIs and token-based services. |
-| **Hybrid** | Combines a recurring base fee with usage-based overage. Supports tiered pricing and overage policies. Best for enterprise SaaS. |
-| **One-Time** | Single purchase with no recurring billing. Best for digital goods or lifetime access. |
-
-Each plan defines:
+Set the values needed for your billing model:
 
 - **Price** and **currency**
-- **Billing cycle** (for recurring, usage-based post-paid, and hybrid plans)
-- **Meter** (for usage-based and hybrid plans) — links to a [meter](/meters/overview) that tracks consumption
-- **Limits** — hard usage caps, free included units, and overage policies
+- **Billing cycle** when applicable
+- **Meter** for usage-based tracking
+- **Limits** and included usage
 - **Features** (optional) — provider-defined feature flags
 
-You can add multiple plans (e.g. a Free tier, a Pro plan, and an Enterprise plan). Plans are created as part of the product — there is no separate setup step before product creation. See [Plans documentation](/plans/overview) for detailed configuration options.
+You can add multiple plans (for example: Free, Pro, Enterprise). Plans are created as part of
+the product. See [Plans documentation](/plans/overview) for plan types and detailed configuration.
 
 After adding your pricing options, you can either click **Create product** to finish, or continue to the optional integration step.
 
@@ -67,15 +60,14 @@ If you skip this step, your product defaults to SDK integration mode.
 
 After creation, your product is active and visible on the product detail page. From there you can:
 
-- Copy the product reference (`prd_...`) for use in the SDK
-- View and manage attached plans
+- Copy the product reference (`prd_...`) and plan references (`pln_...`) for SDK integration
+- View and manage plans
 - Configure or change the integration mode
 - Track purchases and usage
 
-## What to Do Next
+## What to do next
 
-- [Choose Your Path](/get-started/choose-your-path) — compare MCP Pay and SDK integration patterns
-- [Test in Sandbox](/get-started/test-in-sandbox) — validate purchases and usage before going live
-- [SDK quick start](/sdks/typescript/setup/quick-start) — integrate paywall protection
-- [Plans](/plans/overview) — learn about plan types and pricing configuration
-- [Meters](/meters/overview) — set up usage tracking for usage-based plans
+- [TypeScript SDK CLI setup](/sdks/typescript/setup/cli) — fastest setup for TypeScript projects
+- [SDK quick start](/sdks/typescript/setup/quick-start) — protect your first endpoint
+- [Test in sandbox](/get-started/test-in-sandbox) — validate purchases and usage before go-live
+- [Plans](/plans/overview) — detailed plan type and pricing configuration

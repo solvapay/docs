@@ -22,8 +22,8 @@
             "icon": "rocket",
             "pages": [
               "index",
-              "get-started/create-account",
               "get-started/choose-your-path",
+              "get-started/create-account",
               "get-started/create-product",
               "get-started/test-in-sandbox",
               "get-started/go-live"

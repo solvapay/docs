@@ -84,7 +84,7 @@
         "groups": [
           {
             "group": "TypeScript SDK",
-            "icon": "braces",
+            "icon": "code",
             "pages": [
               "sdks/typescript/intro",
               "sdks/typescript/setup/cli",

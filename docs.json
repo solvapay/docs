@@ -30,6 +30,20 @@
             ]
           },
           {
+            "group": "Guides",
+            "icon": "compass",
+            "pages": [
+              "guides/use-agent-skill",
+              "guides/monetize-mcp-server-no-code",
+              "guides/monetize-mcp-server-with-sdk",
+              "guides/add-paywall-to-api-or-app",
+              "guides/add-inline-chat-checkout-react",
+              "guides/manage-account-with-admin-mcp",
+              "guides/handle-webhooks",
+              "mcp-server/testing-auth-and-paywall"
+            ]
+          },
+          {
             "group": "MCP Pay",
             "icon": "credit-card",
             "pages": [
@@ -42,19 +56,11 @@
             ]
           },
           {
-            "group": "Plans",
+            "group": "Plans and billing",
             "icon": "tags",
             "pages": [
               "plans/overview",
               "plans/billing"
-            ]
-          },
-          {
-            "group": "Meters",
-            "icon": "gauge",
-            "pages": [
-              "meters/overview",
-              "meters/events"
             ]
           },
           {
@@ -65,11 +71,10 @@
             ]
           },
           {
-            "group": "MCP Server",
+            "group": "Admin MCP Server",
             "icon": "server",
             "pages": [
               "mcp-server/getting-started",
-              "mcp-server/testing-auth-and-paywall",
               "mcp-server/installation",
               "mcp-server/tools",
               "mcp-server/examples",
@@ -129,6 +134,16 @@
       "href": "https://app.solvapay.com"
     }
   },
+  "redirects": [
+    {
+      "source": "/get-started",
+      "destination": "/"
+    },
+    {
+      "source": "/get-started/index",
+      "destination": "/"
+    }
+  ],
   "contextual": {
     "options": [
       "copy",

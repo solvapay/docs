@@ -1,0 +1,40 @@
+---
+title: "Monetize an MCP server with SDK integration"
+description: "Use the SolvaPay TypeScript SDK to monetize an MCP server with full control over auth, paywall behavior, and tool access."
+---
+
+Use this guide when you want to monetize an MCP server but keep implementation control in your own codebase.
+
+## Who this is for
+
+- Teams building custom MCP server behavior
+- Teams that need custom auth and entitlement logic
+- Teams that want SDK-level control instead of hosted MCP Pay
+
+## What you will achieve
+
+By the end, your MCP server uses the SolvaPay SDK to enforce purchases and manage monetized tool access.
+
+## Prerequisites
+
+- A SolvaPay account
+- A product and at least one plan in the SolvaPay Console
+- A TypeScript MCP server project
+
+## Steps
+
+1. Complete [SDK quick start](/sdks/typescript/setup/quick-start) to set up the base paywall flow.
+2. Follow the [MCP integration guide](/sdks/typescript/guides/mcp).
+3. Configure identity with [custom auth](/sdks/typescript/guides/custom-auth) if your server uses external auth.
+4. Add usage billing with [usage events](/sdks/typescript/guides/usage-events) where needed.
+
+## Verify
+
+- Protected MCP tools require an eligible purchase
+- Valid purchases allow tool execution
+- Usage events are recorded for billable calls
+
+## Next related tasks
+
+- [Monetize an MCP server without code](/guides/monetize-mcp-server-no-code)
+- [Handle SolvaPay webhooks safely](/guides/handle-webhooks)

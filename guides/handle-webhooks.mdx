@@ -1,0 +1,41 @@
+---
+title: "Handle SolvaPay webhooks safely"
+description: "Implement secure webhook verification and event handling for SolvaPay purchases and payments."
+---
+
+Use this guide to process SolvaPay webhook events reliably in production.
+
+## Who this is for
+
+- Teams integrating SolvaPay events into app workflows
+- Teams that need secure signature verification and idempotent handlers
+- Teams handling purchase and payment lifecycle updates
+
+## What you will achieve
+
+By the end, your webhook endpoint verifies signatures, handles core events, and is safe to retry.
+
+## Prerequisites
+
+- A public HTTPS webhook endpoint
+- A webhook signing secret from the SolvaPay Console
+- Server runtime support for raw request body handling
+
+## Steps
+
+1. Read the main [webhooks reference](/webhooks).
+2. Follow SDK handling details in [TypeScript webhook guide](/sdks/typescript/guides/webhooks).
+3. Verify `SV-Signature` before processing any event.
+4. Add idempotency protection using delivery identifiers.
+5. Process core events (`payment.*`, `purchase.*`, `checkout_session.created`) and return `2xx` quickly.
+
+## Verify
+
+- Invalid signatures are rejected
+- Valid events are processed exactly once
+- Retry behavior does not duplicate business side effects
+
+## Next related tasks
+
+- [Plans and billing](/plans/billing)
+- [Test in sandbox](/get-started/test-in-sandbox)

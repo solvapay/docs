@@ -1,6 +1,6 @@
 ---
 title: "Plans"
-description: "Plans define pricing models and access tiers for your products. Each plan type supports different billing strategies."
+description: "Plans define pricing models and access tiers for your products and billing strategy."
 ---
 
 Plans are pricing options embedded within products. They define how customers pay for access — whether through a flat recurring fee, per-unit usage charges, a one-time purchase, or a combination of recurring and usage-based billing.
@@ -39,9 +39,9 @@ Fixed-price plans billed on a regular cycle. Best for SaaS subscriptions with pr
 }
 ```
 
-### Usage-Based
+### Usage-based
 
-Pay-per-use plans where customers are billed based on actual consumption tracked by a [meter](/meters/overview).
+Pay-per-use plans where customers are billed based on actual consumption tracked through usage events.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -224,8 +224,8 @@ When a customer purchases a plan, the plan's configuration is **frozen into a sn
 
 This ensures billing is deterministic — changing a plan's price or limits does not retroactively affect existing purchases.
 
-## Next Steps
+## Next steps
 
 - [Billing](/plans/billing) — billing cycles, usage billing, and end-of-period processing
-- [Meters](/meters/overview) — meter definitions linked to usage-based plans
-- [Usage Records](/meters/events) — how usage data is recorded and queried
+- [Handle webhooks](/guides/handle-webhooks) — purchase and payment lifecycle events
+- [Usage events guide](/sdks/typescript/guides/usage-events) — record and query billable usage

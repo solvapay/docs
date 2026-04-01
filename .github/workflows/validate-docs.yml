@@ -21,9 +21,6 @@ jobs:
       - name: Install Mint CLI
         run: npm install -g mint@latest
 
-      - name: Validate migration mapping is generated
-        run: npx --yes tsx scripts/generate-migration-page-mapping.ts --check
-
       - name: Validate docs build
         run: mint validate
 

@@ -4,11 +4,12 @@ This repository hosts the Mintlify documentation site for SolvaPay.
 
 ## Ownership model
 
-- Product docs (`get-started`, `mcp-pay`, `wallet`, `mcp-server`) are maintained in this repository.
+- Product docs (`get-started`, `guides`, `mcp-pay`, `mcp-server`, `plans`, `webhooks`) are maintained in this repository.
 - TypeScript SDK docs (`sdks/typescript`) are upstream-owned and synced into this repository.
 - API reference (`api-reference/openapi.json`) is generated from backend OpenAPI and synced manually.
 - Do not manually edit `sdks/typescript/**`. Use the sync script.
 - Do not manually edit `api-reference/openapi.json`. Use the sync script.
+- `wallet/**`, `meters/**`, and `internal/**` are non-nav sections.
 
 ## AI-assisted writing
 
@@ -68,18 +69,6 @@ mint broken-links
 ```
 
 The sync script reads the TypeScript SDK page list directly from `docs.json`.
-
-## Migration mapping
-
-`migration/page-mapping.csv` is generated from `migration/scraped/**` and should not be edited by hand.
-
-```bash
-# Regenerate mapping
-npx --yes tsx scripts/generate-migration-page-mapping.ts
-
-# Check if mapping is up to date (CI-safe)
-npx --yes tsx scripts/generate-migration-page-mapping.ts --check
-```
 
 ## Syncing backend OpenAPI docs
 

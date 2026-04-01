@@ -1,0 +1,103 @@
+---
+title: "Use the SolvaPay agent skill"
+description: "Install the SolvaPay skill with one command in any compatible AI coding tool."
+---
+
+Use this guide when you want your AI coding agent to integrate SolvaPay with less prompting.
+
+## Quick start (recommended one command)
+
+Use this command first in any supported environment:
+
+```bash
+npx skills add solvapay
+```
+
+This is the fastest setup path and works across Cursor, Claude Code, Codex, Windsurf, and other
+tools that support Agent Skills.
+
+## Who this is for
+
+- You use Cursor, Claude Code, or another AI coding tool
+- You want faster SolvaPay implementation with fewer manual prompts
+- You want a reusable workflow for SDK integration, MCP Pay setup, and onboarding tasks
+
+## What you will achieve
+
+By the end, your agent can route SolvaPay tasks to the right flow for SDK integration, MCP Pay,
+website checkout, or provider onboarding.
+
+## Prerequisites
+
+- An AI coding tool that supports Agent Skills
+- Access to the SolvaPay skills repository: `https://github.com/solvapay/skills`
+- Optional: a `npx` runtime if you use CLI-based install
+
+## Platform-specific setup (secondary options)
+
+Use the platform-specific instructions below only if you prefer a platform-native flow.
+
+<Tabs>
+  <Tab title="Cursor">
+    **Alternative: Add as a remote rule**
+
+    1. Open Cursor Settings.
+    2. Go to **Rules**.
+    3. In **Project Rules**, click **Add Rule**.
+    4. Choose **Remote Rule (Github)**.
+    5. Enter `https://github.com/solvapay/skills`.
+
+    If you are not using remote rules, use the one-command install above or install the skill into a
+    discovered skills directory such as
+    `.agents/skills/`, `.cursor/skills/`, or `~/.cursor/skills/`.
+
+    <Note>
+      Cursor Marketplace plugin support for SolvaPay is coming soon.
+    </Note>
+  </Tab>
+
+  <Tab title="Claude Code">
+    **Alternative: Ask Claude to install it**
+
+    Use this prompt in Claude Code:
+
+    ```text
+    Install the SolvaPay skill
+    ```
+
+    Claude Code discovers skills from `.claude/skills/` (project) and `~/.claude/skills/` (user).
+  </Tab>
+
+  <Tab title="Other tools">
+    Use the one-command install above.
+
+    This includes platforms like Codex, Windsurf, and other compatible coding agents that support
+    Agent Skills.
+  </Tab>
+</Tabs>
+
+## What the skill covers
+
+- **SDK integration**: Add paywalls, usage billing, and webhooks in app code
+- **MCP Pay setup**: Configure hosted MCP auth and monetization for MCP servers
+- **Website checkout**: Add hosted checkout and customer portal flows for web apps
+- **Provider onboarding**: Set up account, product, plans, sandbox testing, and go-live
+
+## Verify
+
+Ask your agent:
+
+```text
+Help me integrate SolvaPay for my project.
+```
+
+Confirm the agent routes you to the correct path and asks a clarification question when your request
+is ambiguous.
+
+## Next related tasks
+
+- [Monetize an MCP server without code](/guides/monetize-mcp-server-no-code)
+- [Monetize an MCP server with SDK integration](/guides/monetize-mcp-server-with-sdk)
+- [Add a paywall to an API or app](/guides/add-paywall-to-api-or-app)
+- [Create a product](/get-started/create-product)
+- [Handle webhooks](/guides/handle-webhooks)

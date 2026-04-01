@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   repository_dispatch:
     types: [sync-typescript-sdk-docs]
+  schedule:
+    - cron: '0 5 * * 1'
 
 jobs:
   sync:

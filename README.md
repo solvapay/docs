@@ -4,11 +4,12 @@ This repository hosts the Mintlify documentation site for SolvaPay.
 
 ## Ownership model
 
-- Product docs (`get-started`, `mcp-pay`, `wallet`, `mcp-server`) are maintained in this repository.
+- Product docs (`get-started`, `guides`, `mcp-pay`, `mcp-server`, `plans`, `webhooks`) are maintained in this repository.
 - TypeScript SDK docs (`sdks/typescript`) are upstream-owned and synced into this repository.
 - API reference (`api-reference/openapi.json`) is generated from backend OpenAPI and synced manually.
 - Do not manually edit `sdks/typescript/**`. Use the sync script.
 - Do not manually edit `api-reference/openapi.json`. Use the sync script.
+- `wallet/**`, `meters/**`, and `internal/**` are non-nav sections.
 
 ## AI-assisted writing
 
@@ -38,19 +39,36 @@ View your local preview at `http://localhost:3000`.
 
 ## Syncing TypeScript SDK docs
 
-Run the sync script from the docs root:
+The `sdks/typescript/**` content is upstream-owned and synced from the SDK repository.
+Do not manually edit files under `sdks/typescript/**`.
+
+Run sync from the docs root:
 
 ```bash
-./scripts/sync-typescript-sdk-docs.sh
+npx --yes tsx scripts/sync-typescript-sdk-docs.ts
 ```
 
 If your SDK docs source is in a custom location, set:
 
 ```bash
-SDK_DOCS_SOURCE_DIR="/absolute/path/to/sdk/docs-site/sdks/typescript/docs" ./scripts/sync-typescript-sdk-docs.sh
+SDK_DOCS_SOURCE_DIR="/absolute/path/to/solvapay-sdk/docs" npx --yes tsx scripts/sync-typescript-sdk-docs.ts
 ```
 
-The script uses `scripts/typescript-sdk-pages.txt` as the curated page list.
+Helpful flags:
+
+```bash
+# Preview changes without writing files
+npx --yes tsx scripts/sync-typescript-sdk-docs.ts --dry-run
+```
+
+After syncing, run docs checks:
+
+```bash
+mint validate
+mint broken-links
+```
+
+The sync script reads the TypeScript SDK page list directly from `docs.json`.
 
 ## Syncing backend OpenAPI docs
 

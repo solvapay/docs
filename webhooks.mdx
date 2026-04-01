@@ -41,7 +41,7 @@ npm install @solvapay/server
 
 ### 2. Create a webhook endpoint
 
-In the SolvaPay dashboard, go to **Settings → Webhooks** and add your endpoint URL:
+In SolvaPay Console, go to **Settings -> Webhooks** and add your endpoint URL:
 
 ```
 https://your-app.com/api/webhooks/solvapay
@@ -508,7 +508,7 @@ SolvaPay only populates `product` when the customer is created through MCP Pay h
 for a product-linked client.
 
 To learn more about SDK customer syncing, see
-[`/sdks/typescript/getting-started/core-concepts`](/sdks/typescript/getting-started/core-concepts).
+[`/sdks/typescript/setup/core-concepts`](/sdks/typescript/setup/core-concepts).
 
 ```json
 {
@@ -600,7 +600,7 @@ export async function POST(request: NextRequest) {
 ```
 
 For implementation details, see
-[`/sdks/typescript/getting-started/core-concepts`](/sdks/typescript/getting-started/core-concepts)
+[`/sdks/typescript/setup/core-concepts`](/sdks/typescript/setup/core-concepts)
 and [`/sdks/typescript/guides/nextjs`](/sdks/typescript/guides/nextjs).
 
 ### checkout_session.created
@@ -679,7 +679,7 @@ exponential backoff:
 | 7+ | 72 hours |
 
 After **12 failed attempts** the endpoint is automatically disabled. You can re-enable it
-from the dashboard.
+from SolvaPay Console.
 
 ---
 

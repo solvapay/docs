@@ -1,5 +1,5 @@
 ---
-title: "Test in Sandbox"
+title: "Test in sandbox"
 description: "Use sandbox mode to test your integration before or after live activation."
 ---
 
@@ -10,11 +10,11 @@ Before testing, make sure you have:
 - Created your first product
 - Configured pricing plans during product creation
 - Chosen your integration path (Hosted MCP Pay or SDK)
-- Completed Stripe activation for your live account by either:
-  - connecting an existing Stripe account, or
-  - completing setup details for a new Stripe account
 
-## What Is Sandbox Mode?
+If you are on the SDK path, run [`npx solvapay init`](/sdks/typescript/setup/cli) first so your
+project is connected before endpoint testing.
+
+## What is sandbox mode?
 
 In sandbox mode:
 
@@ -27,7 +27,7 @@ You can see your current mode in the console header.
 
 You can switch between **Live** and **sandbox** at any time. Many providers activate live first, then switch back to sandbox for safe testing and regression checks.
 
-## Testing Your Integration
+## Testing your integration
 
 ### For MCP Pay
 
@@ -47,21 +47,25 @@ You can switch between **Live** and **sandbox** at any time. Many providers acti
 
    Try calling a tool that requires a paid plan. You should receive an access denied response with upgrade information.
 
-### For SDK Integration
+### For SDK integration
 
-1. **Use your sandbox API key**
+1. **Run the CLI setup**
+
+   From your project root, run `npx solvapay init` if you have not already.
+
+2. **Use your sandbox API key**
 
    Your sandbox API key is available in Settings > API Keys. Use this in your development environment.
 
-2. **Create a test customer**
+3. **Create a test customer**
 
    Use the SDK or console to create a customer for testing.
 
-3. **Test paywall protection**
+4. **Test paywall protection**
 
    Call a protected endpoint and verify the paywall check runs correctly.
 
-4. **Test the checkout flow**
+5. **Test the checkout flow**
 
    Trigger a checkout and use Stripe test card numbers to complete the payment.
 
@@ -70,11 +74,11 @@ You can switch between **Live** and **sandbox** at any time. Many providers acti
 For live authentication and paywall validation in Claude or Cursor, use
 [Test MCP server auth and paywall](/mcp-server/testing-auth-and-paywall).
 
-## Stripe Test Cards
+## Stripe test cards
 
 Use these card numbers for testing payments:
 
-| Card Number | Result |
+| Card number | Result |
 |-------------|--------|
 | `4242 4242 4242 4242` | Successful payment |
 | `4000 0000 0000 0002` | Card declined |
@@ -82,7 +86,7 @@ Use these card numbers for testing payments:
 
 Use any future expiration date and any 3-digit CVC.
 
-## Testing Checklist
+## Testing checklist
 
 Before or after going live, verify:
 
@@ -94,8 +98,8 @@ Before or after going live, verify:
 - [ ] Usage is tracked correctly in the dashboard
 - [ ] Quota limits are enforced when exceeded
 
-## Next Steps
+## Next steps
 
 Once you've verified your integration works correctly:
 
-- [Go Live](/get-started/go-live) - Complete onboarding and switch to production
+- [Go live](/get-started/go-live) - Complete onboarding and switch to production

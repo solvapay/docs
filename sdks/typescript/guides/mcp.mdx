@@ -1,394 +1,708 @@
 ---
 title: "MCP Server Integration Guide"
-description: "Add paywall protection, usage tracking, and self-service tools to any MCP server using the SolvaPay TypeScript SDK."
+description: "This guide shows you how to integrate SolvaPay SDK with Model Context Protocol (MCP) servers to protect MCP tools with paywall protection and purchase management."
 ---
-
-## Overview
-
-This guide shows how to monetize an MCP server you host yourself using `@solvapay/server`. The SDK is framework-agnostic -- it works with `@modelcontextprotocol/sdk`, FastMCP, or any other MCP implementation.
-
-If you want SolvaPay to handle authentication, billing, and paywall enforcement for you via a managed proxy, see [Hosted MCP Pay](/mcp-pay/overview) instead.
-
-### What the SDK provides
-
-| Capability | SDK Function | Description |
-| --- | --- | --- |
-| Paywall protection | `payable.mcp()` | Wraps tool handlers with limit checks and usage tracking |
-| Self-service tools | `registerVirtualToolsMcp()` | Adds `get_user_info`, `upgrade`, and `manage_account` tools |
-| OAuth bridge helpers | `createMcpOAuthBridge()` | Registers well-known endpoints and attaches `req.auth` |
 
 ## Table of Contents
 
 - [Installation](#installation)
-- [SDK Setup](#sdk-setup)
-- [Protecting Tools](#protecting-tools)
-- [Virtual Tools](#virtual-tools)
-- [Authentication via OAuth Bridge](#authentication-via-oauth-bridge)
+- [Basic Setup](#basic-setup)
+- [Protecting MCP Tools](#protecting-mcp-tools)
+- [Authentication](#authentication)
+- [Error Handling](#error-handling)
 - [Complete Example](#complete-example)
-- [Environment Variables](#environment-variables)
 
 ## Installation
 
-Install the SolvaPay server SDK alongside your MCP framework of choice:
+Install the required packages:
 
 ```bash
-npm install @solvapay/server
+npm install @solvapay/server @modelcontextprotocol/sdk
+# or
+pnpm add @solvapay/server @modelcontextprotocol/sdk
+# or
+yarn add @solvapay/server @modelcontextprotocol/sdk
 ```
 
-The SDK has no dependency on any particular MCP framework. Install whichever MCP library you use separately (e.g. `@modelcontextprotocol/sdk`, `fastmcp`).
+## Basic Setup
 
-## SDK Setup
+### 1. Initialize SolvaPay
 
-### Initialize SolvaPay
-
-Create a shared config module that the rest of your server imports:
+Create a SolvaPay instance in your MCP server:
 
 ```typescript
-import { createSolvaPay, createSolvaPayClient } from '@solvapay/server'
+import { createSolvaPay } from '@solvapay/server'
+import { Server } from '@modelcontextprotocol/sdk/server/index'
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio'
 
-const apiClient = createSolvaPayClient({
-  apiKey: process.env.SOLVAPAY_SECRET_KEY!,
-  apiBaseUrl: process.env.SOLVAPAY_API_BASE_URL,
-})
-
-export const solvaPay = createSolvaPay({ apiClient })
-
-export const productRef = process.env.SOLVAPAY_PRODUCT_REF!
-
-export const payable = solvaPay.payable({
-  product: productRef,
-})
-```
-
-### Optional: bootstrap product + plans + MCP config
-
-If you want a one-call setup for an MCP integration, use `bootstrapMcpProduct`:
-
-```typescript
-const bootstrap = await solvaPay.bootstrapMcpProduct({
-  name: 'Docs Assistant',
-  originUrl: 'https://origin.example.com/mcp',
-  freePlan: {
-    name: 'Free',
-    freeUnits: 1000,
-  },
-  paidPlans: [
-    { key: 'pro', name: 'Pro', price: 2000, currency: 'USD', billingCycle: 'monthly' },
-  ],
-  tools: [
-    { name: 'list_docs', planKeys: ['free'] },
-    { name: 'deep_research', planKeys: ['pro'] },
-    { name: 'health_check', noPlan: true },
-  ],
-})
-
-console.log(bootstrap.product.reference)
-console.log(bootstrap.mcpServer.mcpProxyUrl)
-```
-
-You can also bootstrap free-only by omitting `paidPlans`:
-
-```typescript
-const freeOnly = await solvaPay.bootstrapMcpProduct({
-  name: 'Docs Assistant',
-  originUrl: 'https://origin.example.com/mcp',
-  freePlan: {
-    name: 'Free',
-    freeUnits: 0, // unlimited free usage
-  },
-})
-```
-
-After bootstrap, use `configureMcpPlans` to evolve pricing and tool access without recreating the
-product:
-
-```typescript
-const productRef = bootstrap.product.reference
-
-// 1) Add or replace paid plans
-await solvaPay.configureMcpPlans(productRef, {
-  freePlan: {
-    name: 'Free',
-    freeUnits: 100,
-  },
-  paidPlans: [
-    { key: 'pro', name: 'Pro', price: 2000, currency: 'USD', billingCycle: 'monthly' },
-  ],
-  toolMapping: [
-    { name: 'list_docs', planKeys: ['free', 'pro'] },
-    { name: 'deep_research', planKeys: ['pro'] },
-  ],
-})
-
-// 2) Revert to free-only
-await solvaPay.configureMcpPlans(productRef, {
-  freePlan: {
-    name: 'Free',
-    freeUnits: 0,
-  },
-  paidPlans: [],
-})
-
-// 3) Remap tools only (leave plans unchanged)
-await solvaPay.configureMcpPlans(productRef, {
-  freePlan: {
-    name: 'Free',
-    freeUnits: 1000,
-  },
-  toolMapping: [{ name: 'deep_research', planKeys: ['pro'] }],
-})
-```
-
-`freePlan` is required by the MCP plans API request body.
-
-For enterprise workflows, you can still use separate endpoints for product, plans, and MCP server
-management.
-
-Field naming for bootstrap payloads:
-- Use `originUrl` for the origin MCP endpoint.
-- Use `freePlan` to customize the implicit free plan created by bootstrap.
-- Use `paidPlans` to define paid plans (`key`, `name`, `price`, `currency`, optional billing fields).
-- For tool mapping, prefer `planIds` as canonical persisted field; bootstrap also accepts
-  `planRefs` and `planKeys`.
-
-`createSolvaPay()` also accepts `apiKey` directly if you don't need a custom client:
-
-```typescript
+// Initialize SolvaPay
 const solvaPay = createSolvaPay({
   apiKey: process.env.SOLVAPAY_SECRET_KEY,
 })
-```
 
-### Customer identity
-
-Every paywall check requires a **customer reference** -- a stable identifier for the user making the tool call. For MCP, the SDK can read this from `extra.authInfo`:
-
-```typescript
-const getCustomerRef = (_args: Record<string, unknown>, extra?: McpToolExtra) => {
-  const customerRef = extra?.authInfo?.extra?.customer_ref
-  return typeof customerRef === 'string' && customerRef.trim() ? customerRef : 'anonymous'
-}
-```
-
-`payable.mcp()` defaults to this `extra.authInfo.extra.customer_ref` path automatically, so you only need a custom `getCustomerRef` when you want custom identity rules.
-
-## Protecting Tools
-
-### Wrap handlers with `payable.mcp()`
-
-Write your business logic as a plain async function that receives tool arguments and returns a result object. Then wrap it with `payable.mcp()`:
-
-```typescript
-async function createTask(args: { title: string; description?: string }) {
-  const task = { id: crypto.randomUUID(), ...args, createdAt: new Date().toISOString() }
-  return { success: true, task }
-}
-
-const protectedCreateTask = payable.mcp(createTask, { getCustomerRef })
-```
-
-When `protectedCreateTask` is called:
-
-1. `getCustomerRef` extracts the customer identity from the tool arguments
-2. The SDK calls SolvaPay's limits API to check the customer's plan and usage
-3. If within limits, your business logic runs and usage is tracked
-4. If over limits, the adapter returns a paywall response with a checkout URL
-5. The result is automatically wrapped in MCP `content` format (`{ content: [{ type: 'text', text: '...' }] }`)
-
-You do **not** need to catch `PaywallError` yourself -- the MCP adapter handles it and returns a structured error response that AI clients can act on.
-
-### Build a handler map
-
-A common pattern is to build a map of tool names to handlers, then dispatch in your MCP framework's `tools/call` handler:
-
-```typescript
-const toolHandlers: Record<string, (args: Record<string, unknown>) => Promise<unknown>> = {
-  create_task: payable.mcp(createTask),
-  get_task: payable.mcp(getTask),
-  list_tasks: payable.mcp(listTasks),
-}
-```
-
-### Different plans per tool
-
-Create multiple `payable` instances to assign different plans:
-
-```typescript
-const freeTier = solvaPay.payable({ product: productRef, plan: 'pln_free' })
-const proTier = solvaPay.payable({ product: productRef, plan: 'pln_pro' })
-
-const toolHandlers = {
-  list_tasks: freeTier.mcp(listTasks),
-  create_task: proTier.mcp(createTask),
-}
-```
-
-## Virtual Tools
-
-Virtual tools give users self-service access to their account status, upgrade options, and account management -- the same tools that Hosted MCP Pay provides automatically.
-
-### Register virtual tools (recommended)
-
-```typescript
-await solvaPay.registerVirtualToolsMcp(server, {
-  product: productRef,
+// Create payable handler for your product
+const payable = solvaPay.payable({
+  product: 'prd_YOUR_PRODUCT_ID',
+  plan: 'pln_YOUR_PLAN_ID', // Optional: can be set per tool
 })
 ```
 
-This one call registers all self-service tools directly on an `McpServer`.
+### 2. Create MCP Server
 
-| Tool | Description |
-| --- | --- |
-| `get_user_info` | Returns current user profile and purchase status |
-| `upgrade` | Returns available plans and checkout URLs |
-| `manage_account` | Returns a secure link to the customer portal |
-
-Virtual tools are **not** paywall-protected and are **not** usage-tracked.
-
-### Advanced: manual registration
-
-Use `getVirtualTools()` only if you need custom MCP server plumbing:
+Set up your MCP server:
 
 ```typescript
-const virtualTools = solvaPay.getVirtualTools({
-  product: productRef,
-  getCustomerRef,
-  exclude: ['manage_account'],
-})
-```
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+  Tool,
+} from '@modelcontextprotocol/sdk/types'
 
-## Test in MCP clients
-
-After your MCP Server is connected in Claude or Cursor, run live prompts that validate auth and
-paywall behavior.
-
-Use [Test MCP server auth and paywall](/mcp-server/testing-auth-and-paywall) for the full flow.
-
-The expected outcomes map to SDK virtual tools:
-
-- `show my user info` -> `get_user_info`
-- `show my account page` -> `manage_account`
-- `upgrade` -> `upgrade`
-
-## Authentication via OAuth Bridge
-
-MCP clients (Cursor, Claude Desktop, etc.) authenticate via OAuth 2.0. Use the SDK helper to:
-
-- serve the two well-known discovery endpoints
-- decode bearer JWTs into MCP `authInfo`
-- attach `req.auth` for Streamable HTTP transport
-- return `401` + `WWW-Authenticate` when auth is missing/invalid
-
-```typescript
-import { createMcpOAuthBridge } from '@solvapay/server'
-
-app.use(
-  ...createMcpOAuthBridge({
-    publicBaseUrl: process.env.MCP_PUBLIC_BASE_URL!,
-    apiBaseUrl: process.env.SOLVAPAY_API_BASE_URL || 'https://api.solvapay.com',
-    productRef: process.env.SOLVAPAY_PRODUCT_REF!,
-    mcpPath: '/mcp',
-    requireAuth: true,
-  }),
+// Create MCP server
+const server = new Server(
+  {
+    name: 'solvapay-protected-server',
+    version: '1.0.0',
+  },
+  {
+    capabilities: {
+      tools: {},
+    },
+  },
 )
 ```
 
-If you need the raw metadata payloads outside middleware, use:
+### 3. Define Tools
 
-- `getOAuthProtectedResourceResponse(publicBaseUrl)`
-- `getOAuthAuthorizationServerResponse({ apiBaseUrl, productRef })`
+Define your MCP tools:
+
+```typescript
+const tools: Tool[] = [
+  {
+    name: 'create_task',
+    description: 'Create a new task (requires purchase)',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        title: {
+          type: 'string',
+          description: 'Title of the task',
+        },
+        auth: {
+          type: 'object',
+          description: 'Authentication information',
+          properties: {
+            customer_ref: { type: 'string' },
+          },
+          required: ['customer_ref'],
+        },
+      },
+      required: ['title', 'auth'],
+    },
+  },
+]
+```
+
+## Protecting MCP Tools
+
+### Basic Tool Protection
+
+Wrap your tool handlers with `payable.mcp()`:
+
+```typescript
+// Your business logic function
+async function createTask(args: { title: string; auth: { customer_ref: string } }) {
+  const { title } = args
+
+  // Your business logic here
+  const task = {
+    id: Date.now().toString(),
+    title,
+    createdAt: new Date().toISOString(),
+  }
+
+  return {
+    success: true,
+    task,
+  }
+}
+
+// Handle tool execution
+server.setRequestHandler(CallToolRequestSchema, async request => {
+  const { name, arguments: args } = request.params
+
+  switch (name) {
+    case 'create_task': {
+      // Protect the tool with paywall
+      const handler = payable.mcp(createTask)
+      return await handler(args)
+    }
+
+    default:
+      throw new Error(`Unknown tool: ${name}`)
+  }
+})
+```
+
+### Multiple Tools with Same Plan
+
+If all tools use the same plan, create one `payable` handler:
+
+```typescript
+const payable = solvaPay.payable({
+  product: 'prd_myapi',
+  plan: 'pln_premium',
+})
+
+server.setRequestHandler(CallToolRequestSchema, async request => {
+  const { name, arguments: args } = request.params
+
+  switch (name) {
+    case 'create_task': {
+      const handler = payable.mcp(createTask)
+      return await handler(args)
+    }
+
+    case 'get_task': {
+      const handler = payable.mcp(getTask)
+      return await handler(args)
+    }
+
+    case 'list_tasks': {
+      const handler = payable.mcp(listTasks)
+      return await handler(args)
+    }
+
+    default:
+      throw new Error(`Unknown tool: ${name}`)
+  }
+})
+```
+
+### Different Plans per Tool
+
+Create multiple `payable` handlers for different plans:
+
+```typescript
+const freeTier = solvaPay.payable({
+  product: 'prd_myapi',
+  plan: 'pln_free',
+})
+
+const premiumTier = solvaPay.payable({
+  product: 'prd_myapi',
+  plan: 'pln_premium',
+})
+
+server.setRequestHandler(CallToolRequestSchema, async request => {
+  const { name, arguments: args } = request.params
+
+  switch (name) {
+    case 'list_tasks': {
+      // Free tier tool
+      const handler = freeTier.mcp(listTasks)
+      return await handler(args)
+    }
+
+    case 'create_task': {
+      // Premium tier tool
+      const handler = premiumTier.mcp(createTask)
+      return await handler(args)
+    }
+
+    default:
+      throw new Error(`Unknown tool: ${name}`)
+  }
+})
+```
+
+## Authentication
+
+### Customer Reference in Tool Arguments
+
+The MCP adapter expects customer reference in the `auth` object:
+
+```typescript
+const tools: Tool[] = [
+  {
+    name: 'create_task',
+    description: 'Create a new task',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        auth: {
+          type: 'object',
+          properties: {
+            customer_ref: { type: 'string' },
+          },
+          required: ['customer_ref'],
+        },
+      },
+      required: ['title', 'auth'],
+    },
+  },
+]
+```
+
+### Extract Customer Reference
+
+The MCP adapter automatically extracts `customer_ref` from `args.auth.customer_ref`:
+
+```typescript
+async function createTask(args: { title: string; auth: { customer_ref: string } }) {
+  // customer_ref is automatically extracted by the adapter
+  // Your business logic here
+  return { success: true, task: {} }
+}
+
+const handler = payable.mcp(createTask)
+```
+
+### Custom Customer Reference Extraction
+
+Override customer reference extraction:
+
+```typescript
+const handler = payable.mcp(createTask, {
+  getCustomerRef: (args: any) => {
+    // Custom logic to extract customer reference
+    return args.auth?.customer_ref || args.userId || null
+  },
+})
+```
+
+### OAuth Bearer Token Helper
+
+For MCP servers that authenticate with bearer tokens, you can use the server SDK helper utilities:
+
+```typescript
+import {
+  getCustomerRefFromBearerAuthHeader,
+  McpBearerAuthError,
+} from '@solvapay/server'
+
+const handler = payable.mcp(createTask, {
+  getCustomerRef: args => {
+    const header = args._authHeader as string | undefined
+    try {
+      return getCustomerRefFromBearerAuthHeader(header)
+    } catch (error) {
+      if (error instanceof McpBearerAuthError) {
+        throw new Error('Unauthorized')
+      }
+      throw error
+    }
+  },
+})
+```
+
+These helpers only decode claims (`customerRef`, `customer_ref`, `sub`) and do not verify signatures.
+Use them after token validation (for example with `/v1/customer/auth/userinfo`).
+Fail closed on auth failures. Do not substitute fallback identities such as `anonymous`.
+
+### Non-hosted OAuth Bridge Pattern
+
+If your MCP server runs on localhost/custom domain (not SolvaPay hosted MCP proxy):
+
+1. Serve local discovery endpoints:
+   - `/.well-known/oauth-protected-resource`
+   - `/.well-known/oauth-authorization-server`
+2. Point discovery metadata to SolvaPay OAuth endpoints (`/v1/customer/auth/*`)
+3. Ensure `registration_endpoint` includes `mcp_server_id`
+4. Protect `/mcp` with bearer auth and return RFC9728 `WWW-Authenticate` challenge when missing
+
+Reference implementation: `examples/mcp-oauth-bridge`.
+
+## Error Handling
+
+### Basic Error Handling
+
+The MCP adapter automatically handles `PaywallError` and converts it to MCP error format:
+
+```typescript
+server.setRequestHandler(CallToolRequestSchema, async request => {
+  const { name, arguments: args } = request.params
+
+  try {
+    switch (name) {
+      case 'create_task': {
+        const handler = payable.mcp(createTask)
+        return await handler(args)
+      }
+
+      default:
+        throw new Error(`Unknown tool: ${name}`)
+    }
+  } catch (error) {
+    // PaywallError is automatically handled by the adapter
+    // Other errors are re-thrown
+    throw error
+  }
+})
+```
+
+### Custom Error Handling
+
+Handle errors manually for custom error responses:
+
+```typescript
+import { PaywallError } from '@solvapay/server'
+
+server.setRequestHandler(CallToolRequestSchema, async request => {
+  const { name, arguments: args } = request.params
+
+  try {
+    switch (name) {
+      case 'create_task': {
+        const handler = payable.mcp(createTask)
+        return await handler(args)
+      }
+
+      default:
+        throw new Error(`Unknown tool: ${name}`)
+    }
+  } catch (error) {
+    if (error instanceof PaywallError) {
+      // Custom paywall error response
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              error: 'Payment required',
+              message: error.message,
+              checkoutUrl: error.structuredContent.checkoutUrl,
+              product: error.structuredContent.product,
+            }),
+          },
+        ],
+        isError: true,
+      }
+    }
+
+    // Handle other errors
+    throw error
+  }
+})
+```
 
 ## Complete Example
 
-This example uses `@modelcontextprotocol/sdk` with Express for the HTTP transport. The same SDK calls work with any MCP framework -- only the tool registration and HTTP layer differ.
+Here's a complete MCP server with SolvaPay integration:
 
 ```typescript
 import 'dotenv/config'
-import express from 'express'
-import { randomUUID } from 'node:crypto'
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp'
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp'
-import { isInitializeRequest } from '@modelcontextprotocol/sdk/types'
-import { z } from 'zod'
-import { createMcpOAuthBridge, createSolvaPay, createSolvaPayClient } from '@solvapay/server'
+import { Server } from '@modelcontextprotocol/sdk/server/index'
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio'
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+  Tool,
+} from '@modelcontextprotocol/sdk/types'
+import { createSolvaPay, PaywallError } from '@solvapay/server'
 
-const app = express()
-app.use(express.json())
+// Initialize SolvaPay
+const solvaPay = createSolvaPay({
+  apiKey: process.env.SOLVAPAY_SECRET_KEY,
+})
 
-const productRef = process.env.SOLVAPAY_PRODUCT_REF!
-const apiClient = createSolvaPayClient({ apiKey: process.env.SOLVAPAY_SECRET_KEY! })
-const solvaPay = createSolvaPay({ apiClient })
-const payable = solvaPay.payable({ product: productRef })
+// Create payable handler
+const payable = solvaPay.payable({
+  product: 'prd_myapi',
+  plan: 'pln_premium',
+})
 
-app.use(
-  ...createMcpOAuthBridge({
-    publicBaseUrl: process.env.MCP_PUBLIC_BASE_URL!,
-    apiBaseUrl: process.env.SOLVAPAY_API_BASE_URL || 'https://api.solvapay.com',
-    productRef,
-    mcpPath: '/mcp',
-    requireAuth: true,
-  }),
-)
-
-function createMcpServer() {
-  const server = new McpServer({ name: 'my-mcp-server', version: '1.0.0' }, { capabilities: { tools: {} } })
-
-  void solvaPay.registerVirtualToolsMcp(server, { product: productRef })
-
-  server.registerTool(
-    'create_task',
-    {
-      description: 'Create a new task',
-      inputSchema: { title: z.string() },
+// Define tools
+const tools: Tool[] = [
+  {
+    name: 'create_task',
+    description: 'Create a new task (requires purchase)',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        title: {
+          type: 'string',
+          description: 'Title of the task',
+        },
+        description: {
+          type: 'string',
+          description: 'Optional description of the task',
+        },
+        auth: {
+          type: 'object',
+          description: 'Authentication information',
+          properties: {
+            customer_ref: { type: 'string' },
+          },
+          required: ['customer_ref'],
+        },
+      },
+      required: ['title', 'auth'],
     },
-    payable.mcp(async ({ title }: { title: string }) => ({ success: true, task: { id: randomUUID(), title } })),
-  )
+  },
+  {
+    name: 'get_task',
+    description: 'Get a task by ID (requires purchase)',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+          description: 'ID of the task to retrieve',
+        },
+        auth: {
+          type: 'object',
+          description: 'Authentication information',
+          properties: {
+            customer_ref: { type: 'string' },
+          },
+          required: ['customer_ref'],
+        },
+      },
+      required: ['id', 'auth'],
+    },
+  },
+  {
+    name: 'list_tasks',
+    description: 'List all tasks (requires purchase)',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        limit: {
+          type: 'number',
+          description: 'Maximum number of tasks to return (default: 10)',
+        },
+        offset: {
+          type: 'number',
+          description: 'Number of tasks to skip (default: 0)',
+        },
+        auth: {
+          type: 'object',
+          description: 'Authentication information',
+          properties: {
+            customer_ref: { type: 'string' },
+          },
+          required: ['customer_ref'],
+        },
+      },
+    },
+  },
+]
 
-  return server
+// Business logic functions
+async function createTask(args: {
+  title: string
+  description?: string
+  auth: { customer_ref: string }
+}) {
+  const { title, description } = args
+
+  const task = {
+    id: Date.now().toString(),
+    title,
+    description,
+    createdAt: new Date().toISOString(),
+  }
+
+  return {
+    success: true,
+    message: 'Task created successfully',
+    task,
+  }
 }
 
-const sessions: Record<string, { transport: StreamableHTTPServerTransport }> = {}
+async function getTask(args: { id: string; auth: { customer_ref: string } }) {
+  const { id } = args
 
-app.post('/mcp', async (req, res) => {
-  const sessionId = (req.headers['mcp-session-id'] as string) || ''
-  let transport = sessionId ? sessions[sessionId]?.transport : null
-
-  if (!transport && isInitializeRequest(req.body)) {
-    const server = createMcpServer()
-    transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: () => randomUUID(),
-      onsessioninitialized: sid => {
-        sessions[sid] = { transport: transport! }
-      },
-    })
-    await server.connect(transport)
+  // Simulate fetching from database
+  const task = {
+    id,
+    title: 'Sample Task',
+    description: 'Task description',
+    createdAt: new Date().toISOString(),
   }
 
-  if (!transport) {
-    return res.status(400).json({ error: 'Missing or invalid MCP-Session-Id' })
+  return {
+    success: true,
+    task,
   }
+}
 
-  await transport.handleRequest(req, res, req.body)
+async function listTasks(args: {
+  limit?: number
+  offset?: number
+  auth: { customer_ref: string }
+}) {
+  const { limit = 10, offset = 0 } = args
+
+  // Simulate fetching from database
+  const tasks = Array.from({ length: limit }, (_, i) => ({
+    id: (offset + i + 1).toString(),
+    title: `Task ${offset + i + 1}`,
+    description: `Description for task ${offset + i + 1}`,
+    createdAt: new Date().toISOString(),
+  }))
+
+  return {
+    success: true,
+    tasks,
+    total: tasks.length,
+    limit,
+    offset,
+  }
+}
+
+// Create MCP server
+const server = new Server(
+  {
+    name: 'solvapay-protected-server',
+    version: '1.0.0',
+  },
+  {
+    capabilities: {
+      tools: {},
+    },
+  },
+)
+
+// Handle tool listing
+server.setRequestHandler(ListToolsRequestSchema, async () => {
+  return { tools }
+})
+
+// Handle tool execution
+server.setRequestHandler(CallToolRequestSchema, async request => {
+  const { name, arguments: args } = request.params
+
+  try {
+    switch (name) {
+      case 'create_task': {
+        const handler = payable.mcp(createTask)
+        const result = await handler(args)
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result),
+            },
+          ],
+        }
+      }
+
+      case 'get_task': {
+        const handler = payable.mcp(getTask)
+        const result = await handler(args)
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result),
+            },
+          ],
+        }
+      }
+
+      case 'list_tasks': {
+        const handler = payable.mcp(listTasks)
+        const result = await handler(args)
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result),
+            },
+          ],
+        }
+      }
+
+      default:
+        throw new Error(`Unknown tool: ${name}`)
+    }
+  } catch (error) {
+    if (error instanceof PaywallError) {
+      // Return paywall error in MCP format
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              error: 'Payment required',
+              message: error.message,
+              checkoutUrl: error.structuredContent.checkoutUrl,
+              product: error.structuredContent.product,
+            }),
+          },
+        ],
+        isError: true,
+      }
+    }
+
+    // Re-throw other errors
+    throw error
+  }
+})
+
+// Start the server
+async function main() {
+  const transport = new StdioServerTransport()
+  await server.connect(transport)
+
+  console.error('SolvaPay Protected MCP Server started')
+  console.error('Available tools: create_task, get_task, list_tasks')
+  console.error('Paywall protection enabled')
+}
+
+main().catch(error => {
+  console.error('Failed to start MCP server:', error)
+  process.exit(1)
 })
 ```
 
-For the full working example with SSE streaming, session cleanup, and a test script, see the [`mcp-oauth-bridge` example](https://github.com/solvapay/solvapay-sdk/tree/main/examples/mcp-oauth-bridge) in the SDK repository.
+### Testing the Example
 
-## Environment Variables
+1. Save the code to `src/index.ts`
+2. Set environment variable: `SOLVAPAY_SECRET_KEY=sk_...`
+3. Run the server: `node dist/index.js`
 
-| Variable | Required | Description |
-| --- | --- | --- |
-| `SOLVAPAY_SECRET_KEY` | Yes | Your SolvaPay API secret key (starts with `sk_`) |
-| `SOLVAPAY_API_BASE_URL` | No | API base URL (defaults to `https://api.solvapay.com`) |
-| `SOLVAPAY_PRODUCT_REF` | Yes | Product reference for paywall checks and OAuth DCR |
-| `MCP_PUBLIC_BASE_URL` | Yes | Your server's public origin (used in well-known endpoints) |
-| `MCP_PORT` | No | Port to listen on (default: `3004`) |
+The server will listen on stdio and respond to MCP protocol messages.
+
+## Tool Response Format
+
+The MCP adapter automatically formats responses. Your business logic should return:
+
+- **Object**: Automatically converted to MCP response format
+- **Error**: Thrown as exception (PaywallError handled automatically)
+
+```typescript
+async function createTask(args: any) {
+  // Return object - automatically formatted
+  return { success: true, task: {} }
+
+  // Or throw error - automatically handled
+  if (!args.title) {
+    throw new Error('Title is required')
+  }
+}
+```
+
+## Best Practices
+
+1. **Customer Reference**: Always require `customer_ref` in the `auth` object for tool arguments.
+
+2. **Error Handling**: Handle `PaywallError` appropriately to provide clear error messages to MCP clients.
+
+3. **Tool Documentation**: Provide clear descriptions in tool schemas so users understand what each tool does.
+
+4. **Type Safety**: Use TypeScript for better type safety and developer experience.
+
+5. **Environment Variables**: Store API keys in environment variables, not in code.
+
+6. **Tool Naming**: Use clear, descriptive names for your tools.
 
 ## Next Steps
 
-- [Test MCP server auth and paywall](/mcp-server/testing-auth-and-paywall) -- Live prompt testing
-  for auth and paywall flows in Claude or Cursor
-- [Express.js Integration Guide](./express.mdx) -- Protect HTTP API endpoints with `payable.http()`
-- [Error Handling](./error-handling.mdx) -- Advanced error handling patterns
-- [Webhooks](./webhooks.mdx) -- Handle purchase and payment events
-- [Hosted MCP Pay](/mcp-pay/overview) -- Managed alternative with zero-code setup
+- [Express.js Integration Guide](./express) - Learn HTTP framework integration
+- [Usage Events](./usage-events) - Track and bill tool usage
+- [Custom Authentication Adapters](./custom-auth) - Build custom auth adapters
+- [API Reference](/sdks/typescript/intro) - Full API documentation

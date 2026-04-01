@@ -1,0 +1,44 @@
+---
+title: "Add a paywall to an API or app"
+description: "Use the SolvaPay TypeScript SDK to add paywall checks to APIs, apps, and MCP tools with full customization."
+---
+
+Use this guide when you want full control and plan to integrate monetization directly in your codebase.
+
+## Who this is for
+
+- Teams building APIs, web apps, or custom MCP flows
+- Teams that need custom auth, routing, or entitlement behavior
+- Teams that want code-level control over monetization
+
+## What you will achieve
+
+By the end, your API or app enforces plan access with the SolvaPay TypeScript SDK.
+
+## Prerequisites
+
+- A SolvaPay account
+- A product and plan in the SolvaPay Console
+- A TypeScript project (Node.js, Next.js, Express, or MCP server)
+
+## Steps
+
+1. Run [CLI setup](/sdks/typescript/setup/cli) or [installation](/sdks/typescript/setup/installation).
+2. Complete [SDK quick start](/sdks/typescript/setup/quick-start).
+3. Choose the framework guide you need:
+   - [Express](/sdks/typescript/guides/express)
+   - [Next.js](/sdks/typescript/guides/nextjs)
+   - [MCP](/sdks/typescript/guides/mcp)
+4. Configure auth using [custom auth](/sdks/typescript/guides/custom-auth) if needed.
+5. Add usage billing with [usage events](/sdks/typescript/guides/usage-events) where required.
+
+## Verify
+
+- Protected endpoints or tools return paywall responses for missing purchases
+- Valid purchases pass and execute business logic
+- Usage appears in sandbox data
+
+## Next related tasks
+
+- [Add inline chat checkout with React](/guides/add-inline-chat-checkout-react)
+- [Handle webhooks](/guides/handle-webhooks)

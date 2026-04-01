@@ -1,11 +1,11 @@
 ---
-title: "Getting Started"
-description: "Connect SolvaPay MCP Server to your AI assistant to manage customers, products, purchases, and payments."
+title: "Admin MCP Server getting started"
+description: "Connect the SolvaPay admin MCP Server to your AI assistant to manage your provider account and generate checkout sessions."
 ---
 
-The SolvaPay MCP Server lets you manage your entire SolvaPay account — customers, products, purchases, payments, and more — directly from any AI assistant that supports the Model Context Protocol (MCP).
+The SolvaPay admin MCP Server lets providers manage a SolvaPay account directly from any AI assistant that supports MCP.
 
-Instead of switching between your dashboard and your IDE, you can ask your AI assistant to create customers, check revenue, process refunds, and manage purchases using natural language.
+Instead of switching between your IDE and the SolvaPay Console, you can ask your assistant to create customers, check revenue, process refunds, manage purchases, and generate checkout sessions.
 
 ## What is MCP?
 
@@ -20,13 +20,13 @@ The Model Context Protocol is an open standard that allows AI assistants (like C
 
 How you authenticate depends on your MCP client:
 
-- **OAuth-capable clients** (Claude.ai, Claude Desktop) — You log in with your SolvaPay dashboard credentials directly. No API key required. The MCP server redirects you to the SolvaPay login page, and after you sign in and authorize, the client receives a token automatically.
+- **OAuth-capable clients** (Claude.ai, Claude Desktop) — You log in with your SolvaPay Console credentials directly. No API key required. The MCP server redirects you to the SolvaPay login page, and after you sign in and authorize, the client receives a token automatically.
 
-- **Config-based clients** (Cursor, VS Code, other editors) — These clients don't support OAuth for MCP. You'll need an API key from **Settings > API Keys** in your [SolvaPay dashboard](https://app.solvapay.com) and add it to your client configuration.
+- **Config-based clients** (Cursor, VS Code, other editors) — These clients don't support OAuth for MCP. You'll need an API key from **Settings > API Keys** in [SolvaPay Console](https://app.solvapay.com) and add it to your client configuration.
 
 API keys are prefixed with `sk_sandbox_` (sandbox / test data) or `sk_live_` (production). Use sandbox keys during development and testing.
 
-## What Can You Do?
+## What can you do?
 
 Once connected, you can manage your entire SolvaPay account through natural conversation:
 
@@ -37,15 +37,17 @@ Once connected, you can manage your entire SolvaPay account through natural conv
 
 See the full list of [available tools](/mcp-server/tools) and [detailed examples](/mcp-server/examples).
 
-## Claude.ai Connector
+## Claude.ai connector
 
 SolvaPay works as a native Claude.ai connector. Add it in **Settings > Connectors** — no local setup, config files, or API keys required. Claude handles the OAuth flow automatically and redirects you to the SolvaPay login page to sign in. See the [installation guide](/mcp-server/installation#claudeai-web--mobile) for details.
 
-## MCP Server vs MCP Pay
+## Admin MCP Server vs MCP Pay
 
-The **SolvaPay MCP Server** is for managing your SolvaPay provider account — think of it as a conversational dashboard. [MCP Pay](/mcp-pay/overview) is a different product that lets you monetize your own MCP servers by proxying and paywalling tool access.
+The **SolvaPay admin MCP Server** is for provider account operations. Think of it as a conversational admin layer for your SolvaPay account.
 
-## Next Steps
+[MCP Pay](/mcp-pay/overview) is a separate product for hosted MCP auth and monetization of your own MCP servers.
+
+## Next steps
 
 1. [Install and configure](/mcp-server/installation) the MCP server in your AI assistant
 2. Browse the [available tools](/mcp-server/tools)

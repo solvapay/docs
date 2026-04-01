@@ -1,31 +1,29 @@
 ---
-title: "SolvaPay Documentation"
+title: "SolvaPay documentation"
 sidebarTitle: "Introduction"
-description: "Learn how to launch SolvaPay for MCP Pay, MCP Server, and the TypeScript SDK."
+description: "Documentation for adding authentication, identity, payments, and billing with MCP Pay or the TypeScript SDK."
 mode: "wide"
 ---
 
-<div
-  id="welcome-home"
-  style={{ margin: '2rem auto 2.5rem auto', maxWidth: '980px', textAlign: 'center' }}
->
+<div id="welcome-home" style={{ margin: '2rem auto 2.5rem auto', maxWidth: '980px' }}>
   <div
     style={{
       margin: '0 auto',
-      padding: 'clamp(2.25rem, 6vw, 4.5rem) clamp(1rem, 4vw, 2rem) clamp(2rem, 4vw, 3.5rem)',
+      padding: 'clamp(2rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2rem)',
       borderRadius: '1.25rem',
+      textAlign: 'center',
       background:
         'radial-gradient(circle at top center, color-mix(in srgb, var(--color-primary) 10%, transparent) 0%, transparent 65%)',
     }}
   >
     <h1
       style={{
-        fontSize: 'clamp(2rem, 8vw, 3.35rem)',
+        fontSize: 'clamp(2rem, 8vw, 3.2rem)',
         lineHeight: 1.1,
         margin: '0 auto 1rem',
         letterSpacing: '-0.02em',
         textAlign: 'center',
-        maxWidth: '14ch',
+        maxWidth: '16ch',
         textWrap: 'balance',
       }}
     >
@@ -33,7 +31,7 @@ mode: "wide"
     </h1>
     <p
       style={{
-        fontSize: 'clamp(1.05rem, 3.7vw, 1.32rem)',
+        fontSize: 'clamp(1.02rem, 3.5vw, 1.25rem)',
         color: 'var(--color-text-secondary)',
         marginBottom: '0.75rem',
       }}
@@ -42,33 +40,37 @@ mode: "wide"
     </p>
     <p
       style={{
-        fontSize: 'clamp(0.98rem, 3.2vw, 1.05rem)',
+        fontSize: 'clamp(0.95rem, 3vw, 1.02rem)',
         color: 'var(--color-text-secondary)',
       }}
     >
-      Complete onboarding with company details, create your first product with pricing, then launch with Hosted MCP Pay or the TypeScript SDK.
+      Choose MCP Pay for hosted flows, or use the TypeScript SDK for code-level integration.
     </p>
   </div>
 </div>
 
-<div style={{ margin: '0 auto 3rem', maxWidth: '1240px' }}>
-  <Columns cols={2}>
-    <Card title="Get started" icon="rocket" href="/get-started/create-account">
-      Sign up, complete onboarding, create your first product with pricing, then go live.
-    </Card>
-    <Card title="MCP Pay" icon="plug" href="/mcp-pay/overview">
-      Set up hosted monetization flows with authentication and billing.
-    </Card>
-    {/* Wallet docs are intentionally hidden from users for now.
-        Restore this card when the Wallet section is ready to relaunch. */}
-    {/* <Card title="Wallet" icon="wallet" href="/wallet/overview">
-      Integrate wallet features, vouchers, and provider workflows.
-    </Card> */}
-    <Card title="MCP Server" icon="server" href="/mcp-server/getting-started">
-      Connect SolvaPay tools to your AI assistant through MCP.
-    </Card>
-    <Card title="TypeScript SDK" icon="code" href="/sdks/typescript/intro">
-      Protect endpoints and tools with paywall-aware SDK helpers.
-    </Card>
-  </Columns>
-</div>
+## Choose your starting path
+
+<Columns cols={2}>
+  <Card
+    title="Hosted MCP auth and monetization"
+    icon="credit-card"
+    href="/guides/monetize-mcp-server-no-code"
+  >
+    Monetize an existing MCP server with hosted auth, checkout, and account pages.
+  </Card>
+  <Card title="TypeScript SDK" icon="code" href="/sdks/typescript/setup/cli">
+    Run `npx solvapay init` to connect your project and start SDK integration in minutes.
+  </Card>
+</Columns>
+
+## Developer tools
+
+<Columns cols={2}>
+  <Card title="Admin MCP Server" icon="server" href="/guides/manage-account-with-admin-mcp">
+    Manage your SolvaPay account and generate checkout sessions from your AI assistant.
+  </Card>
+  <Card title="Use the SolvaPay agent skill" icon="sparkles" href="/guides/use-agent-skill">
+    Start with one command: `npx skills add solvapay`. Use platform-specific setup only if needed.
+  </Card>
+</Columns>

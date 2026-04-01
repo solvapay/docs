@@ -29,3 +29,11 @@ footer p:has(> a[href*='mintlify.com']) {
 #content-container:has(#welcome-home) #pagination {
   display: none !important;
 }
+
+/* Home page: hide right-side TOC/context rail */
+#content-container:has(#welcome-home) aside[aria-label='On this page'],
+#content-container:has(#welcome-home) nav[aria-label='On this page'],
+#content-container:has(#welcome-home) #table-of-contents,
+#content-container:has(#welcome-home) #toc {
+  display: none !important;
+}

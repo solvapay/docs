@@ -22,11 +22,25 @@
             "icon": "rocket",
             "pages": [
               "index",
-              "get-started/create-account",
               "get-started/choose-your-path",
+              "get-started/create-account",
               "get-started/create-product",
               "get-started/test-in-sandbox",
               "get-started/go-live"
+            ]
+          },
+          {
+            "group": "Guides",
+            "icon": "compass",
+            "pages": [
+              "guides/use-agent-skill",
+              "guides/monetize-mcp-server-no-code",
+              "guides/monetize-mcp-server-with-sdk",
+              "guides/add-paywall-to-api-or-app",
+              "guides/add-inline-chat-checkout-react",
+              "guides/manage-account-with-admin-mcp",
+              "guides/handle-webhooks",
+              "mcp-server/testing-auth-and-paywall"
             ]
           },
           {
@@ -42,19 +56,11 @@
             ]
           },
           {
-            "group": "Plans",
+            "group": "Plans and billing",
             "icon": "tags",
             "pages": [
               "plans/overview",
               "plans/billing"
-            ]
-          },
-          {
-            "group": "Meters",
-            "icon": "gauge",
-            "pages": [
-              "meters/overview",
-              "meters/events"
             ]
           },
           {
@@ -65,11 +71,10 @@
             ]
           },
           {
-            "group": "MCP Server",
+            "group": "Admin MCP Server",
             "icon": "server",
             "pages": [
               "mcp-server/getting-started",
-              "mcp-server/testing-auth-and-paywall",
               "mcp-server/installation",
               "mcp-server/tools",
               "mcp-server/examples",
@@ -84,27 +89,21 @@
         "groups": [
           {
             "group": "TypeScript SDK",
-            "icon": "braces",
+            "icon": "code",
             "pages": [
               "sdks/typescript/intro",
-              "sdks/typescript/getting-started/introduction",
-              "sdks/typescript/getting-started/cli",
-              "sdks/typescript/getting-started/installation",
-              "sdks/typescript/getting-started/quick-start",
-              "sdks/typescript/getting-started/core-concepts",
-              "sdks/typescript/guides/architecture",
+              "sdks/typescript/setup/cli",
+              "sdks/typescript/setup/installation",
+              "sdks/typescript/setup/quick-start",
+              "sdks/typescript/setup/core-concepts",
               "sdks/typescript/guides/express",
               "sdks/typescript/guides/nextjs",
               "sdks/typescript/guides/react",
               "sdks/typescript/guides/mcp",
               "sdks/typescript/guides/custom-auth",
-              "sdks/typescript/guides/error-handling",
-              "sdks/typescript/guides/testing",
-              "sdks/typescript/guides/performance",
               "sdks/typescript/guides/usage-events",
               "sdks/typescript/guides/webhooks",
-              "sdks/typescript/examples/overview",
-              "sdks/typescript/publishing"
+              "sdks/typescript/guides/examples"
             ]
           }
         ]
@@ -126,7 +125,7 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:contact@solvapay.com"
+        "href": "mailto:support@solvapay.com"
       }
     ],
     "primary": {
@@ -135,6 +134,16 @@
       "href": "https://app.solvapay.com"
     }
   },
+  "redirects": [
+    {
+      "source": "/get-started",
+      "destination": "/"
+    },
+    {
+      "source": "/get-started/index",
+      "destination": "/"
+    }
+  ],
   "contextual": {
     "options": [
       "copy",

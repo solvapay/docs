@@ -3,8 +3,8 @@ title: "Webhook Handling"
 description: "Handle SolvaPay webhooks in your TypeScript application."
 ---
 
-For a complete guide on webhooks — including setup, signature verification, the full event catalog,
-payload schemas, and best practices — see the central [Webhooks documentation](/webhooks).
+For the complete webhook guide — setup, signature verification, event catalog, payload schemas,
+and best practices — see the central [Webhooks documentation](/webhooks).
 
 ## Quick Reference
 
@@ -19,19 +19,13 @@ const event = verifyWebhook({
 
 switch (event.type) {
   case 'payment.succeeded':
-    // handle payment
-    break
-  case 'payment.failed':
-    // handle failed payment
+    // fulfil the order
     break
   case 'purchase.created':
-    // handle new purchase
+    // grant access
     break
   case 'purchase.cancelled':
     // revoke access
-    break
-  case 'checkout_session.created':
-    // handle new checkout session
     break
 }
 ```
@@ -48,4 +42,21 @@ const event = await verifyWebhook({
 })
 ```
 
-See [Webhooks](/webhooks) for the full guide.
+## Event Types
+
+| Event | Description |
+|---|---|
+| `payment.succeeded` | Payment successfully processed |
+| `payment.failed` | Payment attempt failed |
+| `payment.refunded` | Refund successfully processed |
+| `payment.refund_failed` | Refund attempt failed |
+| `purchase.created` | New purchase created |
+| `purchase.updated` | Purchase modified |
+| `purchase.cancelled` | Purchase cancelled |
+| `purchase.expired` | Purchase expired |
+| `purchase.suspended` | Purchase suspended |
+| `customer.created` | Customer created |
+| `customer.updated` | Customer updated |
+| `customer.deleted` | Customer deleted |
+
+See [Webhooks documentation](/webhooks) for full payload schemas and integration examples.

@@ -148,8 +148,8 @@ A daily cron job (10:00 AM UTC) handles recurring plan renewals:
 
 A daily cron job (8:00 AM UTC) handles trial expirations:
 
-- If the plan requires payment: the purchase is **suspended** until payment is received
-- If the plan is a free tier: the purchase transitions to **active**
+- If `requiresPayment` is `true`: the purchase is **suspended** until payment is received
+- If `requiresPayment` is `false`: the purchase transitions to **active**
 
 ## Usage Reset
 

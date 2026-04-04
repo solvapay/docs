@@ -1,23 +1,93 @@
 {
   "components": {
     "schemas": {
-      "AuthResponse": {
-        "properties": {},
+      "BulkCreateUsageRequest": {
+        "properties": {
+          "events": {
+            "items": {
+              "properties": {
+                "actionType": {
+                  "default": "api_call",
+                  "enum": [
+                    "transaction",
+                    "api_call",
+                    "hour",
+                    "email",
+                    "storage",
+                    "custom"
+                  ],
+                  "type": "string"
+                },
+                "customerId": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "duration": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "errorMessage": {
+                  "type": "string"
+                },
+                "idempotencyKey": {
+                  "maxLength": 256,
+                  "type": "string"
+                },
+                "metadata": {
+                  "additionalProperties": {},
+                  "type": "object"
+                },
+                "outcome": {
+                  "default": "success",
+                  "enum": [
+                    "success",
+                    "paywall",
+                    "fail"
+                  ],
+                  "type": "string"
+                },
+                "productReference": {
+                  "type": "string"
+                },
+                "purchaseReference": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "units": {
+                  "default": 1,
+                  "exclusiveMaximum": false,
+                  "exclusiveMinimum": false,
+                  "maximum": 100000,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "customerId",
+                "timestamp"
+              ],
+              "type": "object"
+            },
+            "maxItems": 1000,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "events"
+        ],
         "type": "object"
       },
       "CancelPurchaseRequest": {
         "properties": {
           "reason": {
-            "description": "Reason for cancellation",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "CancelRenewalRequest": {
-        "properties": {
-          "reason": {
-            "description": "Reason for cancelling renewal",
             "type": "string"
           }
         },
@@ -26,28 +96,20 @@
       "CheckLimitRequest": {
         "properties": {
           "customerRef": {
-            "description": "Customer reference identifier",
-            "example": "cus_3C4D5E6F",
+            "minLength": 1,
             "type": "string"
           },
           "meterName": {
-            "description": "Canonical usage meter name used for limit checks (for example: requests, tokens).",
-            "example": "requests",
             "type": "string"
           },
           "planRef": {
-            "description": "Plan reference to pre-select when creating a checkout session. If provided and the customer needs to purchase, the checkout page skips plan selection and shows the payment form directly.",
-            "example": "pln_2B3C4D5E",
             "type": "string"
           },
           "productRef": {
-            "description": "Product reference identifier",
-            "example": "prd_1A2B3C4D",
+            "minLength": 1,
             "type": "string"
           },
           "usageType": {
-            "description": "Usage type alias for meterName. If both are provided, meterName takes precedence.",
-            "example": "requests",
             "type": "string"
           }
         },
@@ -57,106 +119,227 @@
         ],
         "type": "object"
       },
-      "CheckoutSessionResponse": {
+      "CloneProductDto": {
         "properties": {
-          "amount": {
-            "description": "Amount in cents",
-            "example": 2999,
-            "type": "number"
-          },
-          "checkoutUrl": {
-            "description": "Checkout URL to open the checkout page",
-            "example": "https://solvapay.com/customer/checkout?id=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
-            "type": "string"
-          },
-          "currency": {
-            "description": "Currency code",
-            "example": "USD",
-            "type": "string"
-          },
-          "id": {
-            "description": "Checkout session ID",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "sessionId": {
-            "description": "Public session ID used in checkout URL",
-            "example": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
-            "type": "string"
-          },
-          "status": {
-            "description": "Session status",
-            "example": "active",
+          "name": {
+            "minLength": 1,
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "ConfigureMcpPlansDto": {
+        "properties": {
+          "plans": {
+            "items": {
+              "properties": {
+                "billingCycle": {
+                  "enum": [
+                    "weekly",
+                    "monthly",
+                    "quarterly",
+                    "yearly",
+                    "custom"
+                  ],
+                  "type": "string"
+                },
+                "billingModel": {
+                  "enum": [
+                    "pre-paid",
+                    "post-paid"
+                  ],
+                  "type": "string"
+                },
+                "currency": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "features": {
+                  "additionalProperties": {},
+                  "type": "object"
+                },
+                "freeUnits": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "key": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "limit": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "meterId": {
+                  "type": "string"
+                },
+                "name": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "price": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "pricePerUnit": {
+                  "type": "number"
+                },
+                "type": {
+                  "enum": [
+                    "recurring",
+                    "one-time",
+                    "usage-based"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name",
+                "price",
+                "currency"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "toolMapping": {
+            "items": {
+              "properties": {
+                "name": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "planKeys": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "name",
+                "planKeys"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ConfigureMcpPlansResult": {
+        "properties": {
+          "mcpServer": {
+            "additionalProperties": true,
+            "description": "Updated MCP server identity",
+            "type": "object"
+          },
+          "planMap": {
+            "additionalProperties": true,
+            "description": "Resolved plan mapping by key (includes existing free plan)",
+            "type": "object"
+          },
+          "product": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SdkProductResponse"
+              }
+            ],
+            "description": "Updated product"
+          }
+        },
         "required": [
-          "id",
-          "sessionId",
-          "amount",
-          "currency",
-          "status",
-          "checkoutUrl"
+          "product",
+          "mcpServer",
+          "planMap"
         ],
         "type": "object"
       },
       "CreateCheckoutSessionRequest": {
         "properties": {
-          "customerReference": {
-            "description": "Customer reference",
-            "example": "cus_3c4d5e6f7g8h",
+          "customerRef": {
+            "minLength": 1,
             "type": "string"
           },
           "planRef": {
-            "description": "Plan reference (optional)",
-            "example": "pln_2b3c4d5e6f7g",
             "type": "string"
           },
           "productRef": {
-            "description": "Product reference (required)",
-            "example": "prd_1a2b3c4d5e6f",
+            "minLength": 1,
+            "type": "string"
+          },
+          "purpose": {
+            "enum": [
+              "credit_topup"
+            ],
+            "type": "string"
+          },
+          "returnUrl": {
             "type": "string"
           }
         },
         "required": [
-          "customerReference",
-          "productRef"
+          "customerRef"
+        ],
+        "type": "object"
+      },
+      "CreateCheckoutSessionResponse": {
+        "properties": {
+          "checkoutUrl": {
+            "description": "Full checkout URL based on backend configuration (ready to redirect customer)",
+            "example": "https://solvapay.com/customer/checkout?id=e3f1c2d4b6a89f001122334455667788",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "Checkout session ID/token",
+            "example": "e3f1c2d4b6a89f001122334455667788",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sessionId",
+          "checkoutUrl"
         ],
         "type": "object"
       },
       "CreateCustomerRequest": {
         "properties": {
           "email": {
-            "description": "Customer email address (required)",
-            "example": "customer@example.com",
+            "format": "email",
             "type": "string"
           },
           "externalRef": {
-            "description": "External reference ID from your auth system to map this customer to an auth user (optional)",
-            "example": "auth_user_12345",
             "type": "string"
           },
+          "metadata": {
+            "additionalProperties": {},
+            "selfRequired": false,
+            "type": "object"
+          },
           "name": {
-            "description": "Customer full name (optional)",
-            "example": "John Doe",
+            "type": "string"
+          },
+          "telephone": {
             "type": "string"
           }
         },
         "required": [
-          "email"
+          "email",
+          "metadata"
         ],
         "type": "object"
       },
       "CreateCustomerSessionRequest": {
         "properties": {
           "customerRef": {
-            "description": "Customer reference identifier",
-            "example": "cus_3c4d5e6f7g8h",
+            "minLength": 1,
             "type": "string"
           },
           "productRef": {
-            "description": "Optional product reference or ID to scope the customer manage page to a single product.",
-            "example": "prd_1a2b3c4d5e6f",
             "type": "string"
           }
         },
@@ -184,74 +367,58 @@
         ],
         "type": "object"
       },
-      "CustomerWebhookObject": {
+      "CreatePaymentIntentDto": {
         "properties": {
-          "created": {
-            "description": "Unix timestamp when the customer event object was generated",
-            "example": 1774965198,
-            "type": "number"
+          "amount": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 10000000,
+            "minimum": 100,
+            "type": "integer"
           },
-          "email": {
-            "description": "Customer email address",
-            "example": "customer@example.com",
+          "currency": {
             "type": "string"
           },
-          "id": {
-            "description": "Internal customer ID",
-            "example": "69cbd1cea27ee92fbe90413f",
+          "customerReference": {
+            "minLength": 1,
             "type": "string"
           },
-          "name": {
-            "description": "Customer display name",
-            "example": "Test User",
+          "description": {
+            "maxLength": 500,
             "type": "string"
           },
-          "product": {
-            "description": "Product reference captured during OAuth bootstrap when available",
-            "nullable": true,
-            "properties": {
-              "reference": {
-                "description": "Product reference",
-                "example": "mcp_AJDHR12U",
-                "type": "string"
-              }
-            },
-            "required": [
-              "reference"
+          "planRef": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "pricingTier": {
+            "type": "string"
+          },
+          "productRef": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "purpose": {
+            "default": "product",
+            "enum": [
+              "product",
+              "credit_topup",
+              "usage_billing"
             ],
-            "type": "object"
-          },
-          "reference": {
-            "description": "Public customer reference",
-            "example": "cus_0VXPU8NE",
-            "type": "string"
-          },
-          "status": {
-            "description": "Customer status",
-            "example": "active",
-            "type": "string"
-          },
-          "telephone": {
-            "description": "Customer telephone number",
             "type": "string"
           }
         },
         "required": [
-          "id",
-          "created",
-          "product"
+          "customerReference"
         ],
         "type": "object"
       },
       "CreatePlanRequest": {
         "properties": {
           "accessExpiryDays": {
-            "description": "Access expiry in days",
-            "example": 30,
             "type": "number"
           },
           "billingCycle": {
-            "description": "Billing cycle (required for recurring/hybrid, optional for post-paid usage-based)",
             "enum": [
               "weekly",
               "monthly",
@@ -259,296 +426,199 @@
               "yearly",
               "custom"
             ],
-            "example": "monthly",
+            "type": "string"
+          },
+          "billingModel": {
+            "enum": [
+              "pre-paid",
+              "post-paid"
+            ],
             "type": "string"
           },
           "currency": {
-            "description": "Currency code (ISO 4217)",
-            "enum": [
-              "USD",
-              "EUR",
-              "GBP",
-              "SEK",
-              "NOK",
-              "DKK",
-              "CAD",
-              "AUD",
-              "JPY",
-              "CHF",
-              "PLN",
-              "CZK",
-              "HUF",
-              "RON",
-              "BGN",
-              "HRK",
-              "RSD",
-              "MKD",
-              "BAM",
-              "ALL",
-              "ISK",
-              "TRY",
-              "RUB",
-              "UAH",
-              "BYN",
-              "MDL",
-              "GEL",
-              "AMD",
-              "AZN",
-              "KZT",
-              "KGS",
-              "TJS",
-              "TMT",
-              "UZS",
-              "MNT",
-              "CNY",
-              "KRW",
-              "THB",
-              "VND",
-              "IDR",
-              "MYR",
-              "SGD",
-              "PHP",
-              "INR",
-              "PKR",
-              "BDT",
-              "LKR",
-              "NPR",
-              "AFN",
-              "IRR",
-              "IQD",
-              "JOD",
-              "KWD",
-              "LBP",
-              "OMR",
-              "QAR",
-              "SAR",
-              "SYP",
-              "AED",
-              "YER",
-              "ILS",
-              "EGP",
-              "MAD",
-              "TND",
-              "DZD",
-              "LYD",
-              "SDG",
-              "ETB",
-              "KES",
-              "TZS",
-              "UGX",
-              "RWF",
-              "BIF",
-              "DJF",
-              "SOS",
-              "ERN",
-              "SLL",
-              "GMD",
-              "GNF",
-              "CVE",
-              "STN",
-              "AOA",
-              "ZAR",
-              "BWP",
-              "SZL",
-              "LSL",
-              "NAD",
-              "ZMW",
-              "ZWL",
-              "MZN",
-              "MWK",
-              "MGA",
-              "MUR",
-              "SCR",
-              "KMF",
-              "MVR"
-            ],
-            "example": "USD",
             "type": "string"
           },
           "default": {
-            "description": "Whether this is the default plan",
-            "example": false,
             "type": "boolean"
           },
+          "description": {
+            "type": "string"
+          },
           "features": {
-            "additionalProperties": true,
-            "description": "Plan features (generic key/value, shape is provider-defined)",
-            "example": {
-              "apiAccess": true,
-              "prioritySupport": false
-            },
+            "additionalProperties": {},
+            "selfRequired": false,
             "type": "object"
           },
           "freeUnits": {
-            "description": "Number of free units included",
-            "example": 100,
             "type": "number"
           },
-          "isFreeTier": {
-            "description": "Whether this is a free tier plan",
-            "example": false,
-            "type": "boolean"
-          },
           "limit": {
-            "description": "Usage limit for the meter",
-            "example": 10000,
             "type": "number"
           },
           "limits": {
-            "additionalProperties": true,
-            "description": "Usage limits (shape varies by plan type)",
-            "example": {
-              "maxTransactions": 1000
-            },
+            "additionalProperties": {},
+            "selfRequired": false,
             "type": "object"
           },
           "maxActiveUsers": {
-            "description": "Maximum number of active users",
-            "example": 10,
             "type": "number"
           },
           "metadata": {
-            "additionalProperties": true,
-            "description": "Additional metadata",
+            "additionalProperties": {},
+            "selfRequired": false,
             "type": "object"
           },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
           "price": {
-            "description": "Plan price in cents",
-            "example": 2999,
             "type": "number"
           },
-          "requiresPayment": {
-            "description": "Whether payment is required",
-            "example": true,
-            "type": "boolean"
+          "pricePerUnit": {
+            "type": "number"
           },
           "status": {
-            "description": "Plan status",
             "enum": [
               "active",
               "inactive",
               "archived"
             ],
-            "example": "active",
             "type": "string"
           },
           "type": {
-            "description": "Plan type exposed in SDK",
             "enum": [
               "recurring",
+              "usage-based",
+              "hybrid",
               "one-time"
             ],
-            "example": "recurring",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "CreatePreregistrationDto": {
-        "properties": {
-          "businessType": {
-            "example": "SaaS",
-            "type": "string"
-          },
-          "companyName": {
-            "example": "Acme Corp",
-            "type": "string"
-          },
-          "customFields": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object"
-          },
-          "email": {
-            "example": "jane@company.com",
-            "type": "string"
-          },
-          "fullName": {
-            "example": "Jane Smith",
-            "type": "string"
-          },
-          "useCase": {
-            "example": "Purchase billing for our platform",
-            "maxLength": 500,
             "type": "string"
           }
         },
         "required": [
-          "email",
-          "fullName",
-          "companyName"
+          "limits",
+          "metadata",
+          "features"
         ],
         "type": "object"
       },
       "CreateProductRequest": {
         "properties": {
           "config": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ProductConfigDto"
+            "properties": {
+              "deliveryMethod": {
+                "type": "string"
+              },
+              "fulfillmentType": {
+                "type": "string"
+              },
+              "validityPeriod": {
+                "type": "number"
               }
-            ],
-            "description": "Product-specific configuration"
+            },
+            "selfRequired": false,
+            "type": "object"
           },
           "description": {
-            "description": "Product description",
-            "example": "AI-powered writing tool",
             "type": "string"
           },
           "imageUrl": {
-            "description": "URL to the product image",
             "type": "string"
           },
           "isMcpPay": {
-            "default": false,
-            "description": "Whether this product uses MCP Pay proxy",
             "type": "boolean"
           },
           "metadata": {
-            "additionalProperties": true,
-            "description": "Arbitrary key-value metadata",
+            "additionalProperties": {},
+            "selfRequired": false,
             "type": "object"
           },
           "name": {
-            "description": "Product name",
-            "example": "AI Writing Assistant",
+            "minLength": 1,
             "type": "string"
           },
           "productType": {
-            "description": "Free-form product type defined by the provider",
-            "example": "Coding Assistant",
             "type": "string"
           }
         },
         "required": [
-          "name"
+          "name",
+          "config",
+          "metadata"
         ],
         "type": "object"
       },
-      "CreateSecretKey": {
-        "properties": {},
-        "type": "object"
-      },
-      "CreateUser": {
-        "properties": {},
-        "type": "object"
-      },
-      "CreateWebhookEndpointDto": {
+      "CreateUsageRequest": {
         "properties": {
-          "description": {
-            "description": "Webhook endpoint description",
-            "example": "Production webhook",
+          "actionType": {
+            "default": "api_call",
+            "enum": [
+              "transaction",
+              "api_call",
+              "hour",
+              "email",
+              "storage",
+              "custom"
+            ],
             "type": "string"
           },
-          "url": {
-            "description": "Webhook endpoint URL",
-            "example": "https://example.com/webhook",
+          "customerId": {
+            "minLength": 1,
             "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "duration": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "number"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "maxLength": 256,
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {},
+            "selfRequired": false,
+            "type": "object"
+          },
+          "outcome": {
+            "default": "success",
+            "enum": [
+              "success",
+              "paywall",
+              "fail"
+            ],
+            "type": "string"
+          },
+          "productReference": {
+            "type": "string"
+          },
+          "purchaseReference": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "units": {
+            "default": 1,
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 100000,
+            "minimum": 0,
+            "type": "integer"
           }
         },
         "required": [
-          "url"
+          "customerId",
+          "metadata",
+          "timestamp"
         ],
         "type": "object"
       },
@@ -586,230 +656,6 @@
           "reference",
           "name",
           "email"
-        ],
-        "type": "object"
-      },
-      "CustomerSessionResponse": {
-        "properties": {
-          "customerUrl": {
-            "description": "Customer URL to open the customer page",
-            "example": "https://solvapay.com/customer/manage?id=e3f1c2d4b6a89f001122334455667788",
-            "type": "string"
-          },
-          "id": {
-            "description": "Customer session ID",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "sessionId": {
-            "description": "Public session ID used in customer URL",
-            "example": "e3f1c2d4b6a89f001122334455667788",
-            "type": "string"
-          },
-          "status": {
-            "description": "Session status",
-            "example": "active",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "sessionId",
-          "status",
-          "customerUrl"
-        ],
-        "type": "object"
-      },
-      "DynamicClientRegistrationDto": {
-        "properties": {
-          "client_name": {
-            "example": "My AI Agent",
-            "type": "string"
-          },
-          "client_uri": {
-            "example": "https://example.com",
-            "type": "string"
-          },
-          "grant_types": {
-            "example": [
-              "authorization_code",
-              "refresh_token"
-            ],
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "logo_uri": {
-            "example": "https://example.com/logo.png",
-            "type": "string"
-          },
-          "policy_uri": {
-            "example": "https://example.com/policy",
-            "type": "string"
-          },
-          "redirect_uris": {
-            "example": [
-              "https://agent.example.com/callback"
-            ],
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "response_types": {
-            "example": [
-              "code"
-            ],
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "software_id": {
-            "example": "agent-123",
-            "type": "string"
-          },
-          "software_version": {
-            "example": "1.0.0",
-            "type": "string"
-          },
-          "tos_uri": {
-            "example": "https://example.com/tos",
-            "type": "string"
-          }
-        },
-        "required": [
-          "client_name",
-          "redirect_uris"
-        ],
-        "type": "object"
-      },
-      "DynamicClientRegistrationResponseDto": {
-        "properties": {
-          "client_id": {
-            "example": "client-id-123",
-            "type": "string"
-          },
-          "client_id_issued_at": {
-            "example": 1734567890,
-            "type": "number"
-          },
-          "client_name": {
-            "example": "My AI Agent",
-            "type": "string"
-          },
-          "client_secret": {
-            "example": "client-secret-456",
-            "type": "string"
-          },
-          "client_secret_expires_at": {
-            "example": 0,
-            "type": "number"
-          },
-          "grant_types": {
-            "example": [
-              "authorization_code",
-              "refresh_token"
-            ],
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "redirect_uris": {
-            "example": [
-              "https://agent.example.com/callback"
-            ],
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "response_types": {
-            "example": [
-              "code"
-            ],
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "scope": {
-            "example": "openid profile email",
-            "type": "string"
-          },
-          "token_endpoint_auth_method": {
-            "example": "client_secret_basic",
-            "type": "string"
-          }
-        },
-        "required": [
-          "client_id",
-          "client_secret",
-          "client_id_issued_at",
-          "client_secret_expires_at",
-          "client_name",
-          "redirect_uris",
-          "grant_types",
-          "response_types",
-          "scope",
-          "token_endpoint_auth_method"
-        ],
-        "type": "object"
-      },
-      "ExecuteAnalyticsQuery": {
-        "properties": {},
-        "type": "object"
-      },
-      "ExecuteMultipleQueries": {
-        "properties": {},
-        "type": "object"
-      },
-      "ExternalAccount": {
-        "properties": {
-          "accountHolderName": {
-            "description": "Account holder name",
-            "example": "John Doe",
-            "type": "string"
-          },
-          "accountHolderType": {
-            "description": "Account holder type",
-            "enum": [
-              "individual",
-              "company"
-            ],
-            "example": "individual",
-            "type": "string"
-          },
-          "accountNumber": {
-            "description": "Account number",
-            "example": "000123456789",
-            "type": "string"
-          },
-          "country": {
-            "description": "Country code",
-            "example": "US",
-            "type": "string"
-          },
-          "currency": {
-            "description": "Currency code",
-            "example": "usd",
-            "type": "string"
-          },
-          "routingNumber": {
-            "description": "Routing number",
-            "example": "110000000",
-            "type": "string"
-          }
-        },
-        "required": [
-          "country",
-          "currency",
-          "accountHolderName",
-          "accountHolderType",
-          "routingNumber",
-          "accountNumber"
         ],
         "type": "object"
       },
@@ -870,52 +716,106 @@
         ],
         "type": "object"
       },
-      "GithubLoginDto": {
+      "LimitBalanceDto": {
         "properties": {
-          "code": {
-            "description": "The authorization code returned by GitHub",
+          "creditBalance": {
+            "description": "Credit balance in mils",
+            "type": "number"
+          },
+          "currency": {
             "type": "string"
           },
-          "redirect_uri": {
-            "description": "The redirect URI used in the initial authorization request",
-            "type": "string"
+          "pricePerUnit": {
+            "description": "Price per usage unit in mils",
+            "type": "number"
           },
-          "state": {
-            "description": "The state parameter returned by GitHub (contains client_id)",
-            "type": "string"
+          "remainingUnits": {
+            "description": "Estimated whole units remaining from prepaid balance at current pricePerUnit",
+            "type": "number"
           }
         },
         "required": [
-          "code",
-          "redirect_uri",
-          "state"
+          "creditBalance",
+          "pricePerUnit",
+          "currency"
         ],
         "type": "object"
       },
-      "GoogleLoginDto": {
+      "LimitPlanItemDto": {
         "properties": {
-          "code": {
-            "description": "The authorization code returned by Google",
+          "billingCycle": {
             "type": "string"
           },
-          "redirect_uri": {
-            "description": "The redirect URI used in the initial authorization request",
+          "billingModel": {
             "type": "string"
           },
-          "state": {
-            "description": "The state parameter returned by Google (contains client_id)",
+          "currency": {
+            "type": "string"
+          },
+          "freeUnits": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "description": "Price in smallest currency unit (e.g. cents)",
+            "type": "number"
+          },
+          "pricePerUnit": {
+            "description": "Price per usage unit in mils (usage-based plans)",
+            "type": "number"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "requiresPayment": {
+            "type": "boolean"
+          },
+          "type": {
             "type": "string"
           }
         },
         "required": [
-          "code",
-          "redirect_uri",
-          "state"
+          "reference",
+          "type",
+          "price",
+          "currency",
+          "requiresPayment"
+        ],
+        "type": "object"
+      },
+      "LimitProductBriefDto": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference"
         ],
         "type": "object"
       },
       "LimitResponse": {
         "properties": {
+          "activationRequired": {
+            "description": "True when the customer must activate a priced default plan before usage is allowed",
+            "type": "boolean"
+          },
+          "balance": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LimitBalanceDto"
+              }
+            ],
+            "description": "Prepaid usage balance context when the default plan is usage-based"
+          },
           "checkoutSessionId": {
             "description": "Checkout session ID if payment is required",
             "example": "e3f1c2d4b6a89f001122334455667788",
@@ -926,10 +826,41 @@
             "example": "https://solvapay.com/customer/checkout?id=e3f1c2d4b6a89f001122334455667788",
             "type": "string"
           },
+          "confirmationUrl": {
+            "description": "Customer portal confirmation URL when activation is required (fallback when not starting checkout)",
+            "type": "string"
+          },
+          "creditBalance": {
+            "description": "Credit balance in mils (for pre-paid usage-based plans)",
+            "type": "number"
+          },
+          "currency": {
+            "description": "ISO 4217 currency code for credit fields",
+            "type": "string"
+          },
           "meterName": {
             "description": "The meter name to use when tracking usage events",
             "example": "requests",
             "type": "string"
+          },
+          "plans": {
+            "description": "Active plans on the product available for activation or checkout",
+            "items": {
+              "$ref": "#/components/schemas/LimitPlanItemDto"
+            },
+            "type": "array"
+          },
+          "pricePerUnit": {
+            "description": "Price per usage unit in mils (for pre-paid usage-based plans)",
+            "type": "number"
+          },
+          "product": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LimitProductBriefDto"
+              }
+            ],
+            "description": "Product the limit check applies to"
           },
           "remaining": {
             "description": "Remaining usage units before hitting the limit",
@@ -948,267 +879,158 @@
         ],
         "type": "object"
       },
-      "Login": {
-        "properties": {
-          "email": {
-            "description": "Email to send a 6-digit login code to",
-            "type": "string"
-          }
-        },
-        "required": [
-          "email"
-        ],
-        "type": "object"
-      },
-      "McpBootstrapFreePlanConfig": {
-        "properties": {
-          "freeUnits": {
-            "description": "Included free units (default 1000)",
-            "example": 500,
-            "type": "number"
-          },
-          "name": {
-            "description": "Free plan display name override",
-            "example": "Starter",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "McpBootstrapPaidPlanInput": {
-        "properties": {
-          "billingCycle": {
-            "description": "Billing cycle for recurring plans",
-            "enum": [
-              "weekly",
-              "monthly",
-              "quarterly",
-              "yearly",
-              "custom"
-            ],
-            "example": "monthly",
-            "type": "string"
-          },
-          "currency": {
-            "description": "Currency code (ISO 4217)",
-            "example": "USD",
-            "type": "string"
-          },
-          "features": {
-            "additionalProperties": true,
-            "description": "Plan features",
-            "type": "object"
-          },
-          "freeUnits": {
-            "description": "Included free units",
-            "example": 1000,
-            "type": "number"
-          },
-          "key": {
-            "description": "Logical plan key (must not be \"free\")",
-            "example": "pro",
-            "type": "string"
-          },
-          "limit": {
-            "description": "Plan usage limit",
-            "example": 10000,
-            "type": "number"
-          },
-          "meterId": {
-            "description": "Meter id for usage tracking",
-            "example": "67f90f1f1b1c9c0b8df0f001",
-            "type": "string"
-          },
-          "name": {
-            "description": "Plan display name",
-            "example": "Pro",
-            "type": "string"
-          },
-          "price": {
-            "description": "Plan price in cents (must be > 0)",
-            "example": 2000,
-            "type": "number"
-          },
-          "type": {
-            "description": "Plan type",
-            "enum": [
-              "recurring",
-              "one-time"
-            ],
-            "example": "recurring",
-            "type": "string"
-          }
-        },
-        "required": [
-          "key",
-          "name",
-          "price",
-          "currency"
-        ],
-        "type": "object"
-      },
-      "McpBootstrapPreviewResult": {
-        "properties": {
-          "derivedDescription": {
-            "description": "Product description derived from origin server instructions",
-            "example": "MCP toolkit for document retrieval and summarization.",
-            "type": "string"
-          },
-          "derivedName": {
-            "description": "Product name derived from origin MCP metadata or hostname fallback",
-            "example": "acme-origin-mcp",
-            "type": "string"
-          },
-          "discoveredTools": {
-            "description": "Discovered tools from the origin MCP server",
-            "items": {
-              "properties": {
-                "description": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                }
-              },
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "metadataSource": {
-            "description": "Source of derived metadata",
-            "properties": {
-              "description": {
-                "enum": [
-                  "request",
-                  "instructions",
-                  "none"
-                ],
-                "type": "string"
-              },
-              "name": {
-                "enum": [
-                  "request",
-                  "origin",
-                  "hostname"
-                ],
-                "type": "string"
-              }
-            },
-            "type": "object"
-          },
-          "suggestedMapping": {
-            "description": "Suggested default tool-to-plan mapping for UI review",
-            "items": {
-              "properties": {
-                "description": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "planKey": {
-                  "type": "string"
-                }
-              },
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "validation": {
-            "description": "Validation status for the provided bootstrap payload",
-            "properties": {
-              "errors": {
-                "items": {
-                  "$ref": "#/components/schemas/McpBootstrapPreviewValidationError"
-                },
-                "type": "array"
-              },
-              "valid": {
-                "type": "boolean"
-              }
-            },
-            "type": "object"
-          }
-        },
-        "required": [
-          "discoveredTools",
-          "validation",
-          "metadataSource",
-          "suggestedMapping"
-        ],
-        "type": "object"
-      },
-      "McpBootstrapRequest": {
+      "McpBootstrapDto": {
         "properties": {
           "authApiKey": {
-            "description": "Optional auth API key forwarded to origin server",
-            "example": "sk-origin-123",
             "type": "string"
           },
           "authHeaderName": {
-            "description": "Optional auth header name forwarded to origin server",
-            "example": "X-API-Key",
             "type": "string"
           },
           "description": {
-            "description": "Product description",
-            "example": "MCP toolkit with tiered access",
             "type": "string"
           },
-          "freePlan": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/McpBootstrapFreePlanConfig"
-              }
-            ],
-            "description": "Free plan config overrides. A free plan is always created; this just customizes name/freeUnits."
-          },
           "imageUrl": {
-            "description": "Product image URL",
             "type": "string"
           },
           "mcpDomain": {
-            "description": "Optional final MCP subdomain override (for example, value returned by bootstrap-subdomain-checks)",
-            "example": "acme-docs",
             "type": "string"
           },
           "metadata": {
-            "additionalProperties": true,
-            "description": "Arbitrary product metadata",
+            "additionalProperties": {},
+            "selfRequired": false,
             "type": "object"
           },
           "name": {
-            "description": "Product name (optional when derivable from origin MCP metadata)",
-            "example": "Acme MCP Toolkit",
             "type": "string"
           },
           "originUrl": {
-            "description": "Origin MCP server URL (must be https)",
-            "example": "https://origin.example.com/mcp",
+            "format": "uri",
+            "minLength": 1,
             "type": "string"
           },
-          "paidPlans": {
-            "description": "Paid plan definitions requiring price + currency",
+          "plans": {
             "items": {
-              "$ref": "#/components/schemas/McpBootstrapPaidPlanInput"
+              "properties": {
+                "billingCycle": {
+                  "enum": [
+                    "weekly",
+                    "monthly",
+                    "quarterly",
+                    "yearly",
+                    "custom"
+                  ],
+                  "type": "string"
+                },
+                "billingModel": {
+                  "enum": [
+                    "pre-paid",
+                    "post-paid"
+                  ],
+                  "type": "string"
+                },
+                "currency": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "features": {
+                  "additionalProperties": {},
+                  "type": "object"
+                },
+                "freeUnits": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "key": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "limit": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "meterId": {
+                  "type": "string"
+                },
+                "name": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "price": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "pricePerUnit": {
+                  "type": "number"
+                },
+                "type": {
+                  "enum": [
+                    "recurring",
+                    "one-time",
+                    "usage-based"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "name",
+                "price",
+                "currency"
+              ],
+              "type": "object"
             },
             "type": "array"
           },
           "productType": {
-            "description": "Free-form product type",
-            "example": "MCP Server",
             "type": "string"
           },
           "tools": {
-            "description": "Tool to plan mapping configuration",
             "items": {
-              "$ref": "#/components/schemas/McpBootstrapToolInput"
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "name": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "noPlan": {
+                  "type": "boolean"
+                },
+                "planIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "planKeys": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "planRefs": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "type": "object"
             },
             "type": "array"
           }
         },
         "required": [
-          "originUrl"
+          "originUrl",
+          "metadata"
         ],
         "type": "object"
       },
@@ -1275,195 +1097,6 @@
         ],
         "type": "object"
       },
-      "McpBootstrapToolInput": {
-        "properties": {
-          "description": {
-            "description": "Tool description",
-            "example": "Search indexed documents",
-            "type": "string"
-          },
-          "name": {
-            "description": "Tool name",
-            "example": "search_docs",
-            "type": "string"
-          },
-          "noPlan": {
-            "description": "If true, tool is publicly available without a plan",
-            "example": false,
-            "type": "boolean"
-          },
-          "planIds": {
-            "description": "Direct plan IDs allowed for this tool",
-            "example": [
-              "67f90f1f1b1c9c0b8df0f001"
-            ],
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "planKeys": {
-            "description": "Bootstrap plan keys allowed for this tool (for example free or starter_paid)",
-            "example": [
-              "free"
-            ],
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "planRefs": {
-            "description": "Plan references allowed for this tool",
-            "example": [
-              "pln_ABC123"
-            ],
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          }
-        },
-        "required": [
-          "name"
-        ],
-        "type": "object"
-      },
-      "McpServerDto": {
-        "properties": {
-          "authHeaderName": {
-            "description": "Custom auth header name for origin requests",
-            "example": "X-API-Key",
-            "type": "string"
-          },
-          "avatarUrl": {
-            "description": "Avatar image URL",
-            "example": "https://example.com/avatar.png",
-            "type": "string"
-          },
-          "balance": {
-            "description": "Current balance in cents",
-            "example": 1500,
-            "type": "number"
-          },
-          "defaultPlanId": {
-            "description": "Default plan ID for tool access gating. Must belong to the linked product and be a free-tier plan (isFreeTier=true or price=0).",
-            "example": "pln_default",
-            "type": "string"
-          },
-          "hasAuthApiKey": {
-            "description": "Whether an auth API key is configured",
-            "example": true,
-            "type": "boolean"
-          },
-          "id": {
-            "description": "Server ID",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "mcpProxyUrl": {
-            "description": "SolvaPay proxy URL that MCP clients connect to",
-            "example": "https://mytelescope.mcp.solvapay.com/mcp",
-            "type": "string"
-          },
-          "name": {
-            "description": "Domain slug used to derive the MCP endpoint subdomain",
-            "example": "my-mcp-server",
-            "type": "string"
-          },
-          "productId": {
-            "description": "Associated product ID",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "providerId": {
-            "description": "Provider ID that owns this server",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "reference": {
-            "description": "Unique server reference",
-            "example": "mcp_abc123",
-            "type": "string"
-          },
-          "status": {
-            "description": "Server status",
-            "enum": [
-              "active",
-              "inactive",
-              "suspended"
-            ],
-            "example": "active",
-            "type": "string"
-          },
-          "subdomain": {
-            "description": "URL-safe subdomain derived from name",
-            "example": "my-mcp-server",
-            "type": "string"
-          },
-          "tools": {
-            "description": "Registered tools for this server",
-            "items": {
-              "$ref": "#/components/schemas/McpToolDto"
-            },
-            "type": "array"
-          },
-          "totalTransactions": {
-            "description": "Total number of tool-call transactions",
-            "example": 42,
-            "type": "number"
-          },
-          "url": {
-            "description": "Origin URL of the actual MCP server",
-            "example": "https://origin.example.com/mcp",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "subdomain",
-          "url",
-          "providerId"
-        ],
-        "type": "object"
-      },
-      "McpToolDto": {
-        "properties": {
-          "description": {
-            "description": "Human-readable tool description",
-            "example": "Search indexed documents",
-            "type": "string"
-          },
-          "isVirtual": {
-            "description": "Whether this is a virtual platform tool handled by SolvaPay",
-            "example": false,
-            "type": "boolean"
-          },
-          "name": {
-            "description": "Tool name",
-            "example": "search_documents",
-            "type": "string"
-          },
-          "noPlan": {
-            "description": "If true, the tool is unprotected (no purchase check or usage tracking)",
-            "example": false,
-            "type": "boolean"
-          },
-          "planIds": {
-            "description": "Plan IDs that grant access to this tool",
-            "example": [
-              "pln_abc123"
-            ],
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          }
-        },
-        "required": [
-          "name"
-        ],
-        "type": "object"
-      },
       "Plan": {
         "properties": {
           "accessExpiryDays": {
@@ -1498,6 +1131,11 @@
             "example": "$",
             "type": "string"
           },
+          "description": {
+            "description": "Plan description",
+            "example": "Best for teams getting started",
+            "type": "string"
+          },
           "features": {
             "additionalProperties": true,
             "description": "Plan features",
@@ -1516,11 +1154,6 @@
           "isActive": {
             "description": "Whether the plan is active (derived from status)",
             "example": true,
-            "type": "boolean"
-          },
-          "isFreeTier": {
-            "description": "Whether this is a free tier plan",
-            "example": false,
             "type": "boolean"
           },
           "limit": {
@@ -1542,14 +1175,19 @@
             "example": "requests",
             "type": "string"
           },
+          "name": {
+            "description": "Plan name",
+            "example": "Starter",
+            "type": "string"
+          },
           "price": {
             "description": "Plan price in cents",
             "example": 2999,
             "type": "number"
           },
           "pricePerUnit": {
-            "description": "Price per usage unit",
-            "example": 0.01,
+            "description": "Price per usage unit in cents (supports decimals, e.g. 0.1 = 1/10 cent)",
+            "example": 0.1,
             "type": "number"
           },
           "reference": {
@@ -1586,7 +1224,8 @@
             "description": "Plan type exposed in SDK",
             "enum": [
               "recurring",
-              "one-time"
+              "one-time",
+              "usage-based"
             ],
             "example": "recurring",
             "type": "string"
@@ -1602,7 +1241,6 @@
           "reference",
           "price",
           "currency",
-          "isFreeTier",
           "requiresPayment",
           "isActive",
           "status",
@@ -1662,8 +1300,8 @@
             "type": "number"
           },
           "pricePerUnit": {
-            "description": "Price per usage unit in cents",
-            "example": 10,
+            "description": "Price per usage unit in cents (supports decimals, e.g. 0.1 = 1/10 cent)",
+            "example": 0.1,
             "type": "number"
           },
           "reference": {
@@ -1676,6 +1314,26 @@
           "price",
           "currency",
           "planType"
+        ],
+        "type": "object"
+      },
+      "ProcessPaymentIntentDto": {
+        "properties": {
+          "customerRef": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "planRef": {
+            "type": "string"
+          },
+          "productRef": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "productRef",
+          "customerRef"
         ],
         "type": "object"
       },
@@ -1702,7 +1360,7 @@
       "PurchaseInfo": {
         "properties": {
           "amount": {
-            "description": "Amount paid in original currency (in cents)",
+            "description": "Amount in USD cents (normalised for aggregation)",
             "example": 9900,
             "type": "number"
           },
@@ -1717,14 +1375,24 @@
             "type": "string"
           },
           "currency": {
-            "description": "Currency code",
-            "example": "USD",
+            "description": "ISO 4217 currency code of the customer-facing charge",
+            "example": "GBP",
             "type": "string"
           },
           "endDate": {
             "description": "End date of purchase",
             "example": "2025-11-27T10:00:00Z",
             "type": "string"
+          },
+          "exchangeRate": {
+            "description": "Exchange rate from original currency to USD",
+            "example": 1.32,
+            "type": "number"
+          },
+          "originalAmount": {
+            "description": "Original amount in the payment currency (minor units)",
+            "example": 7500,
+            "type": "number"
           },
           "planSnapshot": {
             "description": "Snapshot of the plan at time of purchase",
@@ -1769,7 +1437,7 @@
       "PurchaseResponse": {
         "properties": {
           "amount": {
-            "description": "Amount in cents",
+            "description": "Amount in USD cents (normalised for aggregation)",
             "example": 9900,
             "type": "number"
           },
@@ -1800,8 +1468,8 @@
             "type": "string"
           },
           "currency": {
-            "description": "Currency code",
-            "example": "USD",
+            "description": "Original payment currency code",
+            "example": "GBP",
             "type": "string"
           },
           "customerEmail": {
@@ -1818,23 +1486,34 @@
             "description": "End date",
             "type": "string"
           },
+          "exchangeRate": {
+            "description": "Exchange rate from original currency to USD",
+            "example": 1.3082,
+            "type": "number"
+          },
           "id": {
             "description": "Purchase ID",
             "example": "507f1f77bcf86cd799439011",
             "type": "string"
-          },
-          "isFreeTier": {
-            "description": "Whether this is a free tier purchase",
-            "type": "boolean"
           },
           "isRecurring": {
             "description": "Is recurring",
             "example": true,
             "type": "boolean"
           },
+          "metadata": {
+            "additionalProperties": true,
+            "description": "Arbitrary metadata attached to the purchase",
+            "type": "object"
+          },
           "nextBillingDate": {
             "description": "Next billing date",
             "type": "string"
+          },
+          "originalAmount": {
+            "description": "Original amount in the payment currency (cents/pence)",
+            "example": 10000,
+            "type": "number"
           },
           "paidAt": {
             "description": "Paid at timestamp",
@@ -1846,7 +1525,7 @@
                 "$ref": "#/components/schemas/PlanSnapshotDto"
               }
             ],
-            "description": "Plan snapshot at time of purchase"
+            "description": "Plan snapshot at time of purchase (null for credit topups)"
           },
           "productId": {
             "description": "Product ID",
@@ -1892,7 +1571,6 @@
           "customerRef",
           "customerEmail",
           "productRef",
-          "planSnapshot",
           "status",
           "amount",
           "currency",
@@ -1902,13 +1580,43 @@
         ],
         "type": "object"
       },
-      "RecordBulkMeterEventsDto": {
+      "RecordBulkMeterEventsZodDto": {
         "properties": {
           "events": {
-            "description": "Array of events to record",
             "items": {
-              "$ref": "#/components/schemas/RecordMeterEventDto"
+              "properties": {
+                "customerId": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "meterName": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "productId": {
+                  "type": "string"
+                },
+                "productReference": {
+                  "type": "string"
+                },
+                "properties": {
+                  "additionalProperties": {},
+                  "type": "object"
+                },
+                "timestamp": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "meterName",
+                "customerId"
+              ],
+              "type": "object"
             },
+            "minItems": 1,
             "type": "array"
           }
         },
@@ -1917,60 +1625,38 @@
         ],
         "type": "object"
       },
-      "RecordMeterEventDto": {
+      "RecordMeterEventZodDto": {
         "properties": {
           "customerId": {
-            "description": "Customer reference",
-            "example": "cus_ABC123",
+            "minLength": 1,
             "type": "string"
           },
           "meterName": {
-            "description": "Meter name to record against",
-            "example": "requests",
+            "minLength": 1,
             "type": "string"
           },
           "productId": {
-            "description": "Product ID to scope the usage event to",
             "type": "string"
           },
           "productReference": {
-            "description": "Product reference to scope the usage event to",
             "type": "string"
           },
           "properties": {
-            "additionalProperties": true,
-            "description": "Arbitrary key-value tags",
-            "example": {
-              "endpoint": "/api/v1/search",
-              "region": "us-east-1"
-            },
+            "additionalProperties": {},
+            "selfRequired": false,
             "type": "object"
           },
           "timestamp": {
-            "description": "ISO 8601 timestamp (defaults to now)",
             "type": "string"
           },
           "value": {
-            "default": 1,
-            "description": "Numeric value (default 1)",
-            "example": 1,
             "type": "number"
           }
         },
         "required": [
           "meterName",
-          "customerId"
-        ],
-        "type": "object"
-      },
-      "RequestEmailChange": {
-        "properties": {
-          "newEmail": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "newEmail"
+          "customerId",
+          "properties"
         ],
         "type": "object"
       },
@@ -2020,11 +1706,6 @@
             "example": true,
             "type": "boolean"
           },
-          "isFreeTier": {
-            "description": "Whether this is a free tier plan",
-            "example": false,
-            "type": "boolean"
-          },
           "limit": {
             "description": "Usage limit for the meter",
             "example": 10000,
@@ -2046,8 +1727,8 @@
             "type": "number"
           },
           "pricePerUnit": {
-            "description": "Price per unit in cents",
-            "example": 10,
+            "description": "Price per usage unit in cents (supports decimals, e.g. 0.1 = 1/10 cent)",
+            "example": 0.1,
             "type": "number"
           },
           "reference": {
@@ -2090,7 +1771,6 @@
           "reference",
           "price",
           "currency",
-          "isFreeTier",
           "requiresPayment",
           "isActive",
           "status",
@@ -2203,180 +1883,12 @@
         ],
         "type": "object"
       },
-      "SelectCustomerSessionProductRequest": {
-        "properties": {
-          "productRef": {
-            "description": "Product reference or ID to scope the customer manage session",
-            "example": "prd_1a2b3c4d5e6f",
-            "type": "string"
-          }
-        },
-        "required": [
-          "productRef"
-        ],
-        "type": "object"
-      },
-      "Signup": {
-        "properties": {
-          "email": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "type": {
-            "enum": [
-              "provider",
-              "admin",
-              "super_admin"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "email"
-        ],
-        "type": "object"
-      },
-      "ThemeModeColorsDto": {
-        "properties": {
-          "background": {
-            "description": "Page background color",
-            "example": "#f7f7f8",
-            "type": "string"
-          },
-          "secondary": {
-            "description": "Secondary/muted text color",
-            "example": "#5c5c5c",
-            "type": "string"
-          },
-          "surface": {
-            "description": "Card/surface background color",
-            "example": "#ffffff",
-            "type": "string"
-          },
-          "text": {
-            "description": "Primary text color",
-            "example": "#181818",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "ThemeOverridesDto": {
-        "properties": {
-          "dark": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ThemeModeColorsDto"
-              }
-            ],
-            "description": "Dark mode color overrides"
-          },
-          "light": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ThemeModeColorsDto"
-              }
-            ],
-            "description": "Light mode color overrides"
-          }
-        },
-        "type": "object"
-      },
-      "TosAcceptance": {
-        "properties": {
-          "ip": {
-            "description": "IP address of user accepting ToS",
-            "example": "192.168.1.1",
-            "type": "string"
-          }
-        },
-        "required": [
-          "ip"
-        ],
-        "type": "object"
-      },
-      "UpdateBrandThemeDto": {
-        "properties": {
-          "brandName": {
-            "description": "Provider's brand name displayed on hosted pages",
-            "example": "Acme Corp",
-            "type": "string"
-          },
-          "fontFamily": {
-            "default": "Inter",
-            "description": "Font family for hosted pages",
-            "example": "Inter",
-            "type": "string"
-          },
-          "fontSize": {
-            "default": "16px",
-            "description": "Base font size",
-            "example": "16px",
-            "type": "string"
-          },
-          "logo": {
-            "description": "Logo image URL displayed in hosted page headers",
-            "example": "/ui/files/download/provider-assets/provider-123/logos/logo.png",
-            "type": "string"
-          },
-          "primaryColor": {
-            "description": "Primary/accent color in hex format",
-            "example": "#3182ce",
-            "type": "string"
-          },
-          "themes": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ThemeOverridesDto"
-              }
-            ],
-            "description": "Per-mode color overrides for light and dark themes"
-          }
-        },
-        "required": [
-          "brandName",
-          "primaryColor"
-        ],
-        "type": "object"
-      },
-      "UpdateConnectedAccount": {
-        "properties": {
-          "externalAccount": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ExternalAccount"
-              }
-            ],
-            "description": "External bank account"
-          },
-          "tosAcceptance": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TosAcceptance"
-              }
-            ],
-            "description": "Terms of Service acceptance"
-          },
-          "website": {
-            "description": "Business website URL",
-            "example": "https://example.com",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
       "UpdatePlanRequest": {
         "properties": {
           "accessExpiryDays": {
-            "description": "Access expiry in days",
-            "example": 30,
             "type": "number"
           },
           "billingCycle": {
-            "description": "Billing cycle",
             "enum": [
               "weekly",
               "monthly",
@@ -2384,121 +1896,109 @@
               "yearly",
               "custom"
             ],
-            "example": "monthly",
+            "type": "string"
+          },
+          "billingModel": {
+            "enum": [
+              "pre-paid",
+              "post-paid"
+            ],
             "type": "string"
           },
           "currency": {
-            "description": "Currency code (ISO 4217)",
-            "example": "USD",
             "type": "string"
           },
           "default": {
-            "description": "Whether this is the default plan",
-            "example": false,
             "type": "boolean"
           },
+          "description": {
+            "type": "string"
+          },
           "features": {
-            "additionalProperties": true,
-            "description": "Plan features (generic key/value, shape is provider-defined)",
-            "example": {
-              "apiAccess": true,
-              "prioritySupport": false
-            },
+            "additionalProperties": {},
+            "selfRequired": false,
             "type": "object"
           },
           "freeUnits": {
-            "description": "Number of free units included",
-            "example": 100,
             "type": "number"
           },
-          "isFreeTier": {
-            "description": "Whether this is a free tier plan",
-            "example": false,
-            "type": "boolean"
-          },
           "limit": {
-            "description": "Usage limit for the meter",
-            "example": 10000,
             "type": "number"
           },
           "limits": {
-            "additionalProperties": true,
-            "description": "Usage limits (shape varies by plan type)",
-            "example": {
-              "maxTransactions": 1000
-            },
+            "additionalProperties": {},
+            "selfRequired": false,
             "type": "object"
           },
           "maxActiveUsers": {
-            "description": "Maximum number of active users",
-            "example": 10,
             "type": "number"
           },
           "metadata": {
-            "additionalProperties": true,
-            "description": "Additional metadata",
+            "additionalProperties": {},
+            "selfRequired": false,
             "type": "object"
           },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
           "price": {
-            "description": "Plan price in cents",
-            "example": 2999,
             "type": "number"
           },
-          "requiresPayment": {
-            "description": "Whether payment is required",
-            "example": true,
-            "type": "boolean"
+          "pricePerUnit": {
+            "type": "number"
           },
           "status": {
-            "description": "Plan status",
             "enum": [
               "active",
               "inactive",
               "archived"
             ],
-            "example": "active",
             "type": "string"
           }
         },
-        "type": "object"
-      },
-      "UpdatePreferences": {
-        "properties": {},
+        "required": [
+          "limits",
+          "features",
+          "metadata"
+        ],
         "type": "object"
       },
       "UpdateProductRequest": {
         "properties": {
           "config": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ProductConfigDto"
+            "properties": {
+              "deliveryMethod": {
+                "type": "string"
+              },
+              "fulfillmentType": {
+                "type": "string"
+              },
+              "validityPeriod": {
+                "type": "number"
               }
-            ],
-            "description": "Product-specific configuration"
+            },
+            "selfRequired": false,
+            "type": "object"
           },
           "description": {
-            "description": "Product description",
             "type": "string"
           },
           "imageUrl": {
-            "description": "URL to the product image",
             "type": "string"
           },
           "metadata": {
-            "additionalProperties": true,
-            "description": "Arbitrary key-value metadata",
+            "additionalProperties": {},
+            "selfRequired": false,
             "type": "object"
           },
           "name": {
-            "description": "Product name",
             "type": "string"
           },
           "productType": {
-            "description": "Free-form product type defined by the provider",
             "type": "string"
           },
           "status": {
-            "description": "Product status",
             "enum": [
               "active",
               "inactive",
@@ -2507,107 +2007,10 @@
             "type": "string"
           }
         },
-        "type": "object"
-      },
-      "UpdateProfile": {
-        "properties": {},
-        "type": "object"
-      },
-      "UpdateProviderDto": {
-        "properties": {
-          "businessEmail": {
-            "description": "Business email address",
-            "example": "business@example.com",
-            "type": "string"
-          },
-          "businessType": {
-            "description": "Business type",
-            "enum": [
-              "individual",
-              "company"
-            ],
-            "example": "individual",
-            "type": "string"
-          },
-          "defaultCurrency": {
-            "description": "Default currency code",
-            "example": "usd",
-            "type": "string"
-          },
-          "description": {
-            "description": "Provider description",
-            "example": "My business",
-            "type": "string"
-          },
-          "legalEntity": {
-            "description": "Legal entity information",
-            "type": "object"
-          },
-          "metadata": {
-            "description": "Arbitrary metadata",
-            "type": "object"
-          },
-          "supportEmail": {
-            "description": "Support email address",
-            "example": "support@example.com",
-            "type": "string"
-          },
-          "supportTelephone": {
-            "description": "Support telephone number",
-            "example": "+1234567890",
-            "type": "string"
-          },
-          "telephone": {
-            "description": "Business telephone number",
-            "example": "+1234567890",
-            "type": "string"
-          },
-          "tosAcceptance": {
-            "description": "Terms of Service acceptance",
-            "type": "object"
-          },
-          "website": {
-            "description": "Business website URL",
-            "example": "https://example.com",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "UpdateThemePreferenceDto": {
-        "properties": {
-          "mode": {
-            "description": "Selected UI theme mode",
-            "enum": [
-              "light",
-              "dark"
-            ],
-            "example": "dark",
-            "type": "string"
-          }
-        },
         "required": [
-          "mode"
+          "config",
+          "metadata"
         ],
-        "type": "object"
-      },
-      "UpdateUser": {
-        "properties": {},
-        "type": "object"
-      },
-      "UpdateWebhookEndpointDto": {
-        "properties": {
-          "description": {
-            "description": "Webhook endpoint description",
-            "example": "Updated webhook",
-            "type": "string"
-          },
-          "url": {
-            "description": "Webhook endpoint URL",
-            "example": "https://example.com/webhook",
-            "type": "string"
-          }
-        },
         "type": "object"
       },
       "UsageBillingDto": {
@@ -2736,13 +2139,11 @@
       "UserInfoRequest": {
         "properties": {
           "customerRef": {
-            "description": "Customer reference",
-            "example": "cus_3C4D5E6F",
+            "minLength": 1,
             "type": "string"
           },
           "productRef": {
-            "description": "Product reference",
-            "example": "prd_1A2B3C4D",
+            "minLength": 1,
             "type": "string"
           }
         },
@@ -2835,153 +2236,19 @@
           "email"
         ],
         "type": "object"
-      },
-      "VerifyEmail": {
-        "properties": {
-          "emailVerificationCode": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "emailVerificationCode"
-        ],
-        "type": "object"
-      },
-      "VerifyEmailChange": {
-        "properties": {
-          "code": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "code"
-        ],
-        "type": "object"
-      },
-      "VerifyLoginCode": {
-        "properties": {
-          "code": {
-            "description": "6-digit login code sent to email",
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "email",
-          "code"
-        ],
-        "type": "object"
-      },
-      "WebhookEvent": {
-        "properties": {
-          "api_version": {
-            "description": "Webhook payload API version",
-            "example": "2025-10-01",
-            "type": "string"
-          },
-          "created": {
-            "description": "Unix timestamp when the event was created",
-            "example": 1774965198,
-            "type": "number"
-          },
-          "data": {
-            "properties": {
-              "object": {
-                "description": "Event payload object. Customer events include product.reference when present.",
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/CustomerWebhookObject"
-                  },
-                  {
-                    "additionalProperties": true,
-                    "type": "object"
-                  }
-                ]
-              },
-              "previous_attributes": {
-                "additionalProperties": true,
-                "nullable": true,
-                "type": "object"
-              }
-            },
-            "required": [
-              "object",
-              "previous_attributes"
-            ],
-            "type": "object"
-          },
-          "id": {
-            "description": "Webhook event ID",
-            "example": "evt_cca9a84b5ab29ddc",
-            "type": "string"
-          },
-          "livemode": {
-            "description": "Whether the event was generated in live mode",
-            "example": false,
-            "type": "boolean"
-          },
-          "request": {
-            "properties": {
-              "id": {
-                "nullable": true,
-                "type": "string"
-              },
-              "idempotency_key": {
-                "nullable": true,
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "idempotency_key"
-            ],
-            "type": "object"
-          },
-          "type": {
-            "description": "Webhook event type",
-            "enum": [
-              "payment.succeeded",
-              "payment.failed",
-              "payment.refunded",
-              "payment.refund_failed",
-              "purchase.created",
-              "purchase.updated",
-              "purchase.cancelled",
-              "purchase.expired",
-              "purchase.suspended",
-              "customer.created",
-              "customer.updated",
-              "customer.deleted",
-              "checkout_session.created"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "type",
-          "created",
-          "api_version",
-          "data",
-          "livemode",
-          "request"
-        ],
-        "type": "object"
       }
     },
     "securitySchemes": {
       "OAuth2": {
         "flows": {
           "authorizationCode": {
-            "authorizationUrl": "https://api.solvapay.com/v1/oauth/authorize",
+            "authorizationUrl": "https://api.solvapay.com/v1/customer/auth/authorize",
             "scopes": {
               "email": "Email address",
               "openid": "OpenID Connect scope",
               "profile": "Profile information"
             },
-            "tokenUrl": "https://api.solvapay.com/v1/oauth/token"
+            "tokenUrl": "https://api.solvapay.com/v1/customer/auth/token"
           }
         },
         "type": "oauth2"
@@ -3005,32 +2272,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "customerRef": {
-                    "description": "Customer reference",
-                    "example": "cus_3C4D5E6F",
-                    "type": "string"
-                  },
-                  "planRef": {
-                    "description": "Plan reference (optional — shows plan selector if omitted)",
-                    "example": "pln_2b3c4d5e",
-                    "type": "string"
-                  },
-                  "productRef": {
-                    "description": "Product reference",
-                    "example": "prd_1A2B3C4D",
-                    "type": "string"
-                  },
-                  "returnUrl": {
-                    "description": "URL to redirect after checkout",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "customerRef",
-                  "productRef"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/CreateCheckoutSessionRequest"
               }
             }
           },
@@ -3041,17 +2283,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "properties": {
-                    "checkoutUrl": {
-                      "description": "URL to redirect the customer to",
-                      "type": "string"
-                    },
-                    "sessionId": {
-                      "description": "Checkout session ID",
-                      "type": "string"
-                    }
-                  },
-                  "type": "object"
+                  "$ref": "#/components/schemas/CreateCheckoutSessionResponse"
                 }
               }
             },
@@ -3531,7 +2763,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RecordMeterEventDto"
+                "$ref": "#/components/schemas/RecordMeterEventZodDto"
               }
             }
           },
@@ -3578,7 +2810,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RecordBulkMeterEventsDto"
+                "$ref": "#/components/schemas/RecordBulkMeterEventsZodDto"
               }
             }
           },
@@ -3700,34 +2932,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "customerReference": {
-                    "description": "Customer reference identifier",
-                    "example": "cus_3c4d5e6f7g8h",
-                    "type": "string"
-                  },
-                  "planRef": {
-                    "description": "Plan reference to purchase",
-                    "example": "pln_2b3c4d5e6f7g",
-                    "type": "string"
-                  },
-                  "pricingTier": {
-                    "description": "Name of the pricing tier to purchase (for plans with pricingTiers). If not specified, uses the plan base price.",
-                    "example": "Pro",
-                    "type": "string"
-                  },
-                  "productRef": {
-                    "description": "Product reference that owns the plan",
-                    "example": "prd_1A2B3C4D",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "planRef",
-                  "productRef",
-                  "customerReference"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/CreatePaymentIntentDto"
               }
             }
           },
@@ -3863,28 +3068,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "customerRef": {
-                    "description": "Customer reference identifier",
-                    "example": "cus_456",
-                    "type": "string"
-                  },
-                  "planRef": {
-                    "description": "Plan reference - helps determine if payment is for purchase",
-                    "example": "pln_789",
-                    "type": "string"
-                  },
-                  "productRef": {
-                    "description": "Product reference that owns the plan",
-                    "example": "prd_123",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "productRef",
-                  "customerRef"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/ProcessPaymentIntentDto"
               }
             }
           },
@@ -4226,6 +3410,16 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloneProductDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "201": {
             "content": {
@@ -4247,6 +3441,61 @@
           }
         ],
         "summary": "Clone a product",
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/v1/sdk/products/{productRef}/mcp/plans": {
+      "put": {
+        "description": "Configures plans and optional tool-to-plan mappings for an MCP product.",
+        "operationId": "ProductSdkController_configureMcpPlans",
+        "parameters": [
+          {
+            "description": "Product reference or ID",
+            "in": "path",
+            "name": "productRef",
+            "required": true,
+            "schema": {
+              "example": "prd_1A2B3C4D",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigureMcpPlansDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigureMcpPlansResult"
+                }
+              }
+            },
+            "description": "MCP plans configured successfully"
+          },
+          "400": {
+            "description": "Invalid MCP plans request or product is not MCP-enabled"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Configure MCP plans on an MCP product",
         "tags": [
           "Products"
         ]
@@ -4522,14 +3771,14 @@
     },
     "/v1/sdk/products/mcp/bootstrap": {
       "post": {
-        "description": "Creates an MCP-enabled product, provisions plans, configures origin URL, and maps tools to plans in one request.",
+        "description": "Creates an MCP-enabled product with a unified plans array, configures origin URL, and maps tools to plans in one request.",
         "operationId": "ProductSdkController_bootstrapMcpProduct",
         "parameters": [],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/McpBootstrapRequest"
+                "$ref": "#/components/schemas/McpBootstrapDto"
               }
             }
           },
@@ -4842,66 +4091,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "actionType": {
-                    "description": "Action type (default: api_call)",
-                    "enum": [
-                      "transaction",
-                      "api_call",
-                      "hour",
-                      "email",
-                      "storage",
-                      "custom"
-                    ],
-                    "example": "api_call",
-                    "type": "string"
-                  },
-                  "customerId": {
-                    "description": "Customer identifier",
-                    "example": "cus_3C4D5E6F",
-                    "type": "string"
-                  },
-                  "idempotencyKey": {
-                    "description": "Unique key to prevent duplicate recording (max 256 chars)",
-                    "type": "string"
-                  },
-                  "metadata": {
-                    "additionalProperties": true,
-                    "description": "Arbitrary event properties",
-                    "type": "object"
-                  },
-                  "outcome": {
-                    "description": "Outcome (default: success)",
-                    "enum": [
-                      "success",
-                      "paywall",
-                      "fail"
-                    ],
-                    "type": "string"
-                  },
-                  "productReference": {
-                    "description": "Product reference",
-                    "type": "string"
-                  },
-                  "purchaseReference": {
-                    "description": "Purchase reference",
-                    "type": "string"
-                  },
-                  "timestamp": {
-                    "description": "ISO 8601 timestamp (defaults to now)",
-                    "format": "date-time",
-                    "type": "string"
-                  },
-                  "units": {
-                    "description": "Number of usage units (default: 1)",
-                    "example": 1,
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "customerId"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/CreateUsageRequest"
               }
             }
           },
@@ -4952,65 +4142,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "events": {
-                    "items": {
-                      "properties": {
-                        "actionType": {
-                          "enum": [
-                            "transaction",
-                            "api_call",
-                            "hour",
-                            "email",
-                            "storage",
-                            "custom"
-                          ],
-                          "type": "string"
-                        },
-                        "customerId": {
-                          "type": "string"
-                        },
-                        "idempotencyKey": {
-                          "type": "string"
-                        },
-                        "metadata": {
-                          "additionalProperties": true,
-                          "type": "object"
-                        },
-                        "outcome": {
-                          "enum": [
-                            "success",
-                            "paywall",
-                            "fail"
-                          ],
-                          "type": "string"
-                        },
-                        "productReference": {
-                          "type": "string"
-                        },
-                        "purchaseReference": {
-                          "type": "string"
-                        },
-                        "timestamp": {
-                          "format": "date-time",
-                          "type": "string"
-                        },
-                        "units": {
-                          "type": "number"
-                        }
-                      },
-                      "required": [
-                        "customerId"
-                      ],
-                      "type": "object"
-                    },
-                    "type": "array"
-                  }
-                },
-                "required": [
-                  "events"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/BulkCreateUsageRequest"
               }
             }
           },

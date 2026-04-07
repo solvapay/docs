@@ -50,10 +50,10 @@
                   ],
                   "type": "string"
                 },
-                "productReference": {
+                "productRef": {
                   "type": "string"
                 },
-                "purchaseReference": {
+                "purchaseRef": {
                   "type": "string"
                 },
                 "timestamp": {
@@ -379,7 +379,7 @@
           "currency": {
             "type": "string"
           },
-          "customerReference": {
+          "customerRef": {
             "minLength": 1,
             "type": "string"
           },
@@ -409,7 +409,7 @@
           }
         },
         "required": [
-          "customerReference"
+          "customerRef"
         ],
         "type": "object"
       },
@@ -596,10 +596,10 @@
             ],
             "type": "string"
           },
-          "productReference": {
+          "productRef": {
             "type": "string"
           },
-          "purchaseReference": {
+          "purchaseRef": {
             "type": "string"
           },
           "timestamp": {
@@ -1403,7 +1403,7 @@
             "example": "API Gateway Manager",
             "type": "string"
           },
-          "productReference": {
+          "productRef": {
             "description": "Product reference",
             "example": "prd_abc123",
             "type": "string"
@@ -1596,7 +1596,7 @@
                 "productId": {
                   "type": "string"
                 },
-                "productReference": {
+                "productRef": {
                   "type": "string"
                 },
                 "properties": {
@@ -1638,7 +1638,7 @@
           "productId": {
             "type": "string"
           },
-          "productReference": {
+          "productRef": {
             "type": "string"
           },
           "properties": {
@@ -1823,7 +1823,7 @@
               "defaultPlanId": "67f90f1f1b1c9c0b8df0f001",
               "mcpProxyUrl": "https://acme-docs.mcp.solvapay.com/mcp",
               "mcpServerId": "67f90f1f1b1c9c0b8df0f111",
-              "mcpServerReference": "mcp_ABC123",
+              "mcpServerRef": "mcp_ABC123",
               "mcpSubdomain": "acme-docs",
               "originUrl": "https://origin.example.com/mcp"
             },
@@ -2354,7 +2354,7 @@
                       "currency": "USD",
                       "endDate": "2025-11-27T10:00:00Z",
                       "productName": "API Gateway Manager",
-                      "productReference": "prd_abc123",
+                      "productRef": "prd_abc123",
                       "reference": "pur_1A2B3C4D",
                       "startDate": "2025-10-27T10:00:00Z",
                       "status": "active"
@@ -2511,7 +2511,7 @@
                       "currency": "USD",
                       "endDate": "2025-11-27T10:00:00Z",
                       "productName": "API Gateway Manager",
-                      "productReference": "prd_abc123",
+                      "productRef": "prd_abc123",
                       "reference": "pur_1A2B3C4D",
                       "startDate": "2025-10-27T10:00:00Z",
                       "status": "active"
@@ -2663,7 +2663,7 @@
                         "currency": "USD",
                         "endDate": "2025-11-27T10:00:00Z",
                         "productName": "API Gateway Manager",
-                        "productReference": "prd_abc123",
+                        "productRef": "prd_abc123",
                         "reference": "pur_1A2B3C4D",
                         "startDate": "2025-10-27T10:00:00Z",
                         "status": "active"
@@ -2949,7 +2949,7 @@
                     "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_AbCdEf123456",
                     "createdAt": "2025-10-18T10:30:00.000Z",
                     "currency": "usd",
-                    "customerReference": "cus_3c4d5e6f7g8h",
+                    "customerRef": "cus_3c4d5e6f7g8h",
                     "exchangeRate": 1,
                     "expiresAt": "2025-10-19T10:30:00.000Z",
                     "id": "6743f1a2b3c4d5e6f7g8h9i0",

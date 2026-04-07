@@ -6,7 +6,7 @@
 
 ## Current State Summary
 
-Usage is deeply coupled to the purchase lifecycle. Recording a single event currently requires: resolving customer, resolving product, finding the active purchase, atomically incrementing `purchase.usage.used`, calculating overage, and then creating a `UsageEvent` document. The `UsageEvent` schema has 15+ fields including `purchaseReference`, `productId`, `productReference`, and `actionType` — all tying it to the purchase/product domain.
+Usage is deeply coupled to the purchase lifecycle. Recording a single event currently requires: resolving customer, resolving product, finding the active purchase, atomically incrementing `purchase.usage.used`, calculating overage, and then creating a `UsageEvent` document. The `UsageEvent` schema has 15+ fields including `purchaseRef`, `productId`, `productRef`, and `actionType` — all tying it to the purchase/product domain.
 
 Key files in the current system:
 
@@ -267,7 +267,7 @@ Meters are managed under the **Usage pages** (not a separate section):
 
 - Update `SolvaPayClient.trackUsage()` in `solvapay-sdk/packages/server/src/client.ts` — new signature: `trackUsage({ meter, userId, value?, properties? })`.
 - Update generated types, stub client, and examples.
-- Write a one-time migration script to backfill the timeseries collection from existing `Usage_sandbox` / `Usage_live` documents (map `actionType` -> meter name, `customerReference` -> userId).
+- Write a one-time migration script to backfill the timeseries collection from existing `Usage_sandbox` / `Usage_live` documents (map `actionType` -> meter name, `customerRef` -> userId).
 - Deprecate and eventually remove the old `UsageEvent` schema and related code.
 
 ---

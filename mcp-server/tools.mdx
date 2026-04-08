@@ -140,7 +140,7 @@ Creates a customer if one doesn't exist for the given email. Returns the existin
 | Tool | Description |
 |---|---|
 | `list_purchases` | List all purchases |
-| `get_purchase` | Retrieve a purchase by ID |
+| `get_purchase` | Retrieve a purchase by reference |
 | `get_purchases_by_customer` | Purchases for a customer |
 | `get_purchases_by_product` | Purchases for a product |
 | `cancel_renewal` | Cancel renewal of a purchase |
@@ -156,7 +156,7 @@ Creates a customer if one doesn't exist for the given email. Returns the existin
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `id` | string | Yes | Purchase ID or reference |
+| `reference` | string | Yes | Purchase reference |
 
 ### get_purchases_by_customer
 
@@ -176,7 +176,7 @@ Creates a customer if one doesn't exist for the given email. Returns the existin
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `purchaseId` | string | Yes | Purchase ID or reference |
+| `purchaseRef` | string | Yes | Purchase reference |
 | `reason` | string | No | Cancellation reason |
 
 ### check_limits
@@ -263,7 +263,7 @@ Each object in `events` accepts the same fields as `record_usage`.
 | Tool | Description |
 |---|---|
 | `list_transactions` | List transactions with filters |
-| `get_transaction` | Retrieve a transaction by ID |
+| `get_transaction` | Retrieve a transaction by reference |
 | `get_transaction_stats` | Get transaction count and statistics |
 | `create_refund` | Refund a transaction (full or partial) |
 
@@ -281,7 +281,7 @@ Each object in `events` accepts the same fields as `record_usage`.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `transactionId` | string | Yes | Transaction ID |
+| `transactionRef` | string | Yes | Transaction reference |
 
 ### get_transaction_stats
 
@@ -294,6 +294,6 @@ Each object in `events` accepts the same fields as `record_usage`.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `sourceTransactionId` | string | Yes | Transaction ID to refund |
+| `sourceTransactionRef` | string | Yes | Transaction reference to refund |
 | `amount` | number | No | Partial refund amount (omit for a full refund) |
 | `reason` | string | No | Refund reason |

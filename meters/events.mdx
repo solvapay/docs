@@ -14,7 +14,7 @@ Each usage record contains:
 | `timestamp` | `Date` | When the event occurred |
 | `metadata.providerId` | `ObjectId` | The provider that owns this event |
 | `metadata.meterName` | `string` | Which meter this record belongs to (e.g. `requests`) |
-| `metadata.customerId` | `ObjectId` | The customer who triggered the event (mapped from `customerRef` in the SDK) |
+| `metadata.customerRef` | `string` | The customer who triggered the event |
 | `value` | `number` | Numeric value (defaults to `1` for counters) |
 | `properties` | `object?` | Arbitrary key-value tags for filtering and analysis |
 
@@ -59,7 +59,7 @@ The usage endpoint records generic usage events (not direct meter-name events):
 ```bash
 POST /v1/sdk/usages
 {
-  "customerId": "cus_abc123",
+  "customerRef": "cus_abc123",
   "actionType": "api_call",
   "units": 1,
   "outcome": "success",
@@ -115,7 +115,7 @@ This happens fire-and-forget so it never blocks the tool call response.
 Query total usage for a specific meter and customer within a time range:
 
 ```bash
-GET /ui/meters/mtr_XXXXXXXX/usage?from=2025-01-01&to=2025-02-01&customerId=cus_abc123
+GET /ui/meters/mtr_XXXXXXXX/usage?from=2025-01-01&to=2025-02-01&customerRef=cus_abc123
 ```
 
 ### Time-Bucketed Aggregation
@@ -128,7 +128,7 @@ GET /ui/meters/mtr_XXXXXXXX/usage?from=2025-01-01&to=2025-02-01&granularity=day
 
 Supported granularities: `hour`, `day`, `week`, `month`.
 
-When no `customerId` is specified, the aggregation runs across all customers.
+When no `customerRef` is specified, the aggregation runs across all customers.
 
 ### Analytics Queries
 

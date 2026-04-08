@@ -91,7 +91,7 @@ The `ensure_customer` tool is idempotent — it's safe to call repeatedly with t
 
 **You:** Cancel that renewal — the customer requested a downgrade
 
-*Calls `cancel_renewal` with `purchaseId: "pur_T3U4V5W6"`, `reason: "Customer requested downgrade"`*
+*Calls `cancel_renewal` with `purchaseRef: "pur_T3U4V5W6"`, `reason: "Customer requested downgrade"`*
 
 > The renewal has been cancelled. Jane Smith will retain access until the end of the current billing period (2026-02-15).
 
@@ -115,7 +115,7 @@ The `ensure_customer` tool is idempotent — it's safe to call repeatedly with t
 
 **You:** Refund $25 from transaction txn_D7E8F9G0 — the customer was double-charged
 
-*Calls `create_refund` with `sourceTransactionId: "txn_D7E8F9G0"`, `amount: 2500`, `reason: "Double charge"`*
+*Calls `create_refund` with `sourceTransactionRef: "txn_D7E8F9G0"`, `amount: 2500`, `reason: "Double charge"`*
 
 > A partial refund of **$25.00** has been processed for transaction `txn_D7E8F9G0`. The refund reference is `txn_H1I2J3K4`.
 
@@ -127,7 +127,7 @@ For a full refund, simply omit the `amount` parameter.
 
 **You:** Record that customer cus_X7Y8Z9W0 made a successful API call to product prd_P9Q0R1S2
 
-*Calls `record_usage` with `customerId: "cus_X7Y8Z9W0"`, `productRef: "prd_P9Q0R1S2"`, `actionType: "api_call"`, `units: 1`, `outcome: "success"`*
+*Calls `record_usage` with `customerRef: "cus_X7Y8Z9W0"`, `productRef: "prd_P9Q0R1S2"`, `actionType: "api_call"`, `units: 1`, `outcome: "success"`*
 
 > Usage event recorded successfully.
 
@@ -147,7 +147,7 @@ For a full refund, simply omit the `amount` parameter.
 
 > 5 usage events recorded successfully.
 
-The `record_bulk_usage` tool accepts an array of events using the same payload shape as `record_usage` (`customerId`, `actionType`, `units`, optional `productRef`, and `outcome`).
+The `record_bulk_usage` tool accepts an array of events using the same payload shape as `record_usage` (`customerRef`, `actionType`, `units`, optional `productRef`, and `outcome`).
 Use this for batch processing instead of making individual calls.
 
 ---

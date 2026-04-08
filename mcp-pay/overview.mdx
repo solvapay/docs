@@ -71,9 +71,9 @@ Hosted MCP access uses a clear precedence model:
 - `noPlan: true` on a tool means the tool is public
 - otherwise, access is allowed when the customer's purchase plan matches:
   - the tool's `planIds`, or
-  - the MCP server `defaultPlanId`
+  - the MCP server `defaultPlanRef`
 
-This means `defaultPlanId` is always an additional fallback allowlist for protected tools.
+This means `defaultPlanRef` is always an additional fallback allowlist for protected tools.
 
 For API-first setup, the `POST /v1/sdk/products/mcp/bootstrap` endpoint lets you define:
 - product

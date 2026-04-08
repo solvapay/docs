@@ -196,7 +196,7 @@ For free tiers, `freeUnits: 0` means unlimited free usage, not zero available us
 
 Plans integrate with MCP servers in two ways:
 
-- **Server default plan** — the `defaultPlanId` on an MCP server determines which plan is used for general tool access
+- **Server default plan** — the `defaultPlanRef` on an MCP server determines which plan is used for general tool access
 - **Per-tool plan assignments** — individual MCP tools can reference specific plans via `planIds`, enabling tool-level access tiering
 
 When plans are created, updated, or deleted, MCP server configurations are automatically synced.
@@ -213,7 +213,7 @@ When a customer purchases a plan, the plan's configuration is **frozen into a sn
     "currency": "USD",
     "planType": "usage-based",
     "billingCycle": "monthly",
-    "meterId": "60f7b2...",
+    "meterRef": "mtr_abc123",
     "limit": 10000,
     "freeUnits": 100,
     "pricePerUnit": 10

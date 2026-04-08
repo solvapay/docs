@@ -1,6 +1,64 @@
 {
   "components": {
     "schemas": {
+      "ActivatePlanDto": {
+        "properties": {
+          "customerRef": {
+            "type": "string"
+          },
+          "planRef": {
+            "type": "string"
+          },
+          "productRef": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "customerRef",
+          "productRef",
+          "planRef"
+        ],
+        "type": "object"
+      },
+      "ActivatePlanResponseDto": {
+        "properties": {
+          "checkoutSessionId": {
+            "type": "string"
+          },
+          "checkoutUrl": {
+            "type": "string"
+          },
+          "creditBalance": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "pricePerUnit": {
+            "type": "number"
+          },
+          "purchaseRef": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "activated",
+              "already_active",
+              "topup_required",
+              "payment_required",
+              "invalid"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
       "BulkCreateUsageRequest": {
         "properties": {
           "events": {
@@ -18,7 +76,7 @@
                   ],
                   "type": "string"
                 },
-                "customerId": {
+                "customerRef": {
                   "minLength": 1,
                   "type": "string"
                 },
@@ -70,7 +128,7 @@
                 }
               },
               "required": [
-                "customerId",
+                "customerRef",
                 "timestamp"
               ],
               "type": "object"
@@ -171,9 +229,6 @@
                   "exclusiveMinimum": false,
                   "minimum": 0,
                   "type": "number"
-                },
-                "meterId": {
-                  "type": "string"
                 },
                 "name": {
                   "minLength": 1,
@@ -563,7 +618,7 @@
             ],
             "type": "string"
           },
-          "customerId": {
+          "customerRef": {
             "minLength": 1,
             "type": "string"
           },
@@ -616,7 +671,7 @@
           }
         },
         "required": [
-          "customerId",
+          "customerRef",
           "metadata",
           "timestamp"
         ],
@@ -787,9 +842,6 @@
       },
       "LimitProductBriefDto": {
         "properties": {
-          "id": {
-            "type": "string"
-          },
           "name": {
             "type": "string"
           },
@@ -951,9 +1003,6 @@
                   "minimum": 0,
                   "type": "number"
                 },
-                "meterId": {
-                  "type": "string"
-                },
                 "name": {
                   "minLength": 1,
                   "type": "string"
@@ -1001,19 +1050,7 @@
                 "noPlan": {
                   "type": "boolean"
                 },
-                "planIds": {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
                 "planKeys": {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                "planRefs": {
                   "items": {
                     "type": "string"
                   },
@@ -1055,8 +1092,7 @@
             "additionalProperties": true,
             "description": "Created or updated MCP server identity",
             "example": {
-              "defaultPlanId": "67f90f1f1b1c9c0b8df0f001",
-              "id": "67f90f1f1b1c9c0b8df0f111",
+              "defaultPlanRef": "pln_FREE123",
               "mcpProxyUrl": "https://acme-docs.mcp.solvapay.com/mcp",
               "reference": "mcp_ABC123",
               "subdomain": "acme-docs",
@@ -1069,7 +1105,6 @@
             "description": "Resolved plan mapping by bootstrap key",
             "example": {
               "free": {
-                "id": "67f90f1f1b1c9c0b8df0f001",
                 "name": "Free",
                 "reference": "pln_FREE123"
               }
@@ -1146,11 +1181,6 @@
             "example": 100,
             "type": "number"
           },
-          "id": {
-            "description": "Plan ID",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
           "isActive": {
             "description": "Whether the plan is active (derived from status)",
             "example": true,
@@ -1173,6 +1203,11 @@
           "measures": {
             "description": "What the plan measures for usage tracking",
             "example": "requests",
+            "type": "string"
+          },
+          "meterRef": {
+            "description": "Meter reference for usage-based plans",
+            "example": "mtr_1A2B3C4D",
             "type": "string"
           },
           "name": {
@@ -1237,7 +1272,6 @@
         },
         "required": [
           "type",
-          "id",
           "reference",
           "price",
           "currency",
@@ -1246,74 +1280,6 @@
           "status",
           "createdAt",
           "updatedAt"
-        ],
-        "type": "object"
-      },
-      "PlanSnapshotDto": {
-        "properties": {
-          "billingCycle": {
-            "description": "Billing cycle",
-            "example": "monthly",
-            "nullable": true,
-            "type": "string"
-          },
-          "currency": {
-            "description": "Currency code",
-            "example": "USD",
-            "type": "string"
-          },
-          "features": {
-            "additionalProperties": true,
-            "description": "Plan features",
-            "nullable": true,
-            "type": "object"
-          },
-          "freeUnits": {
-            "description": "Number of free units included",
-            "example": 100,
-            "type": "number"
-          },
-          "limit": {
-            "description": "Usage limit for the meter",
-            "example": 5000,
-            "type": "number"
-          },
-          "limits": {
-            "additionalProperties": true,
-            "description": "Usage limits",
-            "nullable": true,
-            "type": "object"
-          },
-          "meterId": {
-            "description": "Meter ObjectId reference",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "planType": {
-            "description": "Plan type",
-            "example": "recurring",
-            "type": "string"
-          },
-          "price": {
-            "description": "Plan price in cents",
-            "example": 2999,
-            "type": "number"
-          },
-          "pricePerUnit": {
-            "description": "Price per usage unit in cents (supports decimals, e.g. 0.1 = 1/10 cent)",
-            "example": 0.1,
-            "type": "number"
-          },
-          "reference": {
-            "description": "Plan reference",
-            "example": "pln_1A2B3C4D",
-            "type": "string"
-          }
-        },
-        "required": [
-          "price",
-          "currency",
-          "planType"
         ],
         "type": "object"
       },
@@ -1394,6 +1360,11 @@
             "example": 7500,
             "type": "number"
           },
+          "planRef": {
+            "description": "Plan reference from the plan snapshot, for reliable plan matching",
+            "example": "pln_abc123",
+            "type": "string"
+          },
           "planSnapshot": {
             "description": "Snapshot of the plan at time of purchase",
             "type": "object"
@@ -1434,7 +1405,364 @@
         ],
         "type": "object"
       },
-      "PurchaseResponse": {
+      "RecordBulkMeterEventsZodDto": {
+        "properties": {
+          "events": {
+            "items": {
+              "properties": {
+                "customerRef": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "meterName": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "productRef": {
+                  "type": "string"
+                },
+                "properties": {
+                  "additionalProperties": {},
+                  "type": "object"
+                },
+                "timestamp": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "meterName",
+                "customerRef"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "events"
+        ],
+        "type": "object"
+      },
+      "RecordMeterEventZodDto": {
+        "properties": {
+          "customerRef": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "meterName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "productRef": {
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {},
+            "selfRequired": false,
+            "type": "object"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "meterName",
+          "customerRef",
+          "properties"
+        ],
+        "type": "object"
+      },
+      "SdkPlanResponse": {
+        "properties": {
+          "billingCycle": {
+            "description": "Billing cycle",
+            "example": "monthly",
+            "type": "string"
+          },
+          "billingModel": {
+            "description": "Billing model",
+            "example": "pre-paid",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "Creation timestamp",
+            "type": "string"
+          },
+          "currency": {
+            "description": "Currency code (ISO 4217)",
+            "example": "USD",
+            "type": "string"
+          },
+          "currencySymbol": {
+            "description": "Currency symbol",
+            "example": "$",
+            "type": "string"
+          },
+          "features": {
+            "additionalProperties": true,
+            "description": "Plan features",
+            "type": "object"
+          },
+          "freeUnits": {
+            "description": "Included free units",
+            "example": 1000,
+            "type": "number"
+          },
+          "isActive": {
+            "description": "Whether the plan is active",
+            "example": true,
+            "type": "boolean"
+          },
+          "limit": {
+            "description": "Usage limit for the meter",
+            "example": 10000,
+            "type": "number"
+          },
+          "limits": {
+            "additionalProperties": true,
+            "description": "Usage limits",
+            "type": "object"
+          },
+          "measures": {
+            "description": "What the plan measures for usage tracking",
+            "example": "requests",
+            "type": "string"
+          },
+          "meterRef": {
+            "description": "Meter reference for usage-based limits",
+            "example": "mtr_1A2B3C4D",
+            "type": "string"
+          },
+          "price": {
+            "description": "Plan price in cents",
+            "example": 2999,
+            "type": "number"
+          },
+          "pricePerUnit": {
+            "description": "Price per usage unit in cents (supports decimals, e.g. 0.1 = 1/10 cent)",
+            "example": 0.1,
+            "type": "number"
+          },
+          "reference": {
+            "description": "Plan reference",
+            "example": "pln_1A2B3C4D",
+            "type": "string"
+          },
+          "requiresPayment": {
+            "description": "Whether payment is required",
+            "example": true,
+            "type": "boolean"
+          },
+          "rolloverUnusedUnits": {
+            "description": "Whether unused units roll over to next period",
+            "example": false,
+            "type": "boolean"
+          },
+          "setupFee": {
+            "description": "One-time setup fee",
+            "example": 500,
+            "type": "number"
+          },
+          "status": {
+            "description": "Plan status",
+            "example": "active",
+            "type": "string"
+          },
+          "trialDays": {
+            "description": "Free trial period in days",
+            "example": 14,
+            "type": "number"
+          },
+          "updatedAt": {
+            "description": "Last update timestamp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference",
+          "price",
+          "currency",
+          "requiresPayment",
+          "isActive",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "SdkPlanSnapshotDto": {
+        "properties": {
+          "billingCycle": {
+            "description": "Billing cycle",
+            "example": "monthly",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "description": "Currency code",
+            "example": "USD",
+            "type": "string"
+          },
+          "features": {
+            "additionalProperties": true,
+            "description": "Plan features",
+            "nullable": true,
+            "type": "object"
+          },
+          "freeUnits": {
+            "description": "Number of free units included",
+            "example": 100,
+            "type": "number"
+          },
+          "limit": {
+            "description": "Usage limit for the meter",
+            "example": 5000,
+            "type": "number"
+          },
+          "limits": {
+            "additionalProperties": true,
+            "description": "Usage limits",
+            "nullable": true,
+            "type": "object"
+          },
+          "meterRef": {
+            "description": "Meter reference",
+            "example": "mtr_1A2B3C4D",
+            "type": "string"
+          },
+          "planType": {
+            "description": "Plan type",
+            "example": "recurring",
+            "type": "string"
+          },
+          "price": {
+            "description": "Plan price in cents",
+            "example": 2999,
+            "type": "number"
+          },
+          "pricePerUnit": {
+            "description": "Price per usage unit in cents (supports decimals, e.g. 0.1 = 1/10 cent)",
+            "example": 0.1,
+            "type": "number"
+          },
+          "reference": {
+            "description": "Plan reference",
+            "example": "pln_1A2B3C4D",
+            "type": "string"
+          }
+        },
+        "required": [
+          "price",
+          "currency",
+          "planType"
+        ],
+        "type": "object"
+      },
+      "SdkProductResponse": {
+        "properties": {
+          "balance": {
+            "description": "Product balance in cents",
+            "example": 0,
+            "type": "number"
+          },
+          "config": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductConfigDto"
+              }
+            ],
+            "description": "Product-specific configuration"
+          },
+          "createdAt": {
+            "description": "Creation timestamp",
+            "type": "string"
+          },
+          "description": {
+            "description": "Product description",
+            "type": "string"
+          },
+          "imageUrl": {
+            "description": "URL to the product image",
+            "type": "string"
+          },
+          "isMcpPay": {
+            "description": "Whether this product uses MCP Pay proxy",
+            "example": false,
+            "type": "boolean"
+          },
+          "mcp": {
+            "additionalProperties": true,
+            "description": "MCP linkage details for MCP-enabled products",
+            "example": {
+              "defaultPlanRef": "pln_FREE123",
+              "mcpProxyUrl": "https://acme-docs.mcp.solvapay.com/mcp",
+              "mcpServerRef": "mcp_ABC123",
+              "mcpSubdomain": "acme-docs",
+              "originUrl": "https://origin.example.com/mcp"
+            },
+            "type": "object"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "description": "Arbitrary key-value metadata",
+            "type": "object"
+          },
+          "name": {
+            "description": "Product name",
+            "example": "AI Writing Assistant",
+            "type": "string"
+          },
+          "plans": {
+            "description": "Plans associated with this product",
+            "items": {
+              "$ref": "#/components/schemas/SdkPlanResponse"
+            },
+            "type": "array"
+          },
+          "productType": {
+            "description": "Free-form product type",
+            "type": "string"
+          },
+          "reference": {
+            "description": "Product reference",
+            "example": "prd_1A2B3C4D",
+            "type": "string"
+          },
+          "status": {
+            "description": "Product status",
+            "example": "active",
+            "type": "string"
+          },
+          "totalTransactions": {
+            "description": "Total number of transactions",
+            "example": 0,
+            "type": "number"
+          },
+          "updatedAt": {
+            "description": "Last update timestamp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference",
+          "name",
+          "status",
+          "balance",
+          "totalTransactions",
+          "isMcpPay",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "SdkPurchaseResponse": {
         "properties": {
           "amount": {
             "description": "Amount in USD cents (normalised for aggregation)",
@@ -1491,11 +1819,6 @@
             "example": 1.3082,
             "type": "number"
           },
-          "id": {
-            "description": "Purchase ID",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
           "isRecurring": {
             "description": "Is recurring",
             "example": true,
@@ -1522,15 +1845,10 @@
           "planSnapshot": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/PlanSnapshotDto"
+                "$ref": "#/components/schemas/SdkPlanSnapshotDto"
               }
             ],
             "description": "Plan snapshot at time of purchase (null for credit topups)"
-          },
-          "productId": {
-            "description": "Product ID",
-            "example": "507f1f77bcf86cd799439012",
-            "type": "string"
           },
           "productName": {
             "description": "Product name",
@@ -1566,7 +1884,6 @@
           }
         },
         "required": [
-          "id",
           "reference",
           "customerRef",
           "customerEmail",
@@ -1577,309 +1894,6 @@
           "startDate",
           "isRecurring",
           "createdAt"
-        ],
-        "type": "object"
-      },
-      "RecordBulkMeterEventsZodDto": {
-        "properties": {
-          "events": {
-            "items": {
-              "properties": {
-                "customerId": {
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "meterName": {
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "productId": {
-                  "type": "string"
-                },
-                "productRef": {
-                  "type": "string"
-                },
-                "properties": {
-                  "additionalProperties": {},
-                  "type": "object"
-                },
-                "timestamp": {
-                  "type": "string"
-                },
-                "value": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "meterName",
-                "customerId"
-              ],
-              "type": "object"
-            },
-            "minItems": 1,
-            "type": "array"
-          }
-        },
-        "required": [
-          "events"
-        ],
-        "type": "object"
-      },
-      "RecordMeterEventZodDto": {
-        "properties": {
-          "customerId": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "meterName": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "productId": {
-            "type": "string"
-          },
-          "productRef": {
-            "type": "string"
-          },
-          "properties": {
-            "additionalProperties": {},
-            "selfRequired": false,
-            "type": "object"
-          },
-          "timestamp": {
-            "type": "string"
-          },
-          "value": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "meterName",
-          "customerId",
-          "properties"
-        ],
-        "type": "object"
-      },
-      "SdkPlanResponse": {
-        "properties": {
-          "billingCycle": {
-            "description": "Billing cycle",
-            "example": "monthly",
-            "type": "string"
-          },
-          "billingModel": {
-            "description": "Billing model",
-            "example": "pre-paid",
-            "type": "string"
-          },
-          "createdAt": {
-            "description": "Creation timestamp",
-            "type": "string"
-          },
-          "currency": {
-            "description": "Currency code (ISO 4217)",
-            "example": "USD",
-            "type": "string"
-          },
-          "currencySymbol": {
-            "description": "Currency symbol",
-            "example": "$",
-            "type": "string"
-          },
-          "features": {
-            "additionalProperties": true,
-            "description": "Plan features",
-            "type": "object"
-          },
-          "freeUnits": {
-            "description": "Included free units",
-            "example": 1000,
-            "type": "number"
-          },
-          "id": {
-            "description": "Plan ID",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "isActive": {
-            "description": "Whether the plan is active",
-            "example": true,
-            "type": "boolean"
-          },
-          "limit": {
-            "description": "Usage limit for the meter",
-            "example": 10000,
-            "type": "number"
-          },
-          "limits": {
-            "additionalProperties": true,
-            "description": "Usage limits",
-            "type": "object"
-          },
-          "measures": {
-            "description": "What the plan measures for usage tracking",
-            "example": "requests",
-            "type": "string"
-          },
-          "price": {
-            "description": "Plan price in cents",
-            "example": 2999,
-            "type": "number"
-          },
-          "pricePerUnit": {
-            "description": "Price per usage unit in cents (supports decimals, e.g. 0.1 = 1/10 cent)",
-            "example": 0.1,
-            "type": "number"
-          },
-          "reference": {
-            "description": "Plan reference",
-            "example": "pln_1A2B3C4D",
-            "type": "string"
-          },
-          "requiresPayment": {
-            "description": "Whether payment is required",
-            "example": true,
-            "type": "boolean"
-          },
-          "rolloverUnusedUnits": {
-            "description": "Whether unused units roll over to next period",
-            "example": false,
-            "type": "boolean"
-          },
-          "setupFee": {
-            "description": "One-time setup fee",
-            "example": 500,
-            "type": "number"
-          },
-          "status": {
-            "description": "Plan status",
-            "example": "active",
-            "type": "string"
-          },
-          "trialDays": {
-            "description": "Free trial period in days",
-            "example": 14,
-            "type": "number"
-          },
-          "updatedAt": {
-            "description": "Last update timestamp",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "reference",
-          "price",
-          "currency",
-          "requiresPayment",
-          "isActive",
-          "status",
-          "createdAt",
-          "updatedAt"
-        ],
-        "type": "object"
-      },
-      "SdkProductResponse": {
-        "properties": {
-          "balance": {
-            "description": "Product balance in cents",
-            "example": 0,
-            "type": "number"
-          },
-          "config": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ProductConfigDto"
-              }
-            ],
-            "description": "Product-specific configuration"
-          },
-          "createdAt": {
-            "description": "Creation timestamp",
-            "type": "string"
-          },
-          "description": {
-            "description": "Product description",
-            "type": "string"
-          },
-          "id": {
-            "description": "Product ID",
-            "example": "507f1f77bcf86cd799439011",
-            "type": "string"
-          },
-          "imageUrl": {
-            "description": "URL to the product image",
-            "type": "string"
-          },
-          "isMcpPay": {
-            "description": "Whether this product uses MCP Pay proxy",
-            "example": false,
-            "type": "boolean"
-          },
-          "mcp": {
-            "additionalProperties": true,
-            "description": "MCP linkage details for MCP-enabled products",
-            "example": {
-              "defaultPlanId": "67f90f1f1b1c9c0b8df0f001",
-              "mcpProxyUrl": "https://acme-docs.mcp.solvapay.com/mcp",
-              "mcpServerId": "67f90f1f1b1c9c0b8df0f111",
-              "mcpServerRef": "mcp_ABC123",
-              "mcpSubdomain": "acme-docs",
-              "originUrl": "https://origin.example.com/mcp"
-            },
-            "type": "object"
-          },
-          "metadata": {
-            "additionalProperties": true,
-            "description": "Arbitrary key-value metadata",
-            "type": "object"
-          },
-          "name": {
-            "description": "Product name",
-            "example": "AI Writing Assistant",
-            "type": "string"
-          },
-          "plans": {
-            "description": "Plans associated with this product",
-            "items": {
-              "$ref": "#/components/schemas/SdkPlanResponse"
-            },
-            "type": "array"
-          },
-          "productType": {
-            "description": "Free-form product type",
-            "type": "string"
-          },
-          "reference": {
-            "description": "Product reference",
-            "example": "prd_1A2B3C4D",
-            "type": "string"
-          },
-          "status": {
-            "description": "Product status",
-            "example": "active",
-            "type": "string"
-          },
-          "totalTransactions": {
-            "description": "Total number of transactions",
-            "example": 0,
-            "type": "number"
-          },
-          "updatedAt": {
-            "description": "Last update timestamp",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "reference",
-          "name",
-          "status",
-          "balance",
-          "totalTransactions",
-          "isMcpPay",
-          "createdAt",
-          "updatedAt"
         ],
         "type": "object"
       },
@@ -2180,9 +2194,10 @@
       },
       "UserInfoUsageDto": {
         "properties": {
-          "meterId": {
-            "description": "Meter ObjectId reference",
-            "example": "507f1f77bcf86cd799439011",
+          "meterRef": {
+            "description": "Meter reference",
+            "example": "meter_ABC123",
+            "nullable": true,
             "type": "string"
           },
           "percentUsed": {
@@ -2263,6 +2278,42 @@
   },
   "openapi": "3.0.0",
   "paths": {
+    "/v1/sdk/activate": {
+      "post": {
+        "operationId": "ActivateSdkController_activate",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivatePlanDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivatePlanResponseDto"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Activation"
+        ]
+      }
+    },
     "/v1/sdk/checkout-sessions": {
       "post": {
         "description": "Creates a hosted checkout session for a customer to purchase a product plan. Returns a session ID and checkout URL for redirect.",
@@ -2547,6 +2598,77 @@
           }
         ],
         "summary": "Get customer by reference",
+        "tags": [
+          "Customers"
+        ]
+      }
+    },
+    "/v1/sdk/customers/{reference}/balance": {
+      "get": {
+        "description": "Returns the credit balance(s) for a customer identified by reference. Optionally filter by currency using the query parameter.",
+        "operationId": "CustomerSdkController_getCustomerBalance",
+        "parameters": [
+          {
+            "description": "Customer reference identifier",
+            "in": "path",
+            "name": "reference",
+            "required": true,
+            "schema": {
+              "example": "cus_3c4d5e6f7g8h",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by ISO 4217 currency code",
+            "in": "query",
+            "name": "currency",
+            "required": false,
+            "schema": {
+              "example": "USD",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "balances": [
+                      {
+                        "balance": 4200,
+                        "currency": "USD"
+                      }
+                    ],
+                    "customerRef": "cus_3c4d5e6f7g8h"
+                  }
+                }
+              }
+            },
+            "description": "Customer balance retrieved successfully"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "error": "Not Found",
+                    "message": "Customer with reference cus_3c4d5e6f7g8h not found",
+                    "statusCode": 404
+                  }
+                }
+              }
+            },
+            "description": "Customer not found"
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Get customer credit balance",
         "tags": [
           "Customers"
         ]
@@ -2890,10 +3012,9 @@
                         "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_xxx",
                         "createdAt": "2025-10-11T10:30:00.000Z",
                         "currency": "usd",
-                        "id": "pi_1a2b3c4d5e6f7g8h",
                         "planRef": "pln_2b3c4d5e6f7g",
-                        "status": "succeeded",
-                        "stripePaymentIntentId": "pi_stripe_1234567890"
+                        "processorPaymentId": "pi_1a2b3c4d5e6f7g8h",
+                        "status": "succeeded"
                       }
                     ],
                     "total": 1
@@ -2915,7 +3036,7 @@
         ]
       },
       "post": {
-        "description": "Creates a new payment intent for a customer to purchase a plan. Payment intents are used with Stripe.js to process payments. Requires an idempotency key to prevent duplicate charges. Returns client secret and publishable key needed for frontend integration.",
+        "description": "Creates a new payment intent for a customer to purchase a plan. Requires an idempotency key to prevent duplicate charges. Returns client secret and publishable key needed for frontend integration.",
         "operationId": "PaymentIntentSdkController_createPaymentIntent",
         "parameters": [
           {
@@ -2952,13 +3073,11 @@
                     "customerRef": "cus_3c4d5e6f7g8h",
                     "exchangeRate": 1,
                     "expiresAt": "2025-10-19T10:30:00.000Z",
-                    "id": "6743f1a2b3c4d5e6f7g8h9i0",
                     "originalAmount": 4999,
                     "planRef": "pln_2b3c4d5e6f7g",
+                    "processorPaymentId": "pi_1a2b3c4d5e6f7g8h",
                     "publishableKey": "pk_test_...",
-                    "status": "requires_payment_method",
-                    "stripePaymentIntentId": "pi_1a2b3c4d5e6f7g8h",
-                    "transactionId": "6743f1a2b3c4d5e6f7g8h9i1"
+                    "status": "requires_payment_method"
                   }
                 }
               }
@@ -2991,72 +3110,15 @@
         ]
       }
     },
-    "/v1/sdk/payment-intents/{id}": {
-      "get": {
-        "description": "Retrieves detailed information about a specific payment intent including amount, currency, and client secret for Stripe integration.",
-        "operationId": "PaymentIntentSdkController_getPaymentIntent",
-        "parameters": [
-          {
-            "description": "Payment intent MongoDB ID",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "example": {
-                    "amount": 4999,
-                    "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_xxx",
-                    "currency": "usd",
-                    "planRef": "pln_2b3c4d5e6f7g"
-                  }
-                }
-              }
-            },
-            "description": "Payment intent retrieved successfully"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "example": {
-                    "code": "PAYMENT_INTENT_NOT_FOUND",
-                    "error": "Payment intent not found",
-                    "success": false
-                  }
-                }
-              }
-            },
-            "description": "Payment intent not found"
-          }
-        },
-        "security": [
-          {
-            "SecretKey": []
-          }
-        ],
-        "summary": "Get a specific payment intent by ID",
-        "tags": [
-          "Payment Intents"
-        ]
-      }
-    },
-    "/v1/sdk/payment-intents/{id}/process": {
+    "/v1/sdk/payment-intents/{processorPaymentId}/process": {
       "post": {
-        "description": "Processes a payment intent that has been confirmed on the client-side using Stripe.js. Polls the database for payment intent status to become succeeded (up to 10 seconds). Returns the current status of the payment intent.",
+        "description": "Processes a payment intent that has been confirmed on the client side. Polls the database for payment intent status to become succeeded (up to 10 seconds). Returns the current status of the payment intent.",
         "operationId": "PaymentIntentSdkController_processPaymentIntent",
         "parameters": [
           {
-            "description": "Stripe payment intent ID (format: pi_xxx)",
+            "description": "Payment processor ID returned from createPaymentIntent",
             "in": "path",
-            "name": "id",
+            "name": "processorPaymentId",
             "required": true,
             "schema": {
               "example": "pi_1a2b3c4d5e6f7g8h",
@@ -3101,7 +3163,7 @@
                   "timeout": {
                     "description": "Timeout waiting for payment intent confirmation",
                     "value": {
-                      "message": "Timeout while waiting for payment intent confirmation, try again later. This could be due to Stripe webhooks not being configured correctly.",
+                      "message": "Timeout while waiting for payment intent confirmation, try again later. This could be due to payment webhooks not being configured correctly.",
                       "status": "timeout"
                     }
                   }
@@ -3110,7 +3172,7 @@
                   "properties": {
                     "message": {
                       "description": "Optional message, only present for timeout status",
-                      "example": "Timeout while waiting for payment intent confirmation, try again later. This could be due to Stripe webhooks not being configured correctly.",
+                      "example": "Timeout while waiting for payment intent confirmation, try again later. This could be due to payment webhooks not being configured correctly.",
                       "type": "string"
                     },
                     "status": {
@@ -3152,6 +3214,63 @@
           }
         ],
         "summary": "Process payment intent after client-side confirmation",
+        "tags": [
+          "Payment Intents"
+        ]
+      }
+    },
+    "/v1/sdk/payment-intents/{reference}": {
+      "get": {
+        "description": "Retrieves detailed information about a specific payment intent including amount, currency, and client secret.",
+        "operationId": "PaymentIntentSdkController_getPaymentIntent",
+        "parameters": [
+          {
+            "description": "Payment intent reference or processor payment ID",
+            "in": "path",
+            "name": "reference",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "amount": 4999,
+                    "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_xxx",
+                    "currency": "usd",
+                    "planRef": "pln_2b3c4d5e6f7g"
+                  }
+                }
+              }
+            },
+            "description": "Payment intent retrieved successfully"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "code": "PAYMENT_INTENT_NOT_FOUND",
+                    "error": "Payment intent not found",
+                    "success": false
+                  }
+                }
+              }
+            },
+            "description": "Payment intent not found"
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Get a specific payment intent",
         "tags": [
           "Payment Intents"
         ]
@@ -3272,7 +3391,7 @@
     },
     "/v1/sdk/products/{productRef}": {
       "delete": {
-        "description": "Deletes a product permanently in sandbox or when no purchases exist. In live mode with purchases, the product is deactivated instead.",
+        "description": "Deletes a product permanently in sandbox. In live mode, soft-deletes (preserves data but hides from listings). If the product has purchases in live mode, deactivates instead.",
         "operationId": "ProductSdkController_deleteProduct",
         "parameters": [
           {
@@ -3835,18 +3954,18 @@
             }
           },
           {
-            "description": "Filter by product ID",
+            "description": "Filter by product reference",
             "in": "query",
-            "name": "productId",
+            "name": "productRef",
             "required": false,
             "schema": {
               "type": "string"
             }
           },
           {
-            "description": "Filter by customer ID",
+            "description": "Filter by customer reference",
             "in": "query",
-            "name": "customerId",
+            "name": "customerRef",
             "required": false,
             "schema": {
               "type": "string"
@@ -3861,7 +3980,7 @@
                   "properties": {
                     "purchases": {
                       "items": {
-                        "$ref": "#/components/schemas/PurchaseResponse"
+                        "$ref": "#/components/schemas/SdkPurchaseResponse"
                       },
                       "type": "array"
                     }
@@ -3883,15 +4002,15 @@
         ]
       }
     },
-    "/v1/sdk/purchases/{id}": {
+    "/v1/sdk/purchases/{purchaseRef}": {
       "get": {
         "description": "Retrieves a single purchase including plan snapshot, usage, and billing details.",
         "operationId": "PurchaseSdkController_getPurchase",
         "parameters": [
           {
-            "description": "Purchase ID or reference",
+            "description": "Purchase reference or ID",
             "in": "path",
-            "name": "id",
+            "name": "purchaseRef",
             "required": true,
             "schema": {
               "example": "pur_1A2B3C4D",
@@ -3904,7 +4023,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PurchaseResponse"
+                  "$ref": "#/components/schemas/SdkPurchaseResponse"
                 }
               }
             },
@@ -3919,7 +4038,7 @@
             "bearer": []
           }
         ],
-        "summary": "Get a purchase by ID or reference",
+        "summary": "Get a purchase by reference",
         "tags": [
           "Purchases"
         ]
@@ -3958,7 +4077,7 @@
                 "schema": {
                   "properties": {
                     "purchase": {
-                      "$ref": "#/components/schemas/PurchaseResponse"
+                      "$ref": "#/components/schemas/SdkPurchaseResponse"
                     },
                     "success": {
                       "type": "boolean"
@@ -3979,6 +4098,58 @@
           }
         ],
         "summary": "Cancel a purchase",
+        "tags": [
+          "Purchases"
+        ]
+      }
+    },
+    "/v1/sdk/purchases/{purchaseRef}/reactivate": {
+      "post": {
+        "description": "Reactivates a purchase that was cancelled but has not yet reached its end date. Restores auto-renewal and clears cancellation fields.",
+        "operationId": "PurchaseSdkController_reactivatePurchase",
+        "parameters": [
+          {
+            "description": "Purchase reference or ID",
+            "in": "path",
+            "name": "purchaseRef",
+            "required": true,
+            "schema": {
+              "example": "pur_1A2B3C4D",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "purchase": {
+                      "$ref": "#/components/schemas/SdkPurchaseResponse"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Purchase reactivated successfully"
+          },
+          "400": {
+            "description": "Purchase cannot be reactivated"
+          },
+          "404": {
+            "description": "Purchase not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reactivate a cancelled purchase",
         "tags": [
           "Purchases"
         ]
@@ -4008,7 +4179,7 @@
                   "properties": {
                     "purchases": {
                       "items": {
-                        "$ref": "#/components/schemas/PurchaseResponse"
+                        "$ref": "#/components/schemas/SdkPurchaseResponse"
                       },
                       "type": "array"
                     }
@@ -4057,7 +4228,7 @@
                   "properties": {
                     "purchases": {
                       "items": {
-                        "$ref": "#/components/schemas/PurchaseResponse"
+                        "$ref": "#/components/schemas/SdkPurchaseResponse"
                       },
                       "type": "array"
                     }

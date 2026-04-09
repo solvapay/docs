@@ -47,7 +47,7 @@ Pay-per-use plans where customers are billed based on actual consumption tracked
 |-------|------|-------------|
 | `measures` | `string` | What the plan measures for usage tracking (value: `'requests'`) |
 | `billingModel` | `enum` | `pre-paid` (pay upfront for a quota) or `post-paid` (pay after usage) |
-| `pricePerUnit` | `number` | Cost per metered unit |
+| `creditsPerUnit` | `number` | Credits deducted per metered unit |
 | `limit` | `number` | Hard usage cap per period (`0` = unlimited) |
 | `freeUnits` | `number` | Units included before billing starts |
 | `rolloverUnusedUnits` | `boolean` | Carry unused units to the next period |
@@ -58,11 +58,10 @@ Pay-per-use plans where customers are billed based on actual consumption tracked
 {
   "type": "usage-based",
   "price": 0,
-  "currency": "USD",
   "billingModel": "post-paid",
   "billingCycle": "monthly",
   "measures": "requests",
-  "pricePerUnit": 10,
+  "creditsPerUnit": 10,
   "freeUnits": 100,
   "limit": 10000
 }
@@ -83,7 +82,7 @@ Combines a recurring base price with usage-based overage billing. Best for enter
 | `measures` | `string` | What the plan measures for usage tracking (value: `'requests'`) |
 | `limit` | `number` | Included units in the base price |
 | `freeUnits` | `number` | Additional free units beyond the base |
-| `pricePerUnit` | `number` | Flat per-unit rate (fallback if no tiers) |
+| `creditsPerUnit` | `number` | Flat per-unit credit rate (fallback if no tiers) |
 | `usageTiers` | `array` | Volume-based tiered pricing for the usage component |
 | `overagePolicy` | `object` | `allowOverage`, `overageRate`, `maxOverage` |
 | `billingStrategy` | `object` | Whether to bill `recurring_first`, `usage_first`, or `combined` |
@@ -97,16 +96,16 @@ Combines a recurring base price with usage-based overage billing. Best for enter
   "measures": "requests",
   "limit": 1000,
   "freeUnits": 0,
-  "pricePerUnit": 5,
+  "creditsPerUnit": 5,
   "overagePolicy": {
     "allowOverage": true,
     "overageRate": 8,
     "maxOverage": 5000
   },
   "usageTiers": [
-    { "name": "Standard", "minUsage": 0, "maxUsage": 500, "pricePerUnit": 5 },
-    { "name": "High Volume", "minUsage": 501, "maxUsage": 2000, "pricePerUnit": 3 },
-    { "name": "Enterprise", "minUsage": 2001, "pricePerUnit": 1 }
+    { "name": "Standard", "minUsage": 0, "maxUsage": 500, "creditsPerUnit": 5 },
+    { "name": "High Volume", "minUsage": 501, "maxUsage": 2000, "creditsPerUnit": 3 },
+    { "name": "Enterprise", "minUsage": 2001, "creditsPerUnit": 1 }
   ]
 }
 ```
@@ -143,10 +142,10 @@ All plan types share these base fields:
 | Field | Type | Description |
 |-------|------|-------------|
 | `reference` | `string` | Auto-generated identifier (`pln_XXXXXXXX`) |
-| `price` | `number` | Base price in smallest currency unit (e.g. cents) |
-| `currency` | `string` | ISO 4217 currency code (default: `USD`) |
+| `price` | `number` | Base price in smallest currency unit (e.g. cents) for recurring/one-time plans |
+| `currency` | `string` | ISO 4217 currency code for recurring/one-time plans |
 | `status` | `enum` | `active`, `inactive`, or `archived` |
-| `requiresPayment` | `boolean` | Server-derived. `true` when the plan's pricing requires payment (based on `price`, `pricePerUnit`, and plan `type`) |
+| `requiresPayment` | `boolean` | Server-derived. `true` when the plan's pricing requires payment (based on `price`, `creditsPerUnit`, and plan `type`) |
 | `default` | `boolean` | Whether this is the product's default plan |
 | `maxActiveUsers` | `number?` | Maximum concurrent users on this plan |
 | `accessExpiryDays` | `number?` | Days until access expires |
@@ -165,7 +164,7 @@ This means:
 ```
 Product (prd_myapi)
 ├── Plan: Free Tier (pln_abc123) — recurring, $0/month
-├── Plan: Pro (pln_def456) — usage-based, $0.01/request
+├── Plan: Pro (pln_def456) — usage-based, 10 credits/request
 └── Plan: Enterprise (pln_ghi789) — hybrid, $49/month + overage
 ```
 
@@ -216,7 +215,7 @@ When a customer purchases a plan, the plan's configuration is **frozen into a sn
     "meterRef": "mtr_abc123",
     "limit": 10000,
     "freeUnits": 100,
-    "pricePerUnit": 10
+    "creditsPerUnit": 10
   }
 }
 ```

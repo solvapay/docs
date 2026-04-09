@@ -90,18 +90,18 @@ A daily cron job (11:00 AM UTC) processes end-of-period billing for usage-based 
 
 1. Query the Usage timeseries for total usage in the period
 2. Subtract `freeUnits` from the total
-3. Apply the `pricePerUnit` to the billable amount
+3. Apply the `creditsPerUnit` to the billable amount
 4. Respect the `limit` as a hard cap (usage beyond the cap is not billed unless overage is allowed)
 5. Create a payment intent for the calculated cost
 
 **Example:**
 
 ```
-Plan: 100 free units, $0.01/unit, 10,000 limit
+Plan: 100 free units, 100 credits/unit, 10,000 limit
 Usage: 5,250 records in the period
 
 Billable = max(0, min(5250, 10000) - 100) = 5,150 units
-Cost = 5,150 × $0.01 = $51.50
+Cost = 5,150 × 100 = 515,000 credits
 ```
 
 ### Hybrid Plans
@@ -110,8 +110,8 @@ Hybrid plans combine a recurring base fee with usage-based charges:
 
 1. The base price is billed as part of the regular renewal
 2. Usage beyond the included amount is calculated separately
-3. **Tiered pricing** is applied if `usageTiers` are defined — each tier has its own `pricePerUnit` for a range of usage
-4. **Overage** beyond the plan's `limit` is charged at the `overagePolicy.overageRate` (or `pricePerUnit` as fallback)
+3. **Tiered pricing** is applied if `usageTiers` are defined — each tier has its own `creditsPerUnit` for a range of usage
+4. **Overage** beyond the plan's `limit` is charged at the `overagePolicy.overageRate` (or `creditsPerUnit` as fallback)
 5. The `overagePolicy.maxOverage` caps the maximum overage units
 
 **Example with tiered pricing:**
@@ -119,20 +119,20 @@ Hybrid plans combine a recurring base fee with usage-based charges:
 ```
 Base: $49/month, 1,000 included units
 Tiers:
-  0–500:     $0.05/unit
-  501–2,000: $0.03/unit
-  2,001+:    $0.01/unit
-Overage: allowed, rate $0.08/unit, max 5,000
+  0–500:     50 credits/unit
+  501–2,000: 30 credits/unit
+  2,001+:    10 credits/unit
+Overage: allowed, rate 80 credits/unit, max 5,000
 
 Usage: 3,500 records
 
 Included: 1,000 (covered by base price)
 Billable: 2,500 units
-  Tier 1: 500 × $0.05 = $25.00
-  Tier 2: 1,500 × $0.03 = $45.00
-  Tier 3: 500 × $0.01 = $5.00
-Usage cost: $75.00
-Total: $49.00 (base) + $75.00 (usage) = $124.00
+  Tier 1: 500 × 50 = 25,000 credits
+  Tier 2: 1,500 × 30 = 45,000 credits
+  Tier 3: 500 × 10 = 5,000 credits
+Usage cost: 75,000 credits
+Total: $49.00 (base) + 75,000 credits (usage)
 ```
 
 ## Renewal Processing

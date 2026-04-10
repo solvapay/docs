@@ -13,71 +13,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "ok"
-                                        },
-                                        "info": {
-                                            "type": "object",
-                                            "example": {
-                                                "database": {
-                                                    "status": "up"
-                                                }
-                                            },
-                                            "additionalProperties": {
-                                                "type": "object",
-                                                "required": [
-                                                    "status"
-                                                ],
-                                                "properties": {
-                                                    "status": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "additionalProperties": true
-                                            },
-                                            "nullable": true
-                                        },
-                                        "error": {
-                                            "type": "object",
-                                            "example": {},
-                                            "additionalProperties": {
-                                                "type": "object",
-                                                "required": [
-                                                    "status"
-                                                ],
-                                                "properties": {
-                                                    "status": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "additionalProperties": true
-                                            },
-                                            "nullable": true
-                                        },
-                                        "details": {
-                                            "type": "object",
-                                            "example": {
-                                                "database": {
-                                                    "status": "up"
-                                                }
-                                            },
-                                            "additionalProperties": {
-                                                "type": "object",
-                                                "required": [
-                                                    "status"
-                                                ],
-                                                "properties": {
-                                                    "status": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "additionalProperties": true
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/HealthGet200Response"
                                 }
                             }
                         }
@@ -87,80 +23,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "error"
-                                        },
-                                        "info": {
-                                            "type": "object",
-                                            "example": {
-                                                "database": {
-                                                    "status": "up"
-                                                }
-                                            },
-                                            "additionalProperties": {
-                                                "type": "object",
-                                                "required": [
-                                                    "status"
-                                                ],
-                                                "properties": {
-                                                    "status": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "additionalProperties": true
-                                            },
-                                            "nullable": true
-                                        },
-                                        "error": {
-                                            "type": "object",
-                                            "example": {
-                                                "redis": {
-                                                    "status": "down",
-                                                    "message": "Could not connect"
-                                                }
-                                            },
-                                            "additionalProperties": {
-                                                "type": "object",
-                                                "required": [
-                                                    "status"
-                                                ],
-                                                "properties": {
-                                                    "status": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "additionalProperties": true
-                                            },
-                                            "nullable": true
-                                        },
-                                        "details": {
-                                            "type": "object",
-                                            "example": {
-                                                "database": {
-                                                    "status": "up"
-                                                },
-                                                "redis": {
-                                                    "status": "down",
-                                                    "message": "Could not connect"
-                                                }
-                                            },
-                                            "additionalProperties": {
-                                                "type": "object",
-                                                "required": [
-                                                    "status"
-                                                ],
-                                                "properties": {
-                                                    "status": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "additionalProperties": true
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/HealthGet503Response"
                                 }
                             }
                         }
@@ -183,21 +46,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "ok"
-                                        },
-                                        "buildSha": {
-                                            "type": "string",
-                                            "example": "abc1234"
-                                        },
-                                        "timestamp": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/HealthBuildGet200Response"
                                 }
                             }
                         }
@@ -220,29 +69,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "healthy"
-                                        },
-                                        "timestamp": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        },
-                                        "services": {
-                                            "type": "object"
-                                        },
-                                        "database": {
-                                            "type": "object"
-                                        },
-                                        "memory": {
-                                            "type": "object"
-                                        },
-                                        "uptime": {
-                                            "type": "number"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/HealthDetailedGet200Response"
                                 }
                             }
                         }
@@ -275,8 +102,7 @@
                         "content": {
                             "application/octet-stream": {
                                 "schema": {
-                                    "type": "string",
-                                    "format": "binary"
+                                    "$ref": "#/components/schemas/UiFilesDownload*Get200Response"
                                 }
                             }
                         }
@@ -320,8 +146,7 @@
                         "content": {
                             "image/*": {
                                 "schema": {
-                                    "type": "string",
-                                    "format": "binary"
+                                    "$ref": "#/components/schemas/UiFilesMcpServerAvatar*Get200Response"
                                 }
                             }
                         }
@@ -365,8 +190,7 @@
                         "content": {
                             "image/*": {
                                 "schema": {
-                                    "type": "string",
-                                    "format": "binary"
+                                    "$ref": "#/components/schemas/UiFilesPublic*Get200Response"
                                 }
                             }
                         }
@@ -410,12 +234,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiAnalyticsTrackPost200Response"
                                 }
                             }
                         }
@@ -508,65 +327,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "id": {
-                                                "type": "string",
-                                                "description": "Notification ID"
-                                            },
-                                            "title": {
-                                                "type": "string",
-                                                "description": "Notification title"
-                                            },
-                                            "message": {
-                                                "type": "string",
-                                                "description": "Notification message"
-                                            },
-                                            "type": {
-                                                "type": "string",
-                                                "enum": [
-                                                    "info",
-                                                    "success",
-                                                    "warning",
-                                                    "error",
-                                                    "payment",
-                                                    "transaction",
-                                                    "system"
-                                                ],
-                                                "description": "Notification type"
-                                            },
-                                            "priority": {
-                                                "type": "string",
-                                                "enum": [
-                                                    "low",
-                                                    "medium",
-                                                    "high",
-                                                    "urgent"
-                                                ],
-                                                "description": "Notification priority"
-                                            },
-                                            "isRead": {
-                                                "type": "boolean",
-                                                "description": "Whether notification is read"
-                                            },
-                                            "isArchived": {
-                                                "type": "boolean",
-                                                "description": "Whether notification is archived"
-                                            },
-                                            "createdAt": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                                "description": "Creation timestamp"
-                                            },
-                                            "updatedAt": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                                "description": "Last update timestamp"
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiNotificationsGet200Response"
                                 }
                             }
                         }
@@ -624,25 +385,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "total": {
-                                            "type": "number",
-                                            "description": "Total number of notifications"
-                                        },
-                                        "unread": {
-                                            "type": "number",
-                                            "description": "Number of unread notifications"
-                                        },
-                                        "read": {
-                                            "type": "number",
-                                            "description": "Number of read notifications"
-                                        },
-                                        "archived": {
-                                            "type": "number",
-                                            "description": "Number of archived notifications"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiNotificationsStatsGet200Response"
                                 }
                             }
                         }
@@ -673,13 +416,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "count": {
-                                            "type": "number",
-                                            "description": "Number of unread notifications"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiNotificationsUnreadCountGet200Response"
                                 }
                             }
                         }
@@ -880,8 +617,7 @@
                         "content": {
                             "text/plain": {
                                 "schema": {
-                                    "type": "string",
-                                    "example": "# HELP http_requests_total Total number of HTTP requests\n# TYPE http_requests_total counter\nhttp_requests_total{method=\"GET\",status=\"200\"} 100"
+                                    "$ref": "#/components/schemas/MetricsGet200Response"
                                 }
                             }
                         }
@@ -907,38 +643,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "timestamp": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "description": "Timestamp when metrics were collected"
-                                        },
-                                        "metrics": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "name": {
-                                                        "type": "string",
-                                                        "description": "Metric name"
-                                                    },
-                                                    "value": {
-                                                        "type": "number",
-                                                        "description": "Metric value"
-                                                    },
-                                                    "labels": {
-                                                        "type": "object",
-                                                        "description": "Metric labels"
-                                                    },
-                                                    "type": {
-                                                        "type": "string",
-                                                        "description": "Metric type (counter, gauge, histogram)"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/MetricsJsonGet200Response"
                                 }
                             }
                         }
@@ -948,13 +653,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "type": "string",
-                                            "description": "Error message"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/MetricsJsonGet500Response"
                                 }
                             }
                         }
@@ -977,18 +676,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "value": {
-                                                "type": "string"
-                                            },
-                                            "label": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiActivitiesGet200Response"
                                 }
                             }
                         }
@@ -1011,41 +699,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "currencies": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "code": {
-                                                        "type": "string",
-                                                        "description": "Currency code (e.g., USD, EUR, GBP)"
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "description": "Full currency name"
-                                                    },
-                                                    "symbol": {
-                                                        "type": "string",
-                                                        "description": "Currency symbol"
-                                                    },
-                                                    "decimals": {
-                                                        "type": "number",
-                                                        "description": "Number of decimal places"
-                                                    },
-                                                    "isActive": {
-                                                        "type": "boolean",
-                                                        "description": "Whether currency is currently active"
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "count": {
-                                            "type": "number",
-                                            "description": "Total number of supported currencies"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiFxCurrenciesGet200Response"
                                 }
                             }
                         }
@@ -1136,7 +790,7 @@
             "post": {
                 "operationId": "ProviderUiController_startOnboarding",
                 "summary": "Start onboarding and provision Stripe account",
-                "description": "Persists onboarding business details and provisions Stripe synchronously before allowing the onboarding flow to continue.",
+                "description": "Persists onboarding business details and provisions a sandbox Stripe account in the background (non-blocking).",
                 "parameters": [],
                 "requestBody": {
                     "required": true,
@@ -1150,7 +804,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Onboarding saved and Stripe account provisioned"
+                        "description": "Onboarding saved, Stripe provisioning started"
                     }
                 },
                 "tags": [
@@ -1992,27 +1646,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "sandbox": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        },
-                                        "live": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        },
-                                        "liveEnabled": {
-                                            "type": "boolean"
-                                        },
-                                        "liveDisabledReason": {
-                                            "type": "string"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiSecretKeysGet200Response"
                                 }
                             }
                         }
@@ -2051,7 +1685,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiSecretKeysPost201Response"
                                 }
                             }
                         }
@@ -2082,15 +1716,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "enabled": {
-                                            "type": "boolean"
-                                        },
-                                        "reason": {
-                                            "type": "string"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiSecretKeysLiveStatusGet200Response"
                                 }
                             }
                         }
@@ -2121,7 +1747,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiSecretKeysStatsSummaryGet200Response"
                                 }
                             }
                         }
@@ -2162,7 +1788,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiSecretKeysDelete200Response"
                                 }
                             }
                         }
@@ -2203,7 +1829,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiSecretKeysRevealGet200Response"
                                 }
                             }
                         }
@@ -2244,7 +1870,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiSecretKeysRegeneratePost200Response"
                                 }
                             }
                         }
@@ -2311,7 +1937,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiAdminUsersGet200Response"
                                 }
                             }
                         }
@@ -2346,7 +1972,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiAdminUsersPost201Response"
                                 }
                             }
                         }
@@ -2373,7 +1999,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiAdminUsersStatsGet200Response"
                                 }
                             }
                         }
@@ -2410,7 +2036,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiAdminUsersGet200Response2"
                                 }
                             }
                         }
@@ -2458,7 +2084,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiAdminUsersPut200Response"
                                 }
                             }
                         }
@@ -2539,7 +2165,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiAdminUsersStatusPut200Response"
                                 }
                             }
                         }
@@ -2579,7 +2205,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiAdminUsersProviderGet200Response"
                                 }
                             }
                         }
@@ -2637,7 +2263,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array"
+                                    "$ref": "#/components/schemas/UiAdminUsersTransactionsGet200Response"
                                 }
                             }
                         }
@@ -2876,27 +2502,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "amount": {
-                                            "type": "number"
-                                        },
-                                        "currency": {
-                                            "type": "string"
-                                        },
-                                        "clientSecret": {
-                                            "type": "string"
-                                        },
-                                        "publishableKey": {
-                                            "type": "string"
-                                        },
-                                        "accountId": {
-                                            "type": "string"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiPaymentIntentsPost201Response"
                                 }
                             }
                         }
@@ -2937,18 +2543,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "amount": {
-                                            "type": "number"
-                                        },
-                                        "currency": {
-                                            "type": "string"
-                                        },
-                                        "clientSecret": {
-                                            "type": "string"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiPaymentIntentsGet200Response"
                                 }
                             }
                         }
@@ -3561,20 +3156,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "example": {
-                                        "processorPaymentId": "pi_1a2b3c4d5e6f7g8h",
-                                        "planRef": "pln_2b3c4d5e6f7g",
-                                        "customerRef": "cus_3c4d5e6f7g8h",
-                                        "amount": 4999,
-                                        "originalAmount": 4999,
-                                        "currency": "usd",
-                                        "exchangeRate": 1,
-                                        "status": "requires_payment_method",
-                                        "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_AbCdEf123456",
-                                        "publishableKey": "pk_test_...",
-                                        "expiresAt": "2025-10-19T10:30:00.000Z",
-                                        "createdAt": "2025-10-18T10:30:00.000Z"
-                                    }
+                                    "$ref": "#/components/schemas/SdkPaymentIntentsPost201Response"
                                 }
                             }
                         }
@@ -3584,11 +3166,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "example": {
-                                        "statusCode": 400,
-                                        "message": "idempotency-key header is required",
-                                        "error": "Bad Request"
-                                    }
+                                    "$ref": "#/components/schemas/SdkPaymentIntentsPost400Response"
                                 }
                             }
                         }
@@ -3635,20 +3213,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "example": {
-                                        "paymentIntents": [
-                                            {
-                                                "processorPaymentId": "pi_1a2b3c4d5e6f7g8h",
-                                                "planRef": "pln_2b3c4d5e6f7g",
-                                                "amount": 4999,
-                                                "currency": "usd",
-                                                "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_xxx",
-                                                "status": "succeeded",
-                                                "createdAt": "2025-10-11T10:30:00.000Z"
-                                            }
-                                        ],
-                                        "total": 1
-                                    }
+                                    "$ref": "#/components/schemas/SdkPaymentIntentsGet200Response"
                                 }
                             }
                         }
@@ -3686,12 +3251,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "example": {
-                                        "planRef": "pln_2b3c4d5e6f7g",
-                                        "amount": 4999,
-                                        "currency": "usd",
-                                        "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_xxx"
-                                    }
+                                    "$ref": "#/components/schemas/SdkPaymentIntentsGet200Response2"
                                 }
                             }
                         }
@@ -3701,11 +3261,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "example": {
-                                        "success": false,
-                                        "error": "Payment intent not found",
-                                        "code": "PAYMENT_INTENT_NOT_FOUND"
-                                    }
+                                    "$ref": "#/components/schemas/SdkPaymentIntentsGet404Response"
                                 }
                             }
                         }
@@ -3755,52 +3311,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "enum": [
-                                                "succeeded",
-                                                "timeout",
-                                                "failed",
-                                                "cancelled"
-                                            ],
-                                            "description": "Payment intent status",
-                                            "example": "succeeded"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "description": "Optional message, only present for timeout status",
-                                            "example": "Timeout while waiting for payment intent confirmation, try again later. This could be due to payment webhooks not being configured correctly."
-                                        }
-                                    },
-                                    "examples": {
-                                        "succeeded": {
-                                            "value": {
-                                                "status": "succeeded"
-                                            },
-                                            "description": "Payment intent confirmed successfully"
-                                        },
-                                        "timeout": {
-                                            "value": {
-                                                "status": "timeout",
-                                                "message": "Timeout while waiting for payment intent confirmation, try again later. This could be due to payment webhooks not being configured correctly."
-                                            },
-                                            "description": "Timeout waiting for payment intent confirmation"
-                                        },
-                                        "failed": {
-                                            "value": {
-                                                "status": "failed"
-                                            },
-                                            "description": "Payment intent failed"
-                                        },
-                                        "cancelled": {
-                                            "value": {
-                                                "status": "cancelled"
-                                            },
-                                            "description": "Payment intent cancelled"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/SdkPaymentIntentsProcessPost200Response"
                                 }
                             }
                         }
@@ -3810,11 +3321,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "example": {
-                                        "statusCode": 400,
-                                        "message": "Payment not succeeded. Status: requires_payment_method",
-                                        "error": "Bad Request"
-                                    }
+                                    "$ref": "#/components/schemas/SdkPaymentIntentsProcessPost400Response"
                                 }
                             }
                         }
@@ -4289,12 +3796,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "authUrl": {
-                                            "type": "string"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiStripeOauthAuthorizePost200Response"
                                 }
                             }
                         }
@@ -4332,18 +3834,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean"
-                                        },
-                                        "error": {
-                                            "type": "string"
-                                        },
-                                        "source": {
-                                            "type": "string"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiStripeOauthCallbackPost200Response"
                                 }
                             }
                         }
@@ -4456,12 +3947,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiProviderAuthLoginsPost200Response"
                                 }
                             }
                         }
@@ -4531,12 +4017,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiProviderAuthLoginsResendsPost200Response"
                                 }
                             }
                         }
@@ -4597,12 +4078,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "enabled": {
-                                            "type": "boolean"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiProviderAuthTwoFactorVerificationsPost200Response"
                                 }
                             }
                         }
@@ -4731,19 +4207,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "email": {
-                                            "type": "string",
-                                            "format": "email"
-                                        },
-                                        "role": {
-                                            "type": "string"
-                                        },
-                                        "providerName": {
-                                            "type": "string"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiProviderAuthInvitationsGet200Response"
                                 }
                             }
                         }
@@ -5381,25 +4845,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "access_token": {
-                                            "type": "string"
-                                        },
-                                        "token_type": {
-                                            "type": "string",
-                                            "example": "Bearer"
-                                        },
-                                        "expires_in": {
-                                            "type": "number"
-                                        },
-                                        "refresh_token": {
-                                            "type": "string"
-                                        },
-                                        "scope": {
-                                            "type": "string"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/CustomerAuthTokenPost200Response"
                                 }
                             }
                         }
@@ -5572,12 +5018,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "redirectUrl": {
-                                            "type": "string"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/CustomerAuthLoginsPost200Response"
                                 }
                             }
                         }
@@ -6320,45 +5761,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "issuer": {
-                                            "type": "string"
-                                        },
-                                        "authorization_endpoint": {
-                                            "type": "string"
-                                        },
-                                        "token_endpoint": {
-                                            "type": "string"
-                                        },
-                                        "registration_endpoint": {
-                                            "type": "string"
-                                        },
-                                        "response_types_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "grant_types_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "code_challenge_methods_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "token_endpoint_auth_methods_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/ProviderMcpOauth.WellKnownOauthAuthorizationServerGet200Response"
                                 }
                             }
                         }
@@ -6519,12 +5922,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "ok": {
-                                            "type": "boolean"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/ProviderMcpOauthAttachPost200Response"
                                 }
                             }
                         }
@@ -6588,12 +5986,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "redirectUrl": {
-                                            "type": "string"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/ProviderMcpOauthConsentPost200Response"
                                 }
                             }
                         }
@@ -6702,18 +6095,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "access_token": {
-                                            "type": "string"
-                                        },
-                                        "token_type": {
-                                            "type": "string"
-                                        },
-                                        "expires_in": {
-                                            "type": "number"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/ProviderMcpOauthTokenPost200Response"
                                 }
                             }
                         }
@@ -6841,25 +6223,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "plans": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Plan"
-                                            }
-                                        },
-                                        "total": {
-                                            "type": "number",
-                                            "description": "Total number of plans for the product"
-                                        },
-                                        "limit": {
-                                            "type": "number"
-                                        },
-                                        "offset": {
-                                            "type": "number"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/SdkProductsPlansGet200Response"
                                 }
                             }
                         }
@@ -7580,12 +6944,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "isUnique": {
-                                            "type": "boolean"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiProductsNameChecksPost200Response"
                                 }
                             }
                         }
@@ -8449,17 +7808,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "reference": {
-                                            "type": "string",
-                                            "example": "usage_A1B2C3D4"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/SdkUsagesPost200Response"
                                 }
                             }
                         }
@@ -8482,7 +7831,7 @@
             "post": {
                 "operationId": "UsageSdkController_recordBulkUsage",
                 "summary": "Record bulk usage events",
-                "description": "Records multiple usage events in a single request.",
+                "description": "Same persistence rules as POST /sdk/usages for each item: validate batch first, then one insert per event.",
                 "parameters": [],
                 "requestBody": {
                     "required": true,
@@ -8637,13 +7986,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/SdkMeterEventsPost200Response"
                                 }
                             }
                         }
@@ -8666,7 +8009,7 @@
             "post": {
                 "operationId": "MeterEventsSdkController_recordBulkEvents",
                 "summary": "Record meter events in bulk",
-                "description": "Records multiple usage events in a single request for high throughput.",
+                "description": "Persists each event with recordUsage (same shape as single POST), after shared meter/customer checks.",
                 "parameters": [],
                 "requestBody": {
                     "required": true,
@@ -8684,17 +8027,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "inserted": {
-                                            "type": "number",
-                                            "example": 50
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/SdkMeterEventsBulkPost200Response"
                                 }
                             }
                         }
@@ -9031,7 +8364,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiAdminTransactionsGet200Response"
                                 }
                             }
                         }
@@ -9095,7 +8428,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiAdminTransactionsStatsGet200Response"
                                 }
                             }
                         }
@@ -9132,7 +8465,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiAdminTransactionsByIdGet200Response"
                                 }
                             }
                         }
@@ -9181,7 +8514,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiAdminTransactionsBalanceGet200Response"
                                 }
                             }
                         }
@@ -9248,7 +8581,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiAdminTransactionsBalanceHistoryGet200Response"
                                 }
                             }
                         }
@@ -9288,7 +8621,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiAdminTransactionsSystemBalanceGet200Response"
                                 }
                             }
                         }
@@ -9316,10 +8649,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/McpServerDto"
-                                    }
+                                    "$ref": "#/components/schemas/UiMcpServersGet200Response"
                                 }
                             }
                         }
@@ -9506,15 +8836,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "isUnique": {
-                                            "type": "boolean"
-                                        },
-                                        "normalizedDomain": {
-                                            "type": "string"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiMcpServersNameChecksPost200Response"
                                 }
                             }
                         }
@@ -9552,15 +8874,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "effectiveSubdomain": {
-                                            "type": "string"
-                                        },
-                                        "isUnique": {
-                                            "type": "boolean"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiMcpServersBootstrapSubdomainChecksPost200Response"
                                 }
                             }
                         }
@@ -9598,23 +8912,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "tools": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "name": {
-                                                        "type": "string"
-                                                    },
-                                                    "description": {
-                                                        "type": "string"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiMcpServersDiscoverToolsPost200Response"
                                 }
                             }
                         }
@@ -9642,64 +8940,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "issuer": {
-                                            "type": "string",
-                                            "example": "https://mytelescope.mcp.solvapay.com"
-                                        },
-                                        "authorization_endpoint": {
-                                            "type": "string",
-                                            "example": "https://mytelescope.mcp.solvapay.com/v1/customer/auth/authorize"
-                                        },
-                                        "token_endpoint": {
-                                            "type": "string",
-                                            "example": "https://mytelescope.mcp.solvapay.com/v1/customer/auth/token"
-                                        },
-                                        "registration_endpoint": {
-                                            "type": "string",
-                                            "example": "https://mytelescope.mcp.solvapay.com/v1/customer/auth/register"
-                                        },
-                                        "token_endpoint_auth_methods_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            },
-                                            "example": [
-                                                "client_secret_basic",
-                                                "client_secret_post"
-                                            ]
-                                        },
-                                        "response_types_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            },
-                                            "example": [
-                                                "code"
-                                            ]
-                                        },
-                                        "scopes_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            },
-                                            "example": [
-                                                "openid",
-                                                "profile",
-                                                "email"
-                                            ]
-                                        },
-                                        "code_challenge_methods_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            },
-                                            "example": [
-                                                "S256"
-                                            ]
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/McpOauthAuthorizationServersGet200Response"
                                 }
                             }
                         }
@@ -9722,72 +8963,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "issuer": {
-                                            "type": "string"
-                                        },
-                                        "authorization_endpoint": {
-                                            "type": "string"
-                                        },
-                                        "token_endpoint": {
-                                            "type": "string"
-                                        },
-                                        "userinfo_endpoint": {
-                                            "type": "string"
-                                        },
-                                        "registration_endpoint": {
-                                            "type": "string"
-                                        },
-                                        "response_types_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "grant_types_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "subject_types_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "id_token_signing_alg_values_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "token_endpoint_auth_methods_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "scopes_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "claims_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "code_challenge_methods_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/McpOpenidConfigurationGet200Response"
                                 }
                             }
                         }
@@ -9848,33 +9024,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "resource": {
-                                            "type": "string",
-                                            "example": "https://mytelescope.mcp.solvapay.com"
-                                        },
-                                        "authorization_servers": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            },
-                                            "example": [
-                                                "https://mytelescope.mcp.solvapay.com"
-                                            ]
-                                        },
-                                        "scopes_supported": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            },
-                                            "example": [
-                                                "openid",
-                                                "profile",
-                                                "email"
-                                            ]
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/McpOauthProtectedResourceGet200Response"
                                 }
                             }
                         }
@@ -10017,14 +9167,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "purchases": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/PurchaseResponse"
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiPurchasesGet200Response"
                                 }
                             }
                         }
@@ -10113,14 +9256,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean"
-                                        },
-                                        "purchase": {
-                                            "$ref": "#/components/schemas/PurchaseResponse"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiPurchasesCancelPost200Response"
                                 }
                             }
                         }
@@ -10161,14 +9297,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean"
-                                        },
-                                        "purchase": {
-                                            "$ref": "#/components/schemas/PurchaseResponse"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiPurchasesReactivatePost200Response"
                                 }
                             }
                         }
@@ -10240,14 +9369,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "purchases": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/SdkPurchaseResponse"
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/SdkPurchasesGet200Response"
                                 }
                             }
                         }
@@ -10286,14 +9408,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "purchases": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/SdkPurchaseResponse"
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/SdkPurchasesCustomerGet200Response"
                                 }
                             }
                         }
@@ -10335,14 +9450,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "purchases": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/SdkPurchaseResponse"
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/SdkPurchasesProductGet200Response"
                                 }
                             }
                         }
@@ -10436,14 +9544,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean"
-                                        },
-                                        "purchase": {
-                                            "$ref": "#/components/schemas/SdkPurchaseResponse"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/SdkPurchasesCancelPost200Response"
                                 }
                             }
                         }
@@ -10485,14 +9586,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean"
-                                        },
-                                        "purchase": {
-                                            "$ref": "#/components/schemas/SdkPurchaseResponse"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/SdkPurchasesReactivatePost200Response"
                                 }
                             }
                         }
@@ -11019,14 +10113,6 @@
                 "responses": {
                     "201": {
                         "description": "Customer created successfully",
-                        "schema": {
-                            "example": {
-                                "reference": "cus_3c4d5e6f7g8h",
-                                "name": "John Doe",
-                                "email": "customer@example.com",
-                                "externalRef": "auth_user_12345"
-                            }
-                        },
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -11040,11 +10126,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "example": {
-                                        "statusCode": 400,
-                                        "message": "Invalid email format",
-                                        "error": "Bad Request"
-                                    }
+                                    "$ref": "#/components/schemas/SdkCustomersPost400Response"
                                 }
                             }
                         }
@@ -11098,26 +10180,6 @@
                 "responses": {
                     "200": {
                         "description": "Customer retrieved successfully",
-                        "schema": {
-                            "example": {
-                                "reference": "cus_3c4d5e6f7g8h",
-                                "name": "John Doe",
-                                "email": "customer@example.com",
-                                "externalRef": "auth_user_12345",
-                                "purchases": [
-                                    {
-                                        "reference": "pur_1A2B3C4D",
-                                        "productName": "API Gateway Manager",
-                                        "productRef": "prd_abc123",
-                                        "status": "active",
-                                        "startDate": "2025-10-27T10:00:00Z",
-                                        "amount": 9900,
-                                        "currency": "USD",
-                                        "endDate": "2025-11-27T10:00:00Z"
-                                    }
-                                ]
-                            }
-                        },
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -11131,11 +10193,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "example": {
-                                        "statusCode": 400,
-                                        "message": "Must provide exactly one of reference, externalRef, or email",
-                                        "error": "Bad Request"
-                                    }
+                                    "$ref": "#/components/schemas/SdkCustomersGet400Response"
                                 }
                             }
                         }
@@ -11145,11 +10203,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "example": {
-                                        "statusCode": 404,
-                                        "message": "Customer not found",
-                                        "error": "Not Found"
-                                    }
+                                    "$ref": "#/components/schemas/SdkCustomersGet404Response"
                                 }
                             }
                         }
@@ -11188,10 +10242,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "example": {
-                                        "customerRef": "cus_3c4d5e6f7g8h",
-                                        "credits": 4200
-                                    }
+                                    "$ref": "#/components/schemas/SdkCustomersBalanceGet200Response"
                                 }
                             }
                         }
@@ -11201,11 +10252,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "example": {
-                                        "statusCode": 404,
-                                        "message": "Customer with reference cus_3c4d5e6f7g8h not found",
-                                        "error": "Not Found"
-                                    }
+                                    "$ref": "#/components/schemas/SdkCustomersBalanceGet404Response"
                                 }
                             }
                         }
@@ -11241,26 +10288,6 @@
                 "responses": {
                     "200": {
                         "description": "Customer retrieved successfully",
-                        "schema": {
-                            "example": {
-                                "reference": "cus_3c4d5e6f7g8h",
-                                "name": "John Doe",
-                                "email": "customer@example.com",
-                                "externalRef": "auth_user_12345",
-                                "purchases": [
-                                    {
-                                        "reference": "pur_1A2B3C4D",
-                                        "productName": "API Gateway Manager",
-                                        "productRef": "prd_abc123",
-                                        "status": "active",
-                                        "startDate": "2025-10-27T10:00:00Z",
-                                        "amount": 9900,
-                                        "currency": "USD",
-                                        "endDate": "2025-11-27T10:00:00Z"
-                                    }
-                                ]
-                            }
-                        },
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -11274,11 +10301,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "example": {
-                                        "statusCode": 404,
-                                        "message": "Customer with reference cus_3c4d5e6f7g8h not found",
-                                        "error": "Not Found"
-                                    }
+                                    "$ref": "#/components/schemas/SdkCustomersGet404Response2"
                                 }
                             }
                         }
@@ -11322,12 +10345,6 @@
                 "responses": {
                     "201": {
                         "description": "Customer session created successfully",
-                        "schema": {
-                            "example": {
-                                "sessionId": "e3f1c2d4b6a89f001122334455667788",
-                                "customerUrl": "https://solvapay.com/customer/manage?id=e3f1c2d4b6a89f001122334455667788"
-                            }
-                        },
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -11341,11 +10358,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "example": {
-                                        "statusCode": 400,
-                                        "message": "Customer not found",
-                                        "error": "Bad Request"
-                                    }
+                                    "$ref": "#/components/schemas/SdkCustomersCustomerSessionsPost400Response"
                                 }
                             }
                         }
@@ -11355,11 +10368,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "example": {
-                                        "statusCode": 404,
-                                        "message": "Customer not found",
-                                        "error": "Not Found"
-                                    }
+                                    "$ref": "#/components/schemas/SdkCustomersCustomerSessionsPost404Response"
                                 }
                             }
                         }
@@ -11395,34 +10404,6 @@
                 "responses": {
                     "200": {
                         "description": "Customer session retrieved successfully",
-                        "schema": {
-                            "example": {
-                                "sessionId": "e3f1c2d4b6a89f001122334455667788",
-                                "status": "active",
-                                "customerUrl": "https://solvapay.com/customer/manage?id=e3f1c2d4b6a89f001122334455667788",
-                                "expiresAt": "2025-01-01T12:00:00.000Z",
-                                "customer": {
-                                    "reference": "cus_3c4d5e6f7g8h",
-                                    "name": "John Doe",
-                                    "email": "customer@example.com",
-                                    "externalRef": "auth_user_12345",
-                                    "purchases": [
-                                        {
-                                            "reference": "pur_1A2B3C4D",
-                                            "productName": "API Gateway Manager",
-                                            "productRef": "prd_abc123",
-                                            "status": "active",
-                                            "startDate": "2025-10-27T10:00:00Z",
-                                            "amount": 9900,
-                                            "currency": "USD",
-                                            "endDate": "2025-11-27T10:00:00Z"
-                                        }
-                                    ]
-                                },
-                                "createdAt": "2025-01-01T11:45:00.000Z",
-                                "updatedAt": "2025-01-01T11:45:00.000Z"
-                            }
-                        },
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -11436,11 +10417,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "example": {
-                                        "statusCode": 404,
-                                        "message": "Customer session not found: e3f1c2d4b6a89f001122334455667788",
-                                        "error": "Not Found"
-                                    }
+                                    "$ref": "#/components/schemas/SdkCustomersCustomerSessionsGet404Response"
                                 }
                             }
                         }
@@ -11511,41 +10488,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "email": {
-                                            "type": "string"
-                                        },
-                                        "name": {
-                                            "type": "string"
-                                        },
-                                        "type": {
-                                            "type": "string",
-                                            "example": "customer"
-                                        },
-                                        "emailVerified": {
-                                            "type": "boolean"
-                                        },
-                                        "authProvider": {
-                                            "type": "string",
-                                            "example": "google"
-                                        },
-                                        "providerId": {
-                                            "type": "string"
-                                        },
-                                        "preferences": {
-                                            "type": "object"
-                                        },
-                                        "roles": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiCustomersMeGet200Response"
                                 }
                             }
                         }
@@ -12653,35 +11596,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "id": {
-                                            "type": "string",
-                                            "description": "Wallet ID"
-                                        },
-                                        "userId": {
-                                            "type": "string",
-                                            "description": "User ID"
-                                        },
-                                        "balance": {
-                                            "type": "number",
-                                            "description": "Current wallet balance"
-                                        },
-                                        "currency": {
-                                            "type": "string",
-                                            "description": "Wallet currency"
-                                        },
-                                        "createdAt": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "description": "Wallet creation date"
-                                        },
-                                        "updatedAt": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "description": "Last update date"
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiWalletsGet200Response"
                                 }
                             }
                         }
@@ -12712,39 +11627,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "totalTransactions": {
-                                            "type": "number",
-                                            "description": "Total number of transactions"
-                                        },
-                                        "totalVolume": {
-                                            "type": "number",
-                                            "description": "Total transaction volume"
-                                        },
-                                        "averageTransaction": {
-                                            "type": "number",
-                                            "description": "Average transaction amount"
-                                        },
-                                        "lastTransactionDate": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "description": "Date of last transaction"
-                                        },
-                                        "monthlyStats": {
-                                            "type": "object",
-                                            "properties": {
-                                                "currentMonth": {
-                                                    "type": "number",
-                                                    "description": "Transactions this month"
-                                                },
-                                                "previousMonth": {
-                                                    "type": "number",
-                                                    "description": "Transactions last month"
-                                                }
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/UiWalletsStatsGet200Response"
                                 }
                             }
                         }
@@ -12825,7 +11708,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array"
+                                    "$ref": "#/components/schemas/UiAccountsGet200Response"
                                 }
                             }
                         }
@@ -12909,7 +11792,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiAccountsGet200Response2"
                                 }
                             }
                         }
@@ -12959,7 +11842,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UiAccountsStatsGet200Response"
                                 }
                             }
                         }
@@ -14634,8 +13517,7 @@
                     },
                     "properties": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "userId": {
                         "type": "string"
@@ -14701,8 +13583,7 @@
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "actionUrl": {
                         "type": "string"
@@ -14785,7 +13666,7 @@
                             },
                             "metadata": {
                                 "type": "object",
-                                "additionalProperties": {}
+                                "additionalProperties": true
                             },
                             "actionUrl": {
                                 "type": "string"
@@ -14801,8 +13682,7 @@
                                     "live"
                                 ]
                             }
-                        },
-                        "selfRequired": true
+                        }
                     }
                 },
                 "required": [
@@ -14859,8 +13739,7 @@
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "actionUrl": {
                         "type": "string"
@@ -15022,8 +13901,7 @@
                                 "type": "array",
                                 "items": {}
                             }
-                        },
-                        "selfRequired": false
+                        }
                     },
                     "description": {
                         "type": "string"
@@ -15057,8 +13935,7 @@
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "tosAcceptance": {
                         "type": "object",
@@ -15073,8 +13950,7 @@
                             "userAgent": {
                                 "type": "string"
                             }
-                        },
-                        "selfRequired": false
+                        }
                     },
                     "theme": {}
                 },
@@ -15109,6 +13985,9 @@
                 "type": "object",
                 "properties": {
                     "deleteProducts": {
+                        "type": "boolean"
+                    },
+                    "clearAllData": {
                         "type": "boolean"
                     }
                 }
@@ -15279,8 +14158,7 @@
                                 "type": "array",
                                 "items": {}
                             }
-                        },
-                        "selfRequired": false
+                        }
                     },
                     "description": {
                         "type": "string"
@@ -15311,8 +14189,7 @@
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "reference": {
                         "type": "string"
@@ -15425,8 +14302,7 @@
                                 "type": "array",
                                 "items": {}
                             }
-                        },
-                        "selfRequired": false
+                        }
                     },
                     "description": {
                         "type": "string"
@@ -15457,8 +14333,7 @@
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "defaultCurrency": {
                         "type": "string"
@@ -15489,8 +14364,7 @@
                             "requirements": {},
                             "createdAt": {},
                             "updatedAt": {}
-                        },
-                        "selfRequired": false
+                        }
                     },
                     "tosAcceptance": {
                         "type": "object",
@@ -15505,8 +14379,7 @@
                             "userAgent": {
                                 "type": "string"
                             }
-                        },
-                        "selfRequired": false
+                        }
                     }
                 },
                 "required": [
@@ -15624,8 +14497,7 @@
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     }
                 },
                 "required": [
@@ -15658,8 +14530,7 @@
                     },
                     "preferences": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     }
                 },
                 "required": [
@@ -15671,8 +14542,7 @@
                 "properties": {
                     "preferences": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     }
                 },
                 "required": [
@@ -15946,8 +14816,7 @@
                                 "type": "string",
                                 "minLength": 1
                             }
-                        },
-                        "selfRequired": false
+                        }
                     },
                     "tosAcceptance": {
                         "type": "object",
@@ -15956,8 +14825,7 @@
                                 "type": "string",
                                 "minLength": 1
                             }
-                        },
-                        "selfRequired": false
+                        }
                     }
                 },
                 "required": [
@@ -15988,8 +14856,7 @@
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "customerEmail": {
                         "type": "string"
@@ -16021,8 +14888,7 @@
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     }
                 },
                 "required": [
@@ -16721,7 +15587,8 @@
                         "enum": [
                             "recurring",
                             "one-time",
-                            "usage-based"
+                            "usage-based",
+                            "hybrid"
                         ],
                         "example": "recurring"
                     },
@@ -16878,7 +15745,8 @@
                         "enum": [
                             "recurring",
                             "usage-based",
-                            "one-time"
+                            "one-time",
+                            "hybrid"
                         ]
                     },
                     "billingCycle": {
@@ -16913,20 +15781,54 @@
                     "limit": {
                         "type": "number"
                     },
+                    "basePrice": {
+                        "type": "number"
+                    },
+                    "setupFee": {
+                        "type": "number"
+                    },
+                    "trialDays": {
+                        "type": "number"
+                    },
+                    "rolloverUnusedUnits": {
+                        "type": "boolean"
+                    },
+                    "autoRenew": {
+                        "type": "boolean"
+                    },
+                    "usageTracking": {
+                        "type": "object",
+                        "properties": {
+                            "method": {
+                                "type": "string",
+                                "enum": [
+                                    "automatic",
+                                    "manual",
+                                    "hybrid"
+                                ]
+                            },
+                            "granularity": {
+                                "type": "string",
+                                "enum": [
+                                    "hourly",
+                                    "daily",
+                                    "weekly",
+                                    "monthly"
+                                ]
+                            }
+                        }
+                    },
                     "limits": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "features": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "status": {
                         "type": "string",
@@ -16947,6 +15849,7 @@
                     }
                 },
                 "required": [
+                    "usageTracking",
                     "limits",
                     "metadata",
                     "features"
@@ -16996,13 +15899,11 @@
                     },
                     "limits": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "features": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "status": {
                         "type": "string",
@@ -17020,8 +15921,7 @@
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "default": {
                         "type": "boolean"
@@ -17064,13 +15964,11 @@
                             "deliveryMethod": {
                                 "type": "string"
                             }
-                        },
-                        "selfRequired": false
+                        }
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     }
                 },
                 "required": [
@@ -17349,13 +16247,11 @@
                             "deliveryMethod": {
                                 "type": "string"
                             }
-                        },
-                        "selfRequired": false
+                        }
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     }
                 },
                 "required": [
@@ -17494,8 +16390,7 @@
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     }
                 },
                 "required": [
@@ -17919,8 +16814,7 @@
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "duration": {
                         "type": "number",
@@ -18042,8 +16936,7 @@
                     },
                     "properties": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "productRef": {
                         "type": "string"
@@ -18124,8 +17017,7 @@
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     }
                 },
                 "required": [
@@ -19166,8 +18058,7 @@
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "externalRef": {
                         "type": "string"
@@ -19193,8 +18084,7 @@
                     },
                     "metadata": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     },
                     "externalRef": {
                         "type": "string"
@@ -19673,8 +18563,7 @@
                     },
                     "parameters": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": false
+                        "additionalProperties": true
                     }
                 },
                 "required": [
@@ -19719,8 +18608,7 @@
                     },
                     "parameters": {
                         "type": "object",
-                        "additionalProperties": {},
-                        "selfRequired": true
+                        "additionalProperties": true
                     }
                 },
                 "required": [
@@ -19874,8 +18762,7 @@
                                     }
                                 }
                             }
-                        },
-                        "selfRequired": false
+                        }
                     }
                 },
                 "required": [
@@ -19912,8 +18799,7 @@
                         "type": "object",
                         "additionalProperties": {
                             "type": "string"
-                        },
-                        "selfRequired": false
+                        }
                     }
                 },
                 "required": [
@@ -20308,6 +19194,1310 @@
                 "required": [
                     "status"
                 ]
+            },
+            "HealthGet200Response": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "example": "ok"
+                    },
+                    "info": {
+                        "type": "object",
+                        "example": {
+                            "database": {
+                                "status": "up"
+                            }
+                        },
+                        "additionalProperties": {
+                            "type": "object",
+                            "required": [
+                                "status"
+                            ],
+                            "properties": {
+                                "status": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": true
+                        },
+                        "nullable": true
+                    },
+                    "error": {
+                        "type": "object",
+                        "example": {},
+                        "additionalProperties": {
+                            "type": "object",
+                            "required": [
+                                "status"
+                            ],
+                            "properties": {
+                                "status": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": true
+                        },
+                        "nullable": true
+                    },
+                    "details": {
+                        "type": "object",
+                        "example": {
+                            "database": {
+                                "status": "up"
+                            }
+                        },
+                        "additionalProperties": {
+                            "type": "object",
+                            "required": [
+                                "status"
+                            ],
+                            "properties": {
+                                "status": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "HealthGet503Response": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "example": "error"
+                    },
+                    "info": {
+                        "type": "object",
+                        "example": {
+                            "database": {
+                                "status": "up"
+                            }
+                        },
+                        "additionalProperties": {
+                            "type": "object",
+                            "required": [
+                                "status"
+                            ],
+                            "properties": {
+                                "status": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": true
+                        },
+                        "nullable": true
+                    },
+                    "error": {
+                        "type": "object",
+                        "example": {
+                            "redis": {
+                                "status": "down",
+                                "message": "Could not connect"
+                            }
+                        },
+                        "additionalProperties": {
+                            "type": "object",
+                            "required": [
+                                "status"
+                            ],
+                            "properties": {
+                                "status": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": true
+                        },
+                        "nullable": true
+                    },
+                    "details": {
+                        "type": "object",
+                        "example": {
+                            "database": {
+                                "status": "up"
+                            },
+                            "redis": {
+                                "status": "down",
+                                "message": "Could not connect"
+                            }
+                        },
+                        "additionalProperties": {
+                            "type": "object",
+                            "required": [
+                                "status"
+                            ],
+                            "properties": {
+                                "status": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "HealthBuildGet200Response": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "example": "ok"
+                    },
+                    "buildSha": {
+                        "type": "string",
+                        "example": "abc1234"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "HealthDetailedGet200Response": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "example": "healthy"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "services": {
+                        "type": "object"
+                    },
+                    "database": {
+                        "type": "object"
+                    },
+                    "memory": {
+                        "type": "object"
+                    },
+                    "uptime": {
+                        "type": "number"
+                    }
+                }
+            },
+            "UiFilesDownload*Get200Response": {
+                "type": "string",
+                "format": "binary"
+            },
+            "UiFilesMcpServerAvatar*Get200Response": {
+                "type": "string",
+                "format": "binary"
+            },
+            "UiFilesPublic*Get200Response": {
+                "type": "string",
+                "format": "binary"
+            },
+            "UiAnalyticsTrackPost200Response": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "UiNotificationsGet200Response": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "string",
+                            "description": "Notification ID"
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "Notification title"
+                        },
+                        "message": {
+                            "type": "string",
+                            "description": "Notification message"
+                        },
+                        "type": {
+                            "type": "string",
+                            "enum": [
+                                "info",
+                                "success",
+                                "warning",
+                                "error",
+                                "payment",
+                                "transaction",
+                                "system"
+                            ],
+                            "description": "Notification type"
+                        },
+                        "priority": {
+                            "type": "string",
+                            "enum": [
+                                "low",
+                                "medium",
+                                "high",
+                                "urgent"
+                            ],
+                            "description": "Notification priority"
+                        },
+                        "isRead": {
+                            "type": "boolean",
+                            "description": "Whether notification is read"
+                        },
+                        "isArchived": {
+                            "type": "boolean",
+                            "description": "Whether notification is archived"
+                        },
+                        "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Creation timestamp"
+                        },
+                        "updatedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Last update timestamp"
+                        }
+                    }
+                }
+            },
+            "UiNotificationsStatsGet200Response": {
+                "type": "object",
+                "properties": {
+                    "total": {
+                        "type": "number",
+                        "description": "Total number of notifications"
+                    },
+                    "unread": {
+                        "type": "number",
+                        "description": "Number of unread notifications"
+                    },
+                    "read": {
+                        "type": "number",
+                        "description": "Number of read notifications"
+                    },
+                    "archived": {
+                        "type": "number",
+                        "description": "Number of archived notifications"
+                    }
+                }
+            },
+            "UiNotificationsUnreadCountGet200Response": {
+                "type": "object",
+                "properties": {
+                    "count": {
+                        "type": "number",
+                        "description": "Number of unread notifications"
+                    }
+                }
+            },
+            "MetricsGet200Response": {
+                "type": "string",
+                "example": "# HELP http_requests_total Total number of HTTP requests\n# TYPE http_requests_total counter\nhttp_requests_total{method=\"GET\",status=\"200\"} 100"
+            },
+            "MetricsJsonGet200Response": {
+                "type": "object",
+                "properties": {
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Timestamp when metrics were collected"
+                    },
+                    "metrics": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": "Metric name"
+                                },
+                                "value": {
+                                    "type": "number",
+                                    "description": "Metric value"
+                                },
+                                "labels": {
+                                    "type": "object",
+                                    "description": "Metric labels"
+                                },
+                                "type": {
+                                    "type": "string",
+                                    "description": "Metric type (counter, gauge, histogram)"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "MetricsJsonGet500Response": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "description": "Error message"
+                    }
+                }
+            },
+            "UiActivitiesGet200Response": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "type": "string"
+                        },
+                        "label": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "UiFxCurrenciesGet200Response": {
+                "type": "object",
+                "properties": {
+                    "currencies": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "string",
+                                    "description": "Currency code (e.g., USD, EUR, GBP)"
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "description": "Full currency name"
+                                },
+                                "symbol": {
+                                    "type": "string",
+                                    "description": "Currency symbol"
+                                },
+                                "decimals": {
+                                    "type": "number",
+                                    "description": "Number of decimal places"
+                                },
+                                "isActive": {
+                                    "type": "boolean",
+                                    "description": "Whether currency is currently active"
+                                }
+                            }
+                        }
+                    },
+                    "count": {
+                        "type": "number",
+                        "description": "Total number of supported currencies"
+                    }
+                }
+            },
+            "UiSecretKeysGet200Response": {
+                "type": "object",
+                "properties": {
+                    "sandbox": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    },
+                    "live": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    },
+                    "liveEnabled": {
+                        "type": "boolean"
+                    },
+                    "liveDisabledReason": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UiSecretKeysPost201Response": {
+                "type": "object"
+            },
+            "UiSecretKeysLiveStatusGet200Response": {
+                "type": "object",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "reason": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UiSecretKeysStatsSummaryGet200Response": {
+                "type": "object"
+            },
+            "UiSecretKeysDelete200Response": {
+                "type": "object"
+            },
+            "UiSecretKeysRevealGet200Response": {
+                "type": "object"
+            },
+            "UiSecretKeysRegeneratePost200Response": {
+                "type": "object"
+            },
+            "UiAdminUsersGet200Response": {
+                "type": "object"
+            },
+            "UiAdminUsersPost201Response": {
+                "type": "object"
+            },
+            "UiAdminUsersStatsGet200Response": {
+                "type": "object"
+            },
+            "UiAdminUsersGet200Response2": {
+                "type": "object"
+            },
+            "UiAdminUsersPut200Response": {
+                "type": "object"
+            },
+            "UiAdminUsersStatusPut200Response": {
+                "type": "object"
+            },
+            "UiAdminUsersProviderGet200Response": {
+                "type": "object"
+            },
+            "UiAdminUsersTransactionsGet200Response": {
+                "type": "array"
+            },
+            "UiPaymentIntentsPost201Response": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "amount": {
+                        "type": "number"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "clientSecret": {
+                        "type": "string"
+                    },
+                    "publishableKey": {
+                        "type": "string"
+                    },
+                    "accountId": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UiPaymentIntentsGet200Response": {
+                "type": "object",
+                "properties": {
+                    "amount": {
+                        "type": "number"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "clientSecret": {
+                        "type": "string"
+                    }
+                }
+            },
+            "SdkPaymentIntentsPost201Response": {
+                "example": {
+                    "processorPaymentId": "pi_1a2b3c4d5e6f7g8h",
+                    "planRef": "pln_2b3c4d5e6f7g",
+                    "customerRef": "cus_3c4d5e6f7g8h",
+                    "amount": 4999,
+                    "originalAmount": 4999,
+                    "currency": "usd",
+                    "exchangeRate": 1,
+                    "status": "requires_payment_method",
+                    "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_AbCdEf123456",
+                    "publishableKey": "pk_test_...",
+                    "expiresAt": "2025-10-19T10:30:00.000Z",
+                    "createdAt": "2025-10-18T10:30:00.000Z"
+                },
+                "type": "object"
+            },
+            "SdkPaymentIntentsPost400Response": {
+                "example": {
+                    "statusCode": 400,
+                    "message": "idempotency-key header is required",
+                    "error": "Bad Request"
+                },
+                "type": "object"
+            },
+            "SdkPaymentIntentsGet200Response": {
+                "example": {
+                    "paymentIntents": [
+                        {
+                            "processorPaymentId": "pi_1a2b3c4d5e6f7g8h",
+                            "planRef": "pln_2b3c4d5e6f7g",
+                            "amount": 4999,
+                            "currency": "usd",
+                            "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_xxx",
+                            "status": "succeeded",
+                            "createdAt": "2025-10-11T10:30:00.000Z"
+                        }
+                    ],
+                    "total": 1
+                },
+                "type": "object"
+            },
+            "SdkPaymentIntentsGet200Response2": {
+                "example": {
+                    "planRef": "pln_2b3c4d5e6f7g",
+                    "amount": 4999,
+                    "currency": "usd",
+                    "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_xxx"
+                },
+                "type": "object"
+            },
+            "SdkPaymentIntentsGet404Response": {
+                "example": {
+                    "success": false,
+                    "error": "Payment intent not found",
+                    "code": "PAYMENT_INTENT_NOT_FOUND"
+                },
+                "type": "object"
+            },
+            "SdkPaymentIntentsProcessPost200Response": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "succeeded",
+                            "timeout",
+                            "failed",
+                            "cancelled"
+                        ],
+                        "description": "Payment intent status",
+                        "example": "succeeded"
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Optional message, only present for timeout status",
+                        "example": "Timeout while waiting for payment intent confirmation, try again later. This could be due to payment webhooks not being configured correctly."
+                    }
+                }
+            },
+            "SdkPaymentIntentsProcessPost400Response": {
+                "example": {
+                    "statusCode": 400,
+                    "message": "Payment not succeeded. Status: requires_payment_method",
+                    "error": "Bad Request"
+                },
+                "type": "object"
+            },
+            "UiStripeOauthAuthorizePost200Response": {
+                "type": "object",
+                "properties": {
+                    "authUrl": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UiStripeOauthCallbackPost200Response": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "source": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UiProviderAuthLoginsPost200Response": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UiProviderAuthLoginsResendsPost200Response": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UiProviderAuthTwoFactorVerificationsPost200Response": {
+                "type": "object",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "UiProviderAuthInvitationsGet200Response": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "role": {
+                        "type": "string"
+                    },
+                    "providerName": {
+                        "type": "string"
+                    }
+                }
+            },
+            "CustomerAuthTokenPost200Response": {
+                "type": "object",
+                "properties": {
+                    "access_token": {
+                        "type": "string"
+                    },
+                    "token_type": {
+                        "type": "string",
+                        "example": "Bearer"
+                    },
+                    "expires_in": {
+                        "type": "number"
+                    },
+                    "refresh_token": {
+                        "type": "string"
+                    },
+                    "scope": {
+                        "type": "string"
+                    }
+                }
+            },
+            "CustomerAuthLoginsPost200Response": {
+                "type": "object",
+                "properties": {
+                    "redirectUrl": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ProviderMcpOauth.WellKnownOauthAuthorizationServerGet200Response": {
+                "type": "object",
+                "properties": {
+                    "issuer": {
+                        "type": "string"
+                    },
+                    "authorization_endpoint": {
+                        "type": "string"
+                    },
+                    "token_endpoint": {
+                        "type": "string"
+                    },
+                    "registration_endpoint": {
+                        "type": "string"
+                    },
+                    "response_types_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "grant_types_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "code_challenge_methods_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "token_endpoint_auth_methods_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "ProviderMcpOauthAttachPost200Response": {
+                "type": "object",
+                "properties": {
+                    "ok": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "ProviderMcpOauthConsentPost200Response": {
+                "type": "object",
+                "properties": {
+                    "redirectUrl": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ProviderMcpOauthTokenPost200Response": {
+                "type": "object",
+                "properties": {
+                    "access_token": {
+                        "type": "string"
+                    },
+                    "token_type": {
+                        "type": "string"
+                    },
+                    "expires_in": {
+                        "type": "number"
+                    }
+                }
+            },
+            "SdkProductsPlansGet200Response": {
+                "type": "object",
+                "properties": {
+                    "plans": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Plan"
+                        }
+                    },
+                    "total": {
+                        "type": "number",
+                        "description": "Total number of plans for the product"
+                    },
+                    "limit": {
+                        "type": "number"
+                    },
+                    "offset": {
+                        "type": "number"
+                    }
+                }
+            },
+            "UiProductsNameChecksPost200Response": {
+                "type": "object",
+                "properties": {
+                    "isUnique": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "SdkUsagesPost200Response": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "reference": {
+                        "type": "string",
+                        "example": "usage_A1B2C3D4"
+                    }
+                }
+            },
+            "SdkMeterEventsPost200Response": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                }
+            },
+            "SdkMeterEventsBulkPost200Response": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "inserted": {
+                        "type": "number",
+                        "example": 50
+                    }
+                }
+            },
+            "UiAdminTransactionsGet200Response": {
+                "type": "object"
+            },
+            "UiAdminTransactionsStatsGet200Response": {
+                "type": "object"
+            },
+            "UiAdminTransactionsByIdGet200Response": {
+                "type": "object"
+            },
+            "UiAdminTransactionsBalanceGet200Response": {
+                "type": "object"
+            },
+            "UiAdminTransactionsBalanceHistoryGet200Response": {
+                "type": "object"
+            },
+            "UiAdminTransactionsSystemBalanceGet200Response": {
+                "type": "object"
+            },
+            "UiMcpServersGet200Response": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/McpServerDto"
+                }
+            },
+            "UiMcpServersNameChecksPost200Response": {
+                "type": "object",
+                "properties": {
+                    "isUnique": {
+                        "type": "boolean"
+                    },
+                    "normalizedDomain": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UiMcpServersBootstrapSubdomainChecksPost200Response": {
+                "type": "object",
+                "properties": {
+                    "effectiveSubdomain": {
+                        "type": "string"
+                    },
+                    "isUnique": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "UiMcpServersDiscoverToolsPost200Response": {
+                "type": "object",
+                "properties": {
+                    "tools": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "description": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "McpOauthAuthorizationServersGet200Response": {
+                "type": "object",
+                "properties": {
+                    "issuer": {
+                        "type": "string",
+                        "example": "https://mytelescope.mcp.solvapay.com"
+                    },
+                    "authorization_endpoint": {
+                        "type": "string",
+                        "example": "https://mytelescope.mcp.solvapay.com/v1/customer/auth/authorize"
+                    },
+                    "token_endpoint": {
+                        "type": "string",
+                        "example": "https://mytelescope.mcp.solvapay.com/v1/customer/auth/token"
+                    },
+                    "registration_endpoint": {
+                        "type": "string",
+                        "example": "https://mytelescope.mcp.solvapay.com/v1/customer/auth/register"
+                    },
+                    "token_endpoint_auth_methods_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "client_secret_basic",
+                            "client_secret_post"
+                        ]
+                    },
+                    "response_types_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "code"
+                        ]
+                    },
+                    "scopes_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "openid",
+                            "profile",
+                            "email"
+                        ]
+                    },
+                    "code_challenge_methods_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "S256"
+                        ]
+                    }
+                }
+            },
+            "McpOpenidConfigurationGet200Response": {
+                "type": "object",
+                "properties": {
+                    "issuer": {
+                        "type": "string"
+                    },
+                    "authorization_endpoint": {
+                        "type": "string"
+                    },
+                    "token_endpoint": {
+                        "type": "string"
+                    },
+                    "userinfo_endpoint": {
+                        "type": "string"
+                    },
+                    "registration_endpoint": {
+                        "type": "string"
+                    },
+                    "response_types_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "grant_types_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "subject_types_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "id_token_signing_alg_values_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "token_endpoint_auth_methods_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "scopes_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "claims_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "code_challenge_methods_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "McpOauthProtectedResourceGet200Response": {
+                "type": "object",
+                "properties": {
+                    "resource": {
+                        "type": "string",
+                        "example": "https://mytelescope.mcp.solvapay.com"
+                    },
+                    "authorization_servers": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "https://mytelescope.mcp.solvapay.com"
+                        ]
+                    },
+                    "scopes_supported": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "openid",
+                            "profile",
+                            "email"
+                        ]
+                    }
+                }
+            },
+            "UiPurchasesGet200Response": {
+                "properties": {
+                    "purchases": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PurchaseResponse"
+                        }
+                    }
+                }
+            },
+            "UiPurchasesCancelPost200Response": {
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "purchase": {
+                        "$ref": "#/components/schemas/PurchaseResponse"
+                    }
+                }
+            },
+            "UiPurchasesReactivatePost200Response": {
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "purchase": {
+                        "$ref": "#/components/schemas/PurchaseResponse"
+                    }
+                }
+            },
+            "SdkPurchasesGet200Response": {
+                "properties": {
+                    "purchases": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SdkPurchaseResponse"
+                        }
+                    }
+                }
+            },
+            "SdkPurchasesCustomerGet200Response": {
+                "properties": {
+                    "purchases": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SdkPurchaseResponse"
+                        }
+                    }
+                }
+            },
+            "SdkPurchasesProductGet200Response": {
+                "properties": {
+                    "purchases": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SdkPurchaseResponse"
+                        }
+                    }
+                }
+            },
+            "SdkPurchasesCancelPost200Response": {
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "purchase": {
+                        "$ref": "#/components/schemas/SdkPurchaseResponse"
+                    }
+                }
+            },
+            "SdkPurchasesReactivatePost200Response": {
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "purchase": {
+                        "$ref": "#/components/schemas/SdkPurchaseResponse"
+                    }
+                }
+            },
+            "SdkCustomersPost400Response": {
+                "example": {
+                    "statusCode": 400,
+                    "message": "Invalid email format",
+                    "error": "Bad Request"
+                },
+                "type": "object"
+            },
+            "SdkCustomersGet400Response": {
+                "example": {
+                    "statusCode": 400,
+                    "message": "Must provide exactly one of reference, externalRef, or email",
+                    "error": "Bad Request"
+                },
+                "type": "object"
+            },
+            "SdkCustomersGet404Response": {
+                "example": {
+                    "statusCode": 404,
+                    "message": "Customer not found",
+                    "error": "Not Found"
+                },
+                "type": "object"
+            },
+            "SdkCustomersBalanceGet200Response": {
+                "example": {
+                    "customerRef": "cus_3c4d5e6f7g8h",
+                    "credits": 4200,
+                    "displayCurrency": "USD",
+                    "creditsPerMinorUnit": 100
+                },
+                "type": "object"
+            },
+            "SdkCustomersBalanceGet404Response": {
+                "example": {
+                    "statusCode": 404,
+                    "message": "Customer with reference cus_3c4d5e6f7g8h not found",
+                    "error": "Not Found"
+                },
+                "type": "object"
+            },
+            "SdkCustomersGet404Response2": {
+                "example": {
+                    "statusCode": 404,
+                    "message": "Customer with reference cus_3c4d5e6f7g8h not found",
+                    "error": "Not Found"
+                },
+                "type": "object"
+            },
+            "SdkCustomersCustomerSessionsPost400Response": {
+                "example": {
+                    "statusCode": 400,
+                    "message": "Customer not found",
+                    "error": "Bad Request"
+                },
+                "type": "object"
+            },
+            "SdkCustomersCustomerSessionsPost404Response": {
+                "example": {
+                    "statusCode": 404,
+                    "message": "Customer not found",
+                    "error": "Not Found"
+                },
+                "type": "object"
+            },
+            "SdkCustomersCustomerSessionsGet404Response": {
+                "example": {
+                    "statusCode": 404,
+                    "message": "Customer session not found: e3f1c2d4b6a89f001122334455667788",
+                    "error": "Not Found"
+                },
+                "type": "object"
+            },
+            "UiCustomersMeGet200Response": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "customer"
+                    },
+                    "emailVerified": {
+                        "type": "boolean"
+                    },
+                    "authProvider": {
+                        "type": "string",
+                        "example": "google"
+                    },
+                    "providerId": {
+                        "type": "string"
+                    },
+                    "preferences": {
+                        "type": "object"
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "UiWalletsGet200Response": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Wallet ID"
+                    },
+                    "userId": {
+                        "type": "string",
+                        "description": "User ID"
+                    },
+                    "balance": {
+                        "type": "number",
+                        "description": "Current wallet balance"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "Wallet currency"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Wallet creation date"
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Last update date"
+                    }
+                }
+            },
+            "UiWalletsStatsGet200Response": {
+                "type": "object",
+                "properties": {
+                    "totalTransactions": {
+                        "type": "number",
+                        "description": "Total number of transactions"
+                    },
+                    "totalVolume": {
+                        "type": "number",
+                        "description": "Total transaction volume"
+                    },
+                    "averageTransaction": {
+                        "type": "number",
+                        "description": "Average transaction amount"
+                    },
+                    "lastTransactionDate": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Date of last transaction"
+                    },
+                    "monthlyStats": {
+                        "type": "object",
+                        "properties": {
+                            "currentMonth": {
+                                "type": "number",
+                                "description": "Transactions this month"
+                            },
+                            "previousMonth": {
+                                "type": "number",
+                                "description": "Transactions last month"
+                            }
+                        }
+                    }
+                }
+            },
+            "UiAccountsGet200Response": {
+                "type": "array"
+            },
+            "UiAccountsGet200Response2": {
+                "type": "object"
+            },
+            "UiAccountsStatsGet200Response": {
+                "type": "object"
             }
         }
     }

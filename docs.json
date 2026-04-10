@@ -80,6 +80,13 @@
               "mcp-server/examples",
               "mcp-server/faq"
             ]
+          },
+          {
+            "group": "Changelog",
+            "icon": "clock-rotate-left",
+            "pages": [
+              "changelog/2026-04-10"
+            ]
           }
         ]
       },

@@ -1,0 +1,98 @@
+---
+title: "April 2026 release"
+description: "Abstract credits model, sandbox-first onboarding, Go-Live flow, unified plans, and cross-platform refactoring."
+---
+
+## Abstract credits model
+
+Credits are now stored as **abstract integers** rather than currency-denominated amounts. This decouples billing logic from specific currencies and simplifies multi-currency support.
+
+**What changed:**
+
+- Customer balances are a single `{ balance, currency }` object instead of a per-currency array
+- A new `creditsPerMinorUnit` field defines how credits map to the provider's currency (e.g. 100 credits = 1 USD cent)
+- `displayExchangeRate` lets the frontend show USD-equivalent values regardless of the provider's settlement currency
+- Provider currency is locked after the first transaction to prevent inconsistencies
+- Credit topup webhook processing is now idempotent
+
+<Info>
+  Plans that previously used `pricePerUnit` now use `creditsPerUnit`. See [Plans overview](/plans/overview) for the updated schema.
+</Info>
+
+## Sandbox-first onboarding
+
+New providers now start directly in a **sandbox environment** instead of being routed through Stripe setup on first sign-up. This removes friction from the onboarding flow and lets providers explore the platform before connecting a payment processor.
+
+- Sandbox is the default environment for new accounts
+- Stripe provisioning is non-blocking — providers can set up payments later
+- Sandbox comes with sample data for faster testing
+- Dev tools include a new **Clear all data** option alongside the existing reset
+
+## Go-Live flow
+
+A new **Go Live** modal guides providers through the transition from sandbox to production.
+
+- **Stripe OAuth popup**: connects a Stripe account without leaving the SolvaPay Console
+- **Copy products toggle**: optionally migrates sandbox products and plans to the live environment
+- **Validate-only OAuth linking**: verifies the Stripe connection before committing
+- **Environment switcher intercept**: prompts providers who try to switch environments manually
+- **Checklist gating**: blocks the "Next" button while validation is in progress
+- Improved security on the OAuth connection flow
+
+## Unified plans array
+
+Products now store all plans in a single `plans[]` array instead of separate `freePlan` and `paidPlans` fields.
+
+**What changed:**
+
+- `freePlan` and `paidPlans` merged into `plans[]`
+- `requiresPayment` is now **derived on the backend** from plan `price`, `creditsPerUnit`, and `type` — clients no longer send it
+- A `pricingMode` field is used on the frontend for UI display logic
+- Default plan, name, and description fields added to product plans
+
+<Warning>
+  If you previously sent `requiresPayment` in plan creation requests, remove it. The backend now determines this automatically.
+</Warning>
+
+## Usage-based plans
+
+Full support for usage-based plans across the platform:
+
+- Usage plans in product onboarding with sub-cent configuration
+- Plan selection in checkout and customer account pages
+- Usage paywall enforcement in the SDK and MCP server
+- `trackUsage` helper and Usage Simulator added to the SDK checkout demo
+- USD equivalent display in usage-based plan previews
+
+## Identifier refactoring
+
+All `xReference` fields have been renamed to `xRef` across every project for consistency:
+
+| Before | After |
+|--------|-------|
+| `productReference` | `productRef` |
+| `planReference` | `planRef` |
+| `customerReference` | `customerRef` |
+| `stripePaymentIntentId` | `processorPaymentId` |
+
+The MCP Server, Admin MCP, SDK, and all API endpoints now use `ref`-based identifiers.
+
+## SDK updates
+
+- Types regenerated from the backend schema
+- Multi-currency balances replaced with abstract credits
+- `creditsPerMinorUnit` propagated from server through all SDK layers
+- Checkout demo: exchange rate applied to credit estimates, dynamic currency symbol padding
+- Fixed an issue with customer reference extraction in the MCP Server
+
+## Security
+
+- Improved security on Stripe OAuth connection flow
+- Idempotent credit topup webhook processing
+- Tighter rate limiting on authentication endpoints
+
+## Documentation
+
+- OpenAPI spec updated with credits-per-unit changes
+- Plan docs updated from `pricePerUnit` to `creditsPerUnit`
+- MCP Server docs updated to use `ref`-based identifiers

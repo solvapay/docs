@@ -1,6 +1,6 @@
 ---
 title: "Test in sandbox"
-description: "Use sandbox mode to test your integration before or after live activation."
+description: "Use sandbox mode to test your integration before going live."
 ---
 
 ## Prerequisites
@@ -16,6 +16,9 @@ project is connected before endpoint testing.
 
 ## What is sandbox mode?
 
+All new accounts start in sandbox mode. A test Stripe account is automatically provisioned during
+registration, so you can process test payments immediately.
+
 In sandbox mode:
 
 - No real charges are processed
@@ -24,8 +27,6 @@ In sandbox mode:
 - All data is separate from production
 
 You can see your current mode in the console header.
-
-You can switch between **Live** and **sandbox** at any time. Many providers activate live first, then switch back to sandbox for safe testing and regression checks.
 
 ## Testing your integration
 
@@ -88,7 +89,7 @@ Use any future expiration date and any 3-digit CVC.
 
 ## Testing checklist
 
-Before or after going live, verify:
+Before going live, verify:
 
 - [ ] Users can authenticate (OAuth for MCP Pay, your auth for SDK)
 - [ ] Free plan users can access free tools/endpoints
@@ -102,4 +103,4 @@ Before or after going live, verify:
 
 Once you've verified your integration works correctly:
 
-- [Go live](/get-started/go-live) - Complete onboarding and switch to production
+- [Go live](/get-started/go-live) - Connect Stripe and switch to production

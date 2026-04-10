@@ -1,42 +1,47 @@
 ---
 title: "Go live"
-description: "Once you've tested your integration in sandbox mode, you're ready to switch to Live mode and start accepting real payments."
+description: "Connect your Stripe account and switch to live mode to start accepting real payments."
 ---
 
 ## Go-live checklist
 
-Before you can switch to live mode, complete these steps:
+The Go-Live flow walks you through a checklist before switching to live mode. You can start it
+from the **Go Live** card on your dashboard or by toggling the environment switcher to **Live**.
 
 ### Required
 
-- [ ] **Account setup complete** - Provider profile completed in SolvaPay Console
-- [ ] **Product and plans ready** - Product created and pricing configured
-- [ ] **Integration path validated in sandbox** - MCP Pay or SDK flow tested end-to-end
-- [ ] **Stripe account connected** - Connect an existing Stripe account in **Settings > Payments**, or create a new one
-- [ ] **Stripe account verified** - Complete Stripe identity verification
+- [ ] **Email verified** - Confirm your email address
+- [ ] **Product created** - At least one product with a configured plan
+- [ ] **Business details complete** - Provider profile completed in SolvaPay Console
 
 ### Recommended
 
+- [ ] **Two-factor authentication** - Enable 2FA for your account
 - [ ] **Branding configured** - Upload logo and set colors in **Settings > Pages**
 - [ ] **Webhook handling verified** - Confirm events are processed successfully
 
-You can check your onboarding progress in the console. Incomplete steps are highlighted.
+## Connect Stripe
 
-If you have not finished Stripe setup yet, return to **Settings > Payments** and complete either:
+As part of the Go-Live flow, you connect a Stripe account for processing real payments. Choose one
+of two options:
 
-- **Connect existing Stripe account**
-- **Create new Stripe account** and finish onboarding details
+- **Connect an existing Stripe account** - Link a Stripe account you already own via OAuth
+- **Create a new Stripe account** - SolvaPay creates a new Stripe account using your business details
+
+In sandbox mode, a test Stripe account is provisioned automatically. The live Stripe connection
+happens only when you go through the Go-Live flow.
 
 ## Switch to live mode
 
-Once your checklist is complete:
+Once all required checklist items are complete and Stripe is connected:
 
-1. Open the SolvaPay console
-2. Find the **Sandbox/Live toggle**
-3. Click to switch to **Live** mode
-4. Confirm the switch
+1. Open the SolvaPay Console
+2. Click **Go Live** from the dashboard card, or toggle the **Sandbox/Live** switch
+3. Walk through the Go-Live checklist
+4. Choose whether to **copy your sandbox products** to live mode
+5. Confirm the switch
 
-That's it. Your integration is now processing real payments.
+Your integration is now processing real payments.
 
 ## What changes in live mode
 
@@ -51,15 +56,14 @@ Your proxy URLs and API endpoints remain the same. The mode switch happens at th
 
 ## Switching back to sandbox
 
-You can switch back to sandbox mode at any time to:
+After going live, you can switch back to sandbox mode at any time using the environment toggle to:
 
 - Test new features or plans
 - Debug issues without affecting live mode usage
 - Train team members
 
-This is available after live activation, whether you activated by connecting an existing Stripe account or completing setup for a new Stripe account.
-
-Your sandbox and live data are kept separate. Switching modes doesn't affect existing customers or purchases in either environment.
+Your sandbox and live data are kept separate. Switching modes does not affect existing customers or
+purchases in either environment.
 
 ## After going live
 

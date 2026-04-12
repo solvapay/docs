@@ -27,12 +27,11 @@ The `payable()` method accepts a `scheme` option that determines how payments ar
 
 ### `limits` (Default)
 
-Plan-based access with usage quotas. No token locking — the SDK checks if the consumer's plan allows the request and tracks usage.
+Product-based access with usage quotas. No token locking — the SDK checks if the consumer's purchase allows the request and tracks usage. Plans are resolved automatically from the customer's purchase.
 
 ```typescript
 const handler = solvaPay.payable({
   product: 'prd_myapi',
-  plan: 'pln_premium',
   scheme: 'limits', // default, can be omitted
 })
 ```

@@ -1,6 +1,6 @@
 ---
 title: "April 2026 release"
-description: "Abstract credits model, sandbox-first onboarding, Go-Live flow, unified plans, and cross-platform refactoring."
+description: "Abstract credits, sandbox-first onboarding, Go-Live, usage-based plans, 2FA, cookie consent, and Console improvements."
 ---
 
 ## Abstract credits model
@@ -64,35 +64,34 @@ Full support for usage-based plans across the platform:
 - `trackUsage` helper and Usage Simulator added to the SDK checkout demo
 - USD equivalent display in usage-based plan previews
 
-## Identifier refactoring
+## Two-factor authentication
 
-All `xReference` fields have been renamed to `xRef` across every project for consistency:
+Two-factor authentication is now available for all provider accounts and **required to go live**.
 
-| Before | After |
-|--------|-------|
-| `productReference` | `productRef` |
-| `planReference` | `planRef` |
-| `customerReference` | `customerRef` |
-| `stripePaymentIntentId` | `processorPaymentId` |
+- Set up and manage 2FA from the **Account** page in the SolvaPay Console
+- 2FA is a required step in the Go Live checklist — it can be configured inline without leaving the wizard
+- Backup codes are generated during setup for account recovery
 
-The MCP Server, Admin MCP, SDK, and all API endpoints now use `ref`-based identifiers.
+## Cookie consent
+
+GDPR-compliant cookie consent is now shared across `solvapay.com` and `app.solvapay.com`.
+
+- Accept or decline cookies once — your preference carries across all SolvaPay subdomains
+- Manage preferences (Necessary / Analytics) at any time from the cookie banner
+- All analytics scripts are gated behind consent
+
+## SolvaPay Console
+
+- New **ProductQuickStart** card on the home page with ready-to-paste integration snippets for CLI, Agent Skill, and environment variables
+- **Product selector** dropdown for providers with multiple products
+- **Manage account** link shown after plan activation in checkout
+- Faster manage account page loading with parallel data fetching
 
 ## SDK updates
 
 - Types regenerated from the backend schema
 - Multi-currency balances replaced with abstract credits
 - `creditsPerMinorUnit` propagated from server through all SDK layers
+- Usage paywall enforcement in the SDK and MCP server
+- `trackUsage` helper and Usage Simulator added to the checkout demo
 - Checkout demo: exchange rate applied to credit estimates, dynamic currency symbol padding
-- Fixed an issue with customer reference extraction in the MCP Server
-
-## Security
-
-- Improved security on Stripe OAuth connection flow
-- Idempotent credit topup webhook processing
-- Tighter rate limiting on authentication endpoints
-
-## Documentation
-
-- OpenAPI spec updated with credits-per-unit changes
-- Plan docs updated from `pricePerUnit` to `creditsPerUnit`
-- MCP Server docs updated to use `ref`-based identifiers

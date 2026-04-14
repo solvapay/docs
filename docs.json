@@ -109,6 +109,7 @@
               "sdks/typescript/guides/mcp",
               "sdks/typescript/guides/custom-auth",
               "sdks/typescript/guides/usage-events",
+              "sdks/typescript/guides/purchase-management",
               "sdks/typescript/guides/webhooks",
               "sdks/typescript/guides/examples"
             ]

@@ -101,7 +101,7 @@ A `TokenLock` record represents an in-flight reservation. It tracks:
 | `amount` | Reserved token amount |
 | `settledAmount` | Actual tokens charged (set on settle) |
 | `providerId` | Which provider the lock is for |
-| `productReference` | Which product |
+| `productRef` | Which product |
 | `status` | `reserved` → `settled` or `released` or `expired` |
 | `expiresAt` | TTL deadline for auto-release |
 | `voucherId` | If this lock is backed by a voucher (optional) |

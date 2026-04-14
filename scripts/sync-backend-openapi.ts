@@ -128,6 +128,59 @@ const filterExternalOperations = (
   }
 }
 
+const collectSchemaRefs = (node: unknown, refs: Set<string>): void => {
+  if (!node || typeof node !== 'object') return
+
+  if (Array.isArray(node)) {
+    for (const item of node) collectSchemaRefs(item, refs)
+    return
+  }
+
+  const obj = node as Record<string, unknown>
+  if (typeof obj.$ref === 'string') {
+    const match = obj.$ref.match(/^#\/components\/schemas\/(.+)$/)
+    if (match) refs.add(match[1])
+  }
+
+  for (const value of Object.values(obj)) collectSchemaRefs(value, refs)
+}
+
+const pruneUnreferencedSchemas = (spec: Record<string, unknown>): number => {
+  const components = spec.components
+  if (!isRecord(components)) return 0
+  const schemas = components.schemas
+  if (!isRecord(schemas)) return 0
+
+  const reachable = new Set<string>()
+  const queue: string[] = []
+
+  collectSchemaRefs(spec.paths, reachable)
+  queue.push(...reachable)
+
+  while (queue.length > 0) {
+    const name = queue.pop()!
+    const schema = schemas[name]
+    if (!schema) continue
+    const nested = new Set<string>()
+    collectSchemaRefs(schema, nested)
+    for (const ref of nested) {
+      if (!reachable.has(ref)) {
+        reachable.add(ref)
+        queue.push(ref)
+      }
+    }
+  }
+
+  let pruned = 0
+  for (const name of Object.keys(schemas)) {
+    if (!reachable.has(name)) {
+      delete schemas[name]
+      pruned++
+    }
+  }
+  return pruned
+}
+
 const sanitizeMintlifyIncompatibleResponses = (spec: Record<string, unknown>): number => {
   const paths = spec.paths
   if (!isRecord(paths)) {
@@ -291,6 +344,7 @@ const main = async (): Promise<void> => {
     removedOperations: removedDeprecatedOperations,
     removedPaths: removedDeprecatedPaths,
   } = filterDeprecatedOperations(source)
+  const prunedSchemas = pruneUnreferencedSchemas(source)
   const removedIncompatibleResponses = sanitizeMintlifyIncompatibleResponses(source)
   const { next: rewrittenPublicUrls, rewrites: rewrittenPublicUrlCount } = rewritePublicOauthUrls(
     source,
@@ -307,6 +361,7 @@ const main = async (): Promise<void> => {
   console.log(`Removed empty paths after external filter: ${removedNonExternalPaths}`)
   console.log(`Filtered deprecated operations: ${removedDeprecatedOperations}`)
   console.log(`Removed empty paths after deprecated filter: ${removedDeprecatedPaths}`)
+  console.log(`Pruned unreachable schemas: ${prunedSchemas}`)
   console.log(`Sanitized response-level examples: ${removedIncompatibleResponses}`)
   console.log(`Rewritten OAuth public URLs: ${rewrittenPublicUrlCount}`)
   console.log(`Updated: ${TARGET_FILE}`)

@@ -31,9 +31,44 @@ A purchase moves through these states during its lifecycle:
 |-------|-------------|
 | `trialing` | Customer is in a free trial period (set by `trialDays` on the plan) |
 | `active` | Purchase is active and the customer has access |
-| `cancelled` | Cancel requested but still active until period end |
-| `expired` | Purchase has ended (trial expired without payment, or cancelled and period ended) |
+| `active` (pending cancellation) | Active with `cancelledAt` set — access continues until period end, can be reactivated |
+| `cancelled` | Cancel confirmed at period end |
+| `expired` | Purchase has ended (trial expired without payment, cancelled and period ended, or replaced by plan switch) |
 | `past_due` | Payment failed; purchase may be suspended |
+
+## Reactivation
+
+When a customer cancels a recurring purchase, the purchase enters a "pending cancellation" state — it remains `active` with `cancelledAt` set, and the customer keeps access until the current billing period ends.
+
+Before the period ends, the cancellation can be undone:
+
+```typescript
+import { reactivateRenewal } from '@solvapay/next'
+
+await reactivateRenewal(request, { purchaseRef: 'pur_...' })
+```
+
+This clears `cancelledAt` and restores `autoRenew`, so the purchase continues renewing as normal. A `purchase.updated` webhook fires.
+
+**Preconditions:** the purchase must be `active`, have `cancelledAt` set, and `endDate` must not have passed.
+
+## Plan Switching
+
+When a customer wants to change plans on a product, call `activatePlan` with the new plan reference. If the customer already has an active purchase on a different plan for that product, the system automatically:
+
+1. Expires the existing purchase
+2. Creates a new purchase on the requested plan
+
+```typescript
+import { activatePlan } from '@solvapay/next'
+
+const result = await activatePlan(request, {
+  productRef: 'prd_myapi',
+  planRef: 'pln_pro', // new plan
+})
+```
+
+This produces two webhook events: `purchase.expired` for the old purchase and `purchase.created` for the new one.
 
 ## Usage Tracking on Purchases
 

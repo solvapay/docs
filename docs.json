@@ -106,6 +106,7 @@
               "sdks/typescript/guides/express",
               "sdks/typescript/guides/nextjs",
               "sdks/typescript/guides/react",
+              "sdks/typescript/guides/supabase-edge",
               "sdks/typescript/guides/mcp",
               "sdks/typescript/guides/custom-auth",
               "sdks/typescript/guides/usage-events",

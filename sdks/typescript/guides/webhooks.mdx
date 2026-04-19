@@ -42,6 +42,25 @@ const event = await verifyWebhook({
 })
 ```
 
+### Supabase Edge Functions
+
+For Supabase Edge Functions, `@solvapay/supabase` provides a `solvapayWebhook` factory that handles the full lifecycle (read body, verify signature, parse, respond):
+
+```typescript
+// supabase/functions/solvapay-webhook/index.ts
+import { solvapayWebhook } from '@solvapay/supabase'
+
+Deno.serve(solvapayWebhook({
+  onEvent: async event => {
+    // Handle events here
+  },
+}))
+```
+
+The factory reads `SOLVAPAY_WEBHOOK_SECRET` from the environment automatically. Use `verifyWebhook` from `@solvapay/server/edge` if you need manual control over the request lifecycle.
+
+See the [Supabase Edge Functions guide](/sdks/typescript/guides/supabase-edge) for the complete setup.
+
 ## Event Types
 
 | Event | Description |

@@ -108,6 +108,7 @@
               "sdks/typescript/guides/react",
               "sdks/typescript/guides/supabase-edge",
               "sdks/typescript/guides/mcp",
+              "sdks/typescript/guides/mcp-app",
               "sdks/typescript/guides/custom-auth",
               "sdks/typescript/guides/usage-events",
               "sdks/typescript/guides/purchase-management",

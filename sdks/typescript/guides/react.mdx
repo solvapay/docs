@@ -304,7 +304,8 @@ function Dashboard() {
 
 #### usePurchase Return Values
 
-- `loading` - Boolean indicating if purchase check is in progress
+- `loading` - Boolean indicating the first purchase check for this user is in progress. Stays `false` on background refetches — gate your initial skeleton on this.
+- `isRefetching` - Boolean indicating a background refetch is in progress (first fetch already completed). Use for subtle "refreshing" indicators that shouldn't remount the UI.
 - `purchases` - Array of purchase objects
 - `activePurchase` - The active purchase (or null)
 - `hasPaidPurchase` - Boolean indicating if user has paid purchase
@@ -541,13 +542,13 @@ function PurchaseDetails() {
 import { usePurchase } from '@solvapay/react'
 
 function PurchaseStatus() {
-  const { activePurchase, refetch, loading } = usePurchase()
+  const { activePurchase, refetch, loading, isRefetching } = usePurchase()
 
   return (
     <div>
       <p>Status: {activePurchase?.status || 'None'}</p>
-      <button onClick={() => refetch()} disabled={loading}>
-        Refresh
+      <button onClick={() => refetch()} disabled={loading || isRefetching}>
+        {isRefetching ? 'Refreshing...' : 'Refresh'}
       </button>
     </div>
   )

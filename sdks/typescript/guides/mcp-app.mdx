@@ -73,7 +73,7 @@ On the server, register each tool with the canonical name so the client adapter 
 
 ```ts
 import { registerAppTool } from '@modelcontextprotocol/ext-apps/server'
-import { MCP_TOOL_NAMES } from '@solvapay/react/mcp'
+import { MCP_TOOL_NAMES } from '@solvapay/mcp'
 import { checkPurchaseCore, createCheckoutSessionCore } from '@solvapay/server'
 
 registerAppTool(
@@ -97,7 +97,7 @@ registerAppTool(
 )
 ```
 
-Pair this with `createMcpOAuthBridge` from `@solvapay/server` to surface `customer_ref` on `extra.authInfo` — the core helpers read it from the synthesised request headers. A complete working server lives at [`examples/mcp-checkout-app/src/server.ts`](https://github.com/solvapay/solvapay-sdk/blob/main/examples/mcp-checkout-app/src/server.ts).
+Pair this with `createMcpOAuthBridge` from `@solvapay/mcp` to surface `customer_ref` on `extra.authInfo` — the core helpers read it from the synthesised request headers. For the full batteries-included setup use `createSolvaPayMcpServer` from `@solvapay/mcp-sdk`. A complete working server lives at [`examples/mcp-checkout-app/src/server.ts`](https://github.com/solvapay/solvapay-sdk/blob/main/examples/mcp-checkout-app/src/server.ts).
 
 ## Authentication
 

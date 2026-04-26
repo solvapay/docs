@@ -75,6 +75,16 @@ Hosted MCP access uses a clear precedence model:
 
 This means `defaultPlanRef` is always an additional fallback allowlist for protected tools.
 
+## Plan activation policy
+
+When a customer calls `activate_plan` / `POST /v1/sdk/activate`, the response depends on the plan type:
+
+- **Free** — `activated` immediately.
+- **Usage-based (PAYG)** — `activated` eagerly at zero balance. The customer can call protected tools immediately and pay per use. Top-up is a separate step via `topup` / `createTopupPaymentIntent` and does not block activation.
+- **Recurring / hybrid** — returns `topup_required` or `payment_required` when the customer has no credit balance and no card on file. Route them to checkout before granting access.
+
+The MCP App surface exposes this policy directly: the agent can call `activate_plan` and expect the paywall to clear for usage-based plans, with the `topup` intent handled asynchronously.
+
 For API-first setup, the `POST /v1/sdk/products/mcp/bootstrap` endpoint lets you define:
 - product
 - plans (free and paid in one array)

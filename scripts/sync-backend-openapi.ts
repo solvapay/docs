@@ -181,6 +181,38 @@ const pruneUnreferencedSchemas = (spec: Record<string, unknown>): number => {
   return pruned
 }
 
+const sanitizeNonStandardSchemaFields = (value: unknown): number => {
+  if (Array.isArray(value)) {
+    return value.reduce<number>((sum, item) => sum + sanitizeNonStandardSchemaFields(item), 0)
+  }
+
+  if (!isRecord(value)) {
+    return 0
+  }
+
+  let mutations = 0
+
+  if ('selfRequired' in value) {
+    delete value.selfRequired
+    mutations += 1
+  }
+
+  if (
+    'additionalProperties' in value &&
+    isRecord(value.additionalProperties) &&
+    Object.keys(value.additionalProperties).length === 0
+  ) {
+    value.additionalProperties = true
+    mutations += 1
+  }
+
+  for (const child of Object.values(value)) {
+    mutations += sanitizeNonStandardSchemaFields(child)
+  }
+
+  return mutations
+}
+
 const sanitizeMintlifyIncompatibleResponses = (spec: Record<string, unknown>): number => {
   const paths = spec.paths
   if (!isRecord(paths)) {
@@ -345,6 +377,7 @@ const main = async (): Promise<void> => {
     removedPaths: removedDeprecatedPaths,
   } = filterDeprecatedOperations(source)
   const prunedSchemas = pruneUnreferencedSchemas(source)
+  const sanitizedSchemaFields = sanitizeNonStandardSchemaFields(source)
   const removedIncompatibleResponses = sanitizeMintlifyIncompatibleResponses(source)
   const { next: rewrittenPublicUrls, rewrites: rewrittenPublicUrlCount } = rewritePublicOauthUrls(
     source,
@@ -362,6 +395,7 @@ const main = async (): Promise<void> => {
   console.log(`Filtered deprecated operations: ${removedDeprecatedOperations}`)
   console.log(`Removed empty paths after deprecated filter: ${removedDeprecatedPaths}`)
   console.log(`Pruned unreachable schemas: ${prunedSchemas}`)
+  console.log(`Sanitized non-standard schema fields (selfRequired, additionalProperties={}): ${sanitizedSchemaFields}`)
   console.log(`Sanitized response-level examples: ${removedIncompatibleResponses}`)
   console.log(`Rewritten OAuth public URLs: ${rewrittenPublicUrlCount}`)
   console.log(`Updated: ${TARGET_FILE}`)

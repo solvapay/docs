@@ -96,7 +96,7 @@
                   "type": "string"
                 },
                 "metadata": {
-                  "additionalProperties": {},
+                  "additionalProperties": true,
                   "type": "object"
                 },
                 "outcome": {
@@ -213,7 +213,7 @@
                   "type": "string"
                 },
                 "features": {
-                  "additionalProperties": {},
+                  "additionalProperties": true,
                   "type": "object"
                 },
                 "freeUnits": {
@@ -368,8 +368,7 @@
             "type": "string"
           },
           "metadata": {
-            "additionalProperties": {},
-            "selfRequired": false,
+            "additionalProperties": true,
             "type": "object"
           },
           "name": {
@@ -506,8 +505,7 @@
             "type": "string"
           },
           "features": {
-            "additionalProperties": {},
-            "selfRequired": false,
+            "additionalProperties": true,
             "type": "object"
           },
           "freeUnits": {
@@ -517,16 +515,14 @@
             "type": "number"
           },
           "limits": {
-            "additionalProperties": {},
-            "selfRequired": false,
+            "additionalProperties": true,
             "type": "object"
           },
           "maxActiveUsers": {
             "type": "number"
           },
           "metadata": {
-            "additionalProperties": {},
-            "selfRequired": false,
+            "additionalProperties": true,
             "type": "object"
           },
           "name": {
@@ -582,7 +578,6 @@
                 "type": "string"
               }
             },
-            "selfRequired": false,
             "type": "object"
           }
         },
@@ -608,7 +603,6 @@
                 "type": "number"
               }
             },
-            "selfRequired": false,
             "type": "object"
           },
           "description": {
@@ -621,8 +615,7 @@
             "type": "boolean"
           },
           "metadata": {
-            "additionalProperties": {},
-            "selfRequired": false,
+            "additionalProperties": true,
             "type": "object"
           },
           "name": {
@@ -674,8 +667,7 @@
             "type": "string"
           },
           "metadata": {
-            "additionalProperties": {},
-            "selfRequired": false,
+            "additionalProperties": true,
             "type": "object"
           },
           "outcome": {
@@ -985,8 +977,7 @@
             "type": "string"
           },
           "metadata": {
-            "additionalProperties": {},
-            "selfRequired": false,
+            "additionalProperties": true,
             "type": "object"
           },
           "name": {
@@ -1025,7 +1016,7 @@
                   "type": "string"
                 },
                 "features": {
-                  "additionalProperties": {},
+                  "additionalProperties": true,
                   "type": "object"
                 },
                 "freeUnits": {
@@ -1459,7 +1450,7 @@
                   "type": "string"
                 },
                 "properties": {
-                  "additionalProperties": {},
+                  "additionalProperties": true,
                   "type": "object"
                 },
                 "timestamp": {
@@ -1498,8 +1489,7 @@
             "type": "string"
           },
           "properties": {
-            "additionalProperties": {},
-            "selfRequired": false,
+            "additionalProperties": true,
             "type": "object"
           },
           "timestamp": {
@@ -2063,8 +2053,7 @@
             "type": "string"
           },
           "features": {
-            "additionalProperties": {},
-            "selfRequired": false,
+            "additionalProperties": true,
             "type": "object"
           },
           "freeUnits": {
@@ -2074,16 +2063,14 @@
             "type": "number"
           },
           "limits": {
-            "additionalProperties": {},
-            "selfRequired": false,
+            "additionalProperties": true,
             "type": "object"
           },
           "maxActiveUsers": {
             "type": "number"
           },
           "metadata": {
-            "additionalProperties": {},
-            "selfRequired": false,
+            "additionalProperties": true,
             "type": "object"
           },
           "name": {
@@ -2123,7 +2110,6 @@
                 "type": "number"
               }
             },
-            "selfRequired": false,
             "type": "object"
           },
           "description": {
@@ -2133,8 +2119,7 @@
             "type": "string"
           },
           "metadata": {
-            "additionalProperties": {},
-            "selfRequired": false,
+            "additionalProperties": true,
             "type": "object"
           },
           "name": {

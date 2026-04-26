@@ -97,7 +97,7 @@ registerAppTool(
 )
 ```
 
-Pair this with `createMcpOAuthBridge` from `@solvapay/mcp` to surface `customer_ref` on `extra.authInfo` — the core helpers read it from the synthesised request headers. For the full batteries-included setup use `createSolvaPayMcpServer` from `@solvapay/mcp-sdk`. A complete working server lives at [`examples/mcp-checkout-app/src/server.ts`](https://github.com/solvapay/solvapay-sdk/blob/main/examples/mcp-checkout-app/src/server.ts).
+Pair this with `createMcpOAuthBridge` from `@solvapay/mcp/fetch` (or `/express`) to surface `customer_ref` on `extra.authInfo` — the core helpers read it from the synthesised request headers. For the full batteries-included setup use `createSolvaPayMcpServer` from `@solvapay/mcp`. A complete working server lives at [`examples/mcp-checkout-app/src/server.ts`](https://github.com/solvapay/solvapay-sdk/blob/main/examples/mcp-checkout-app/src/server.ts).
 
 ## Authentication
 
@@ -152,14 +152,25 @@ On `focus` / `visibilitychange`, call `refetch()` from `usePurchase` so returnin
 Once a customer has paid, drop `<CurrentPlanCard />` into the tree and the SDK does the rest — plan name, next-billing line, payment-method summary, **Update card** and **Cancel plan** actions. The card returns `null` when there is no active purchase, so you can render it unconditionally.
 
 ```tsx
-import { CurrentPlanCard } from '@solvapay/react'
+import { CurrentPlanCard, LaunchCustomerPortalButton } from '@solvapay/react'
 
 function Account() {
-  return <CurrentPlanCard />
+  return (
+    <>
+      <CurrentPlanCard />
+      <LaunchCustomerPortalButton>Manage billing</LaunchCustomerPortalButton>
+    </>
+  )
 }
 ```
 
-Behind the scenes the card calls `getPaymentMethod`, and `<UpdatePaymentMethodButton>` pre-fetches `createCustomerSession` so the portal link is ready the moment the user clicks.
+- **`<CurrentPlanCard />`** renders the active plan, mirrored card brand/last4, and inline **Update card** / **Cancel plan** actions.
+- **`<LaunchCustomerPortalButton />`** opens the hosted customer portal in a new tab. It pre-fetches `createCustomerSession` on hover so the portal link is ready the moment the user clicks (anchor-click semantics are preserved for sandboxed hosts).
+- **`usePaymentMethod()`** exposes the mirrored card under `{ paymentMethod, loading, refetch }` when you need to build a custom account view. The card brand and last4 come from the `payment_intent.succeeded` webhook persisted on the Customer — no card-element iframe required inside the MCP App sandbox.
+
+## Text-only paywall
+
+The MCP App surface uses SolvaPay's **text-only paywall**. `payable.mcp` emits a plain-text `Purchase required` response — no embedded UI meta, no structured checkout payload — so the host model can read the copy, call `create_checkout_session`, and surface the returned URL however it likes. There is no `McpPaywallView` / `McpNudgeView` / `McpUpsellStrip` component anymore; render checkout through `<PaymentForm>` or the hosted URL instead.
 
 ## Complete example
 

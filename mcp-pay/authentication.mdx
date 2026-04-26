@@ -103,6 +103,25 @@ MCP clients often use custom URL protocols for OAuth callbacks:
 
 MCP Pay fully supports these custom protocols, ensuring seamless authentication across different MCP client applications. The OAuth server correctly handles redirects to these custom schemes.
 
+## Redirect URI allowlist
+
+DCR rejects any `redirect_uri` that is neither a known custom-protocol scheme nor a host on the HTTPS allowlist. When a client registers a disallowed URI, the server now returns an explicit `Invalid redirect_uri: <uri>` error instead of a generic rejection, so client logs surface the offending value.
+
+Default allowlist entries include:
+
+- Localhost (`http://localhost`, `http://127.0.0.1` with any port) for local development and MCP Inspector
+- `*.mcpjam.com` — MCP Jam's hosted inspector subdomains
+- Custom protocol schemes: `cursor://`, `claude://`, `vscode://`, `cline://`, and the other MCP-client schemes above
+
+Two environment knobs on the backend control the allowlist at deploy time:
+
+| Variable | Effect |
+|---|---|
+| `OAUTH_DCR_ALLOWED_REDIRECT_HOST_SUFFIXES` | Comma-separated list of DNS suffixes (e.g. `inspector.example.com,mcp.myco.dev`) appended to the defaults |
+| `OAUTH_DCR_ALLOW_ANY_HTTPS_REDIRECTS` | Set to `true` to accept any HTTPS URL (use only in trusted environments — this disables the allowlist) |
+
+Both keys are also exposed as `oauthDcrAllowedRedirectHostSuffixes` / `oauthDcrAllowAnyHttpsRedirects` fields on the internal config for runtime overrides.
+
 ## Token Lifecycle
 
 ### Access Tokens

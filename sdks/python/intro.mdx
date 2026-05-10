@@ -1,0 +1,40 @@
+---
+title: "Python SDK"
+description: "Community Python SDK for SolvaPay — payment rails for agent frameworks built in Python."
+---
+
+## What is solvapay-python?
+
+A community-maintained Python SDK that mirrors the most-used surface of `@solvapay/server`.
+Python is the dominant language for agent frameworks (LangChain, FastMCP, CrewAI, AutoGen) but
+SolvaPay's official SDK is TypeScript-only. This SDK brings first-class Python support so agent
+developers can gate tools behind paywalls without switching ecosystems.
+
+```python
+from solvapay import SolvaPay, paywall
+
+sv = SolvaPay()  # reads SOLVAPAY_SECRET_KEY from env
+
+@paywall.require(product="prd_YOUR_PRODUCT", client=sv)
+def run_analysis(*, customer_ref: str, text: str) -> dict:
+    ...  # only runs if customer is within limits
+```
+
+## Core capabilities
+
+- **Sync client** — `create_checkout_session`, `ensure_customer`, `get_customer`, `check_limits`
+- **Webhook verification** — HMAC-SHA256 `verify_webhook` matching the TS implementation
+- **`@paywall.require`** — one-decorator paywall for any Python function
+- **FastAPI helper** — `webhook_router()` mounts a verified webhook handler in one line
+- **FastMCP demo** — gate MCP tools per-call with `@mcp.tool()` + `@paywall.require`
+
+## Packages
+
+- **`solvapay`** — single package, MIT, Python 3.10+
+- Install: `pip install git+https://github.com/dhruv-sanan/solvapay-python`
+
+## Next steps
+
+- [Installation](./setup/installation) — install and configure env vars
+- [Quick start](./setup/quick-start) — protect your first function in 3 lines
+- [FastMCP paywall guide](./guides/fastmcp-paywall) — gate MCP tools per-call

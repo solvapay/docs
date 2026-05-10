@@ -1,0 +1,141 @@
+---
+title: "FastMCP paywall"
+description: "Gate any Python MCP tool behind a per-call SolvaPay paywall in under 60 seconds."
+---
+
+## What this guide shows
+
+Stack `@paywall.require` on top of `@mcp.tool()` to monetize any Python MCP server tool per-call.
+When a customer exceeds their limit the tool returns a structured dict with a checkout URL the LLM
+can surface directly to the user — no stack trace, no broken conversation.
+
+**Demo repo:** [`examples/fastmcp-paywall/`](https://github.com/dhruv-sanan/solvapay-python/tree/main/examples/fastmcp-paywall)
+
+## Install
+
+```bash
+pip install git+https://github.com/dhruv-sanan/solvapay-python fastmcp python-dotenv
+export SOLVAPAY_SECRET_KEY=sk_sandbox_...
+export SOLVAPAY_PRODUCT_REF=prd_YOUR_PRODUCT
+```
+
+## The pattern
+
+```python
+import functools
+import os
+from typing import Any
+
+from fastmcp import FastMCP
+from solvapay import SolvaPay, paywall
+from solvapay.paywall import PaywallRequired
+
+sv = SolvaPay()
+mcp = FastMCP("my-server")
+
+PRODUCT_REF = os.environ["SOLVAPAY_PRODUCT_REF"]
+DEMO_CUSTOMER = os.environ.get("SOLVAPAY_DEMO_CUSTOMER_REF", "cus_demo")
+
+
+def _gated(fn):
+    """Convert PaywallRequired into a structured dict instead of a stack trace."""
+    protected = paywall.require(product=PRODUCT_REF, client=sv)(fn)
+
+    @functools.wraps(fn)  # preserves signature so FastMCP generates correct tool schema
+    def wrapper(**kwargs: Any) -> Any:
+        try:
+            return protected(**kwargs)
+        except PaywallRequired as exc:
+            return {
+                "paywall_required": True,
+                "checkout_url": exc.checkout_url,
+                "message": "This tool is paywalled. Pay at the URL to unlock.",
+            }
+
+    return wrapper
+
+
+@mcp.tool()
+@_gated
+def analyze_text(*, text: str, customer_ref: str = DEMO_CUSTOMER) -> dict[str, Any]:
+    """Word/char/sentence breakdown. Gated at $0.05/call by SolvaPay."""
+    words = text.split()
+    return {
+        "word_count": len(words),
+        "char_count": len(text),
+        "sentence_count": text.count(".") + text.count("!") + text.count("?"),
+    }
+
+
+if __name__ == "__main__":
+    mcp.run()
+```
+
+## Why `@mcp.tool()` is the outer decorator
+
+`@mcp.tool()` must wrap the result of `@_gated` so FastMCP registers the gated function — not the
+raw function — as the tool handler. Reversed order registers the unprotected function.
+
+## Why `functools.wraps`
+
+FastMCP uses `inspect.signature` to generate the JSON schema for each tool. Without
+`@functools.wraps(fn)`, the wrapper's `**kwargs` signature is used and the schema is empty.
+`@functools.wraps` sets `__wrapped__` so `inspect.signature` follows the chain to the original
+function's typed arguments.
+
+## Paywall response shape
+
+When gated, the tool returns:
+
+```json
+{
+  "paywall_required": true,
+  "checkout_url": "https://solvapay.com/c/sess_...",
+  "message": "This tool is paywalled. Pay at the URL to unlock."
+}
+```
+
+The LLM renders the `checkout_url` as a link. The user pays, the session refreshes, and the
+next call goes through.
+
+## Plug into Claude Desktop
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "command": "uv",
+      "args": ["--directory", "/abs/path/to/my-server", "run", "python", "server.py"],
+      "env": {
+        "SOLVAPAY_SECRET_KEY": "sk_sandbox_...",
+        "SOLVAPAY_PRODUCT_REF": "prd_..."
+      }
+    }
+  }
+}
+```
+
+## Per-user customer ref in production
+
+The demo uses an env-var default for `customer_ref`. In production, extract it from the MCP
+session context so each user is gated against their own purchase:
+
+```python
+# FastMCP 0.4+ context access (exact API may vary by version)
+@mcp.tool()
+@_gated
+def analyze_text(*, text: str, customer_ref: str) -> dict[str, Any]:
+    ...
+```
+
+Pass `customer_ref` from your auth layer or MCP session metadata to each tool call.
+
+## Run the full demo
+
+```bash
+git clone https://github.com/dhruv-sanan/solvapay-python
+cd solvapay-python/examples/fastmcp-paywall
+cp .env.example .env  # fill in credentials
+uv sync
+uv run python claim.py   # smoke test without Claude Desktop
+```

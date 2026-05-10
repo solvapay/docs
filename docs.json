@@ -95,6 +95,16 @@
         "icon": "code",
         "groups": [
           {
+            "group": "Python SDK (community)",
+            "icon": "python",
+            "pages": [
+              "sdks/python/intro",
+              "sdks/python/setup/installation",
+              "sdks/python/setup/quick-start",
+              "sdks/python/guides/fastmcp-paywall"
+            ]
+          },
+          {
             "group": "TypeScript SDK",
             "icon": "code",
             "pages": [

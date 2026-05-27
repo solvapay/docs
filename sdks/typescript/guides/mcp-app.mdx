@@ -176,6 +176,56 @@ The MCP App surface uses SolvaPay's **text-only paywall**. `payable.mcp` emits a
 
 A full working example — server, client, OAuth bridge, polling, and the five-state purchase flow — lives in the SDK repo at [`examples/mcp-checkout-app`](https://github.com/solvapay/solvapay-sdk/tree/main/examples/mcp-checkout-app). Clone it, set `SOLVAPAY_SECRET_KEY` and `SOLVAPAY_PRODUCT_REF`, point `basic-host` at `http://localhost:3006/mcp`, and you have an end-to-end paywalled MCP App running locally.
 
+## ChatGPT host caveats
+
+ChatGPT's Custom Connector is the most permissive MCP host for SolvaPay's iframe surface, but two of its behaviours are easy to trip over.
+
+### Iframe `tools/call` must appear in `tools/list`
+
+ChatGPT's gateway re-validates every iframe-initiated `tools/call` against the connector's cached `tools/list` catalog. If a tool isn't in the catalog, the gateway returns `MCP error -32000: MCP Resource not found` without forwarding the request to your server. The iframe sees the error as `Top-up initialization failed` (or the equivalent message for the active flow) and the worker tail shows nothing.
+
+This collides with `hideToolsByAudience: ['ui']` — the SDK option that hides the seven UI transport tools (`create_payment_intent`, `create_topup_payment_intent`, `process_payment`, `create_checkout_session`, `create_customer_session`, `cancel_renewal`, `reactivate_renewal`) from `tools/list` so the model only sees the four intent tools (`upgrade`, `manage_account`, `activate_plan`, `topup`). On every other host the iframe can still invoke the hidden tools because the host proxies `postMessage` straight through; on ChatGPT it can't.
+
+The SDK handles this for you: when `tools/list` is requested by ChatGPT (detected via `request.headers['user-agent']` matching `/openai-mcp/i`, with a `clientInfo.name` fallback), the audience filter is bypassed and the full eleven-tool catalog is returned. Every other host gets the trimmed catalog. Use the option exactly as you'd expect:
+
+```ts
+createSolvaPayMcpFetch({
+  // ...
+  hideToolsByAudience: ['ui'],
+})
+```
+
+If you need to extend the bypass to a future iframe-capable host or disable it on a known text-only deployment, pass the object form:
+
+```ts
+createSolvaPayMcpFetch({
+  // ...
+  hideToolsByAudience: {
+    audiences: ['ui'],
+    // Add another iframe-capable host:
+    bypassWhen: ctx =>
+      /openai-mcp|future-iframe-host/i.test(
+        ctx.extra?.requestInfo?.headers?.['user-agent'] ?? '',
+      ),
+    // Or apply the filter unconditionally:
+    // bypassWhen: () => false,
+  },
+})
+```
+
+The bypass logs a single throttled `console.warn` per server instance when it fires, so it's visible in your tail without flooding it.
+
+### `tools/list` is cached per `(organization, connector)`
+
+ChatGPT fetches `tools/list` once when an organization adds the connector and reuses the cached catalog indefinitely. Disconnecting your personal OAuth and reconnecting does **not** invalidate the cache — neither does redeploying your server. If you change the tool surface (add a tool, rename a tool, change a description), an org with the connector already added will keep using the stale catalog.
+
+To force a refresh:
+
+- **Delete the connector entirely** (Settings → Connectors → connector → **Delete**, not "Disconnect"), then re-add it from the same URL. This is the only reliable invalidation.
+- Or test the change from a different ChatGPT workspace / organization that hasn't seen the connector before.
+
+If you're iterating on tool definitions, expect to delete and re-add the connector after every meaningful change.
+
 ## Known boundaries
 
 - **`trackUsage` stays on the server.** Usage metering belongs on your backend, not the client — continue to call `solvaPay.trackUsage(...)` from `@solvapay/server` inside your tool handlers.

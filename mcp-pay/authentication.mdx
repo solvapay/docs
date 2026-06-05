@@ -20,24 +20,30 @@ When a user adds your MCP server to their client (e.g., Cursor), the following O
 sequenceDiagram
   participant M as MCP client (Cursor)
   participant O as SolvaPay OAuth server
-  participant I as Google or GitHub login
+  participant L as Hosted login
+  participant C as Consent screen
+  participant I as Google or GitHub
 
-  M->>O: 1. Authorize request (PKCE)
-  O->>I: 2. Redirect to login
-  I-->>O: 3. User authenticates
-  O-->>M: 4. Authorization code
-  M->>O: 5. Exchange code for token
-  O-->>M: 6. Access token
+  M->>O: 1. Authorize (PKCE, optional resource)
+  O->>L: 2. Redirect to login (sid)
+  L->>I: 3. User signs in
+  I-->>L: 4. Identity attached to session
+  L->>C: 5. Redirect to consent (sid)
+  C-->>O: 6. User approves access
+  O-->>M: 7. Authorization code
+  M->>O: 8. Exchange code for token
+  O-->>M: 9. Access token
 ```
 
 ### Flow Steps
 
-1. **MCP client initiates OAuth** - Client requests authorization with PKCE challenge
-2. **Redirect to hosted login** - User sees a branded login page with your provider branding
-3. **User authenticates** - User clicks "Continue with Google" or "Continue with GitHub"
-4. **Authorization code returned** - SolvaPay redirects back to the MCP client with an auth code
-5. **Token exchange** - Client exchanges the code for an access token
-6. **Authenticated** - Client can now make tool calls with the access token
+1. **MCP client initiates OAuth** — Client requests authorization with PKCE and optional `resource` (protected resource URL).
+2. **Redirect to hosted login** — User sees a branded login page with your provider branding. SolvaPay creates a short-lived consent session (`sid` in the URL).
+3. **User authenticates** — User signs in with Google, GitHub, or email/password. Login attaches identity to the consent session; it does not issue an authorization code yet.
+4. **Consent screen** — User reviews requested scopes, the redirect destination, and SolvaPay Terms/Privacy, then approves or cancels.
+5. **Authorization code returned** — After approval, SolvaPay redirects to the MCP client callback with an authorization code. Cancel returns `access_denied` with no account or token created.
+6. **Token exchange** — Client exchanges the code for an access token (PKCE verifier required).
+7. **Authenticated** — Client can make tool calls with the access token.
 
 ## Dynamic Client Registration (DCR)
 
@@ -76,12 +82,12 @@ No additional configuration is needed—the login page automatically uses your p
 
 ### First-Time Users
 
-When a user authenticates for the first time:
+When a user approves consent for the first time:
 
-1. Their account is automatically created
+1. Their customer account is created (if new)
 2. They're assigned your default (free) plan
-3. They're redirected back to their MCP client
-4. They can immediately start using tools
+3. They're redirected back to their MCP client with an authorization code
+4. After token exchange, they can use tools according to their plan
 
 ## OAuth Scopes
 

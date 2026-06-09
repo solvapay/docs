@@ -44,15 +44,15 @@
             ]
           },
           {
-            "group": "MCP Pay",
+            "group": "No-code MCP integration",
             "icon": "credit-card",
             "pages": [
-              "mcp-pay/overview",
-              "mcp-pay/quick-start",
-              "mcp-pay/create-hosted-mcp-pay-product",
-              "mcp-pay/authentication",
-              "mcp-pay/hosted-pages",
-              "mcp-pay/best-practices"
+              "no-code-mcp/overview",
+              "no-code-mcp/quick-start",
+              "no-code-mcp/create-no-code-mcp-product",
+              "no-code-mcp/authentication",
+              "no-code-mcp/hosted-pages",
+              "no-code-mcp/best-practices"
             ]
           },
           {
@@ -152,6 +152,14 @@
     {
       "source": "/get-started/index",
       "destination": "/"
+    },
+    {
+      "source": "/mcp-pay/create-hosted-mcp-pay-product",
+      "destination": "/no-code-mcp/create-no-code-mcp-product"
+    },
+    {
+      "source": "/mcp-pay/:slug",
+      "destination": "/no-code-mcp/:slug"
     }
   ],
   "contextual": {

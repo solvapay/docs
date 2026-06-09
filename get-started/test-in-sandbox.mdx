@@ -9,7 +9,7 @@ Before testing, make sure you have:
 
 - Created your first product
 - Configured pricing plans during product creation
-- Chosen your integration path (Hosted MCP Pay or SDK)
+- Chosen your integration path (no-code MCP integration or SDK)
 
 If you are on the SDK path, run [`npx solvapay init`](/sdks/typescript/setup/cli) first so your
 project is connected before endpoint testing.
@@ -29,11 +29,11 @@ You can switch between **Live** and **sandbox** at any time. Many providers acti
 
 ## Testing your integration
 
-### For MCP Pay
+### For the no-code MCP integration
 
 1. **Add your proxy URL to an MCP client**
 
-   Copy the proxy URL from the MCP Pay section and add it to your MCP client (e.g., Cursor, Claude Desktop).
+   Copy the proxy URL from the no-code MCP integration section and add it to your MCP client (e.g., Cursor, Claude Desktop).
 
 2. **Complete the OAuth flow**
 
@@ -90,7 +90,7 @@ Use any future expiration date and any 3-digit CVC.
 
 Before or after going live, verify:
 
-- [ ] Users can authenticate (OAuth for MCP Pay, your auth for SDK)
+- [ ] Users can authenticate (OAuth for the no-code MCP integration, your auth for SDK)
 - [ ] Free plan users can access free tools/endpoints
 - [ ] Paid tools are blocked for free users
 - [ ] Checkout flow completes successfully

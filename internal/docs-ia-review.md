@@ -12,7 +12,7 @@ This file captures the concrete review output used to execute the IA refresh.
 ### Findings
 
 - New users could reach feature areas quickly, but the old nav made intent selection harder than necessary.
-- `MCP Pay`, `MCP Server`, and SDK MCP integration were easy to confuse on first read.
+- The no-code MCP integration, `MCP Server`, and SDK MCP integration were easy to confuse on first read.
 - `Meters` as a standalone nav group over-emphasized implementation detail over user jobs.
 - The homepage did not consistently lead with SolvaPay's product-layer framing.
 
@@ -20,7 +20,7 @@ This file captures the concrete review output used to execute the IA refresh.
 
 - Added a task-oriented `Guides` group in `docs.json`.
 - Kept product/reference depth, but made entry paths intent-first.
-- Renamed nav group labels to explain function first (`Hosted MCP auth and monetization`, `Admin MCP Server`).
+- Renamed nav group labels to explain function first (`No-code MCP integration`, `Admin MCP Server`).
 - Removed standalone `Meters` from published navigation.
 
 ## 2) Product-story review
@@ -28,14 +28,14 @@ This file captures the concrete review output used to execute the IA refresh.
 ### Findings
 
 - The docs discussed capabilities but did not consistently present one clear product narrative.
-- `MCP Pay` branding appeared without enough explanatory text in some entry pages.
+- The no-code MCP integration appeared without enough explanatory text in some entry pages.
 - Admin MCP positioning existed, but was not consistently foregrounded as provider-facing.
 - Inline React checkout existed in SDK docs but was not promoted as a secondary product surface.
 
 ### Decisions applied
 
 - Home and path-selection pages now lead with: SolvaPay as the product layer for monetizing MCP servers and apps.
-- `MCP Pay` is presented as hosted MCP auth and monetization, with brand name as secondary label.
+- The no-code MCP integration is presented as hosted auth and monetization, described by its function rather than a brand name.
 - Admin MCP is explicitly positioned as provider account management and checkout-session operations.
 - Added a dedicated inline checkout guide to increase discoverability.
 
@@ -44,8 +44,8 @@ This file captures the concrete review output used to execute the IA refresh.
 ### Findings
 
 - Webhooks content spans product docs and SDK docs.
-- MCP concepts span hosted MCP monetization, admin MCP operations, and SDK MCP integration.
-- Usage/metering concepts are referenced across plans, hosted MCP, and SDK usage events.
+- MCP concepts span the no-code MCP integration, admin MCP operations, and SDK MCP integration.
+- Usage/metering concepts are referenced across plans, the no-code MCP integration, and SDK usage events.
 
 ### Decisions applied
 
@@ -87,17 +87,17 @@ Classification values:
 | `get-started/create-product` | onboarding | Product bootstrap |
 | `get-started/test-in-sandbox` | onboarding | Sandbox validation |
 | `get-started/go-live` | onboarding | Production launch |
-| `guides/monetize-mcp-server-no-code` | task-guide | Hosted MCP path |
+| `guides/monetize-mcp-server-no-code` | task-guide | No-code MCP path |
 | `guides/add-paywall-to-api-or-app` | task-guide | SDK path |
 | `guides/add-inline-chat-checkout-react` | recipe | Inline checkout |
 | `guides/manage-account-with-admin-mcp` | task-guide | Admin MCP operations |
 | `guides/handle-webhooks` | task-guide | Secure webhook handling |
-| `mcp-pay/overview` | concept | Hosted MCP auth and monetization model |
-| `mcp-pay/quick-start` | task-guide | Hosted setup |
-| `mcp-pay/create-hosted-mcp-pay-product` | recipe | Product setup walkthrough |
-| `mcp-pay/authentication` | reference | Auth specifics |
-| `mcp-pay/hosted-pages` | concept | Hosted UX surfaces |
-| `mcp-pay/best-practices` | concept | Design guidance |
+| `no-code-mcp/overview` | concept | No-code MCP auth and monetization model |
+| `no-code-mcp/quick-start` | task-guide | No-code setup |
+| `no-code-mcp/create-no-code-mcp-product` | recipe | Product setup walkthrough |
+| `no-code-mcp/authentication` | reference | Auth specifics |
+| `no-code-mcp/hosted-pages` | concept | Hosted UX surfaces |
+| `no-code-mcp/best-practices` | concept | Design guidance |
 | `plans/overview` | concept | Plan models |
 | `plans/billing` | reference | Billing behavior |
 | `webhooks` | reference | Event contract + verification |

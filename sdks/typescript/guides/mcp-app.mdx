@@ -149,7 +149,7 @@ On `focus` / `visibilitychange`, call `refetch()` from `usePurchase` so returnin
 
 ## Account management
 
-Once a customer has paid, drop `<CurrentPlanCard />` into the tree and the SDK does the rest — plan name, next-billing line, payment-method summary, **Update card** and **Cancel plan** actions. The card returns `null` when there is no active purchase, so you can render it unconditionally.
+Once a customer has paid, drop `<CurrentPlanCard />` into the tree and the SDK does the rest — plan name, next-billing line, payment-method summary, plus **Update card** and **Cancel plan** actions. The card returns `null` when there is no active purchase, so you can render it unconditionally. The MCP `manage_account` view passes `hideUpdatePaymentButton` and `hideCancelButton` and pairs the card with a single **Manage account** customer-portal CTA — both flows run through the portal there.
 
 ```tsx
 import { CurrentPlanCard, LaunchCustomerPortalButton } from '@solvapay/react'
@@ -158,73 +158,23 @@ function Account() {
   return (
     <>
       <CurrentPlanCard />
-      <LaunchCustomerPortalButton>Manage billing</LaunchCustomerPortalButton>
+      <LaunchCustomerPortalButton />
     </>
   )
 }
 ```
 
-- **`<CurrentPlanCard />`** renders the active plan, mirrored card brand/last4, and inline **Update card** / **Cancel plan** actions.
-- **`<LaunchCustomerPortalButton />`** opens the hosted customer portal in a new tab. It pre-fetches `createCustomerSession` on hover so the portal link is ready the moment the user clicks (anchor-click semantics are preserved for sandboxed hosts).
+- **`<CurrentPlanCard />`** renders the active plan, mirrored card brand/last4, and inline **Update card** / **Cancel plan** actions. The MCP `manage_account` view hides both — card updates and cancellation route through the **Manage account** customer-portal CTA — and surfaces a one-line hint pointing at it.
+- **`<LaunchCustomerPortalButton />`** opens the hosted customer portal in a new tab (default label: "Manage account"). The button renders enabled from first paint and fetches the portal URL in the background; multiple instances under the same provider share a single in-flight `createCustomerSession` round-trip. When the URL has resolved, click is a real `<a target="_blank">` navigation (sandbox-safe). On a cache-miss click the handler awaits the in-flight promise and falls back to `window.open`.
 - **`usePaymentMethod()`** exposes the mirrored card under `{ paymentMethod, loading, refetch }` when you need to build a custom account view. The card brand and last4 come from the `payment_intent.succeeded` webhook persisted on the Customer — no card-element iframe required inside the MCP App sandbox.
 
 ## Text-only paywall
 
-The MCP App surface uses SolvaPay's **text-only paywall**. `payable.mcp` emits a plain-text `Purchase required` response — no embedded UI meta, no structured checkout payload — so the host model can read the copy, call `create_checkout_session`, and surface the returned URL however it likes. There is no `McpPaywallView` / `McpNudgeView` / `McpUpsellStrip` component anymore; render checkout through `<PaymentForm>` or the hosted URL instead.
+The MCP App surface uses SolvaPay's **text-only paywall**. A `registerPayable` tool emits a plain-text `Purchase required` response — no embedded UI meta, no structured checkout payload — so the host model can read the copy, call `create_checkout_session`, and surface the returned URL however it likes. There is no `McpPaywallView` / `McpNudgeView` / `McpUpsellStrip` component anymore; render checkout through `<PaymentForm>` or the hosted URL instead.
 
 ## Complete example
 
 A full working example — server, client, OAuth bridge, polling, and the five-state purchase flow — lives in the SDK repo at [`examples/mcp-checkout-app`](https://github.com/solvapay/solvapay-sdk/tree/main/examples/mcp-checkout-app). Clone it, set `SOLVAPAY_SECRET_KEY` and `SOLVAPAY_PRODUCT_REF`, point `basic-host` at `http://localhost:3006/mcp`, and you have an end-to-end paywalled MCP App running locally.
-
-## ChatGPT host caveats
-
-ChatGPT's Custom Connector is the most permissive MCP host for SolvaPay's iframe surface, but two of its behaviours are easy to trip over.
-
-### Iframe `tools/call` must appear in `tools/list`
-
-ChatGPT's gateway re-validates every iframe-initiated `tools/call` against the connector's cached `tools/list` catalog. If a tool isn't in the catalog, the gateway returns `MCP error -32000: MCP Resource not found` without forwarding the request to your server. The iframe sees the error as `Top-up initialization failed` (or the equivalent message for the active flow) and the worker tail shows nothing.
-
-This collides with `hideToolsByAudience: ['ui']` — the SDK option that hides the seven UI transport tools (`create_payment_intent`, `create_topup_payment_intent`, `process_payment`, `create_checkout_session`, `create_customer_session`, `cancel_renewal`, `reactivate_renewal`) from `tools/list` so the model only sees the four intent tools (`upgrade`, `manage_account`, `activate_plan`, `topup`). On every other host the iframe can still invoke the hidden tools because the host proxies `postMessage` straight through; on ChatGPT it can't.
-
-The SDK handles this for you: when `tools/list` is requested by ChatGPT (detected via `request.headers['user-agent']` matching `/openai-mcp/i`, with a `clientInfo.name` fallback), the audience filter is bypassed and the full eleven-tool catalog is returned. Every other host gets the trimmed catalog. Use the option exactly as you'd expect:
-
-```ts
-createSolvaPayMcpFetch({
-  // ...
-  hideToolsByAudience: ['ui'],
-})
-```
-
-If you need to extend the bypass to a future iframe-capable host or disable it on a known text-only deployment, pass the object form:
-
-```ts
-createSolvaPayMcpFetch({
-  // ...
-  hideToolsByAudience: {
-    audiences: ['ui'],
-    // Add another iframe-capable host:
-    bypassWhen: ctx =>
-      /openai-mcp|future-iframe-host/i.test(
-        ctx.extra?.requestInfo?.headers?.['user-agent'] ?? '',
-      ),
-    // Or apply the filter unconditionally:
-    // bypassWhen: () => false,
-  },
-})
-```
-
-The bypass logs a single throttled `console.warn` per server instance when it fires, so it's visible in your tail without flooding it.
-
-### `tools/list` is cached per `(organization, connector)`
-
-ChatGPT fetches `tools/list` once when an organization adds the connector and reuses the cached catalog indefinitely. Disconnecting your personal OAuth and reconnecting does **not** invalidate the cache — neither does redeploying your server. If you change the tool surface (add a tool, rename a tool, change a description), an org with the connector already added will keep using the stale catalog.
-
-To force a refresh:
-
-- **Delete the connector entirely** (Settings → Connectors → connector → **Delete**, not "Disconnect"), then re-add it from the same URL. This is the only reliable invalidation.
-- Or test the change from a different ChatGPT workspace / organization that hasn't seen the connector before.
-
-If you're iterating on tool definitions, expect to delete and re-add the connector after every meaningful change.
 
 ## Known boundaries
 
@@ -232,6 +182,6 @@ If you're iterating on tool definitions, expect to delete and re-add the connect
 
 ## Next steps
 
-- [MCP Server integration](/sdks/typescript/guides/mcp) — server-side paywall patterns with `payable.mcp()`
+- [MCP Server integration](/sdks/typescript/guides/mcp) — server-side paywall patterns with `createSolvaPayMcpServer` and `registerPayable`
 - [React SDK guide](/sdks/typescript/guides/react) — hooks and components used under `createMcpAppAdapter`
 - [Purchase management](/sdks/typescript/guides/purchase-management) — cancel, reactivate, renewal semantics

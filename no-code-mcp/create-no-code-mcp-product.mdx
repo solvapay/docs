@@ -1,5 +1,5 @@
 ---
-title: "Create a Hosted MCP Pay Product"
+title: "Create a no-code MCP product"
 description: "Use this flow when you want the no-code setup: SolvaPay hosts authentication, identity, billing, and payment."
 ---
 
@@ -19,9 +19,9 @@ Start in **Products**, complete product details, then select at least one plan i
 If you are in onboarding, this can be your guided first product flow.
 
 
-## Step 2: Enable Hosted MCP Pay Configuration
+## Step 2: Enable the no-code MCP integration
 
-In the Integration step, enable and configure Hosted MCP Pay:
+In the Integration step, enable and configure the no-code MCP integration:
 
 - MCP URL slug (public endpoint slug)
 - Origin MCP server URL (your upstream MCP endpoint)
@@ -33,7 +33,7 @@ In the Integration step, enable and configure Hosted MCP Pay:
 After creating the product, open the product details page and confirm:
 
 - Product is active
-- Hosted MCP integration is enabled
+- The no-code MCP integration is enabled
 - Generated MCP server URL is present and copyable
 
 ## Step 4: Use Connect for quick client testing
@@ -52,7 +52,7 @@ If you do not use a listed client, copy the MCP URL and connect in your preferre
 
 ## User Onboarding Behavior
 
-When users connect to the hosted MCP server URL:
+When users connect to the proxied MCP server URL:
 
 1. They authenticate via SolvaPay-hosted OAuth
 2. SolvaPay evaluates plan access for requested tools
@@ -63,8 +63,8 @@ When users connect to the hosted MCP server URL:
 - Follow [Test MCP server auth and paywall](/mcp-server/testing-auth-and-paywall) for live client
   testing prompts and expected outcomes
 - Use **Connect** in product overview to start the live connection flow in Claude or Cursor
-- Review [Authentication](/mcp-pay/authentication) for OAuth behavior
-- Configure [Hosted Pages](/mcp-pay/hosted-pages) for branded customer flows
+- Review [Authentication](/no-code-mcp/authentication) for OAuth behavior
+- Configure [Hosted Pages](/no-code-mcp/hosted-pages) for branded customer flows
 
 ## API quickstart (SDK bootstrap endpoint)
 

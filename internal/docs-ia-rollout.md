@@ -15,7 +15,7 @@ This is the execution order for the IA refresh.
 1. Update `docs.json` navigation groups and labels
 2. Add intent-driven guides in `guides/**`
 3. Update homepage and path-selection content
-4. Clarify admin MCP and hosted MCP naming
+4. Clarify admin MCP and no-code MCP integration naming
 
 ## Phase 3: ownership and maintenance
 

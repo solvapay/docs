@@ -9,7 +9,7 @@ Use this guide when you want to monetize an MCP server but keep implementation c
 
 - Teams building custom MCP server behavior
 - Teams that need custom auth and entitlement logic
-- Teams that want SDK-level control instead of hosted MCP Pay
+- Teams that want SDK-level control instead of the no-code MCP integration
 
 ## What you will achieve
 
@@ -21,12 +21,15 @@ By the end, your MCP server uses the SolvaPay SDK to enforce purchases and manag
 - A product and at least one plan in the SolvaPay Console
 - A TypeScript MCP server project
 
+Start from `createSolvaPayMcpServer` — the recommended factory that wires the transport, intent tools, paywall, and UI resource for you, so you register paid tools with `registerPayable` instead of hand-rolling an MCP server.
+
 ## Steps
 
 1. Complete [SDK quick start](/sdks/typescript/setup/quick-start) to set up the base paywall flow.
 2. Follow the [MCP integration guide](/sdks/typescript/guides/mcp).
 3. Configure identity with [custom auth](/sdks/typescript/guides/custom-auth) if your server uses external auth.
 4. Add usage billing with [usage events](/sdks/typescript/guides/usage-events) where needed.
+5. Render a custom checkout or account UI inside the host iframe with the [MCP App integration guide](/sdks/typescript/guides/mcp-app).
 
 ## Verify
 

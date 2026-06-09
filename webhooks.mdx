@@ -207,7 +207,7 @@ const event: WebhookEvent = verifyWebhook({
   secret: process.env.SOLVAPAY_WEBHOOK_SECRET!,
 })
 
-// event.type is typed as WebhookEventType — autocomplete for all 13 event names
+// event.type is typed as WebhookEventType — autocomplete for every event name
 // event.data.object contains the event-specific payload
 ```
 
@@ -257,46 +257,153 @@ function verify(body: string, header: string, secret: string): boolean {
 
 ## Event Types
 
-SolvaPay emits the following business events. Only meaningful outcome events are sent — you will not receive events for internal CRUD operations on products, plans, or other configuration entities.
+SolvaPay emits **46 event types** spanning the full lifecycle — from customer and
+purchase creation through payments, refunds, disputes, payouts, credits, metered usage,
+and catalog changes. The canonical list is also available programmatically from
+`GET /v1/sdk/webhooks/event-types` and is what powers both the SDK `WebhookEventType`
+type and the event multiselect in the Console.
 
-### Payment Events
-
-| Event | Trigger | Description |
-|---|---|---|
-| `payment.succeeded` | Stripe confirms payment | A payment has been successfully processed. |
-| `payment.failed` | Stripe reports failure | A payment attempt has failed. |
-| `payment.refunded` | Refund completed | A refund has been successfully processed. |
-| `payment.refund_failed` | Refund rejected | A refund attempt has failed. |
-
-### Purchase Events
-
-| Event | Trigger | Description |
-|---|---|---|
-| `purchase.created` | Purchase record created | A new purchase (subscription or one-time) has been created. Also fires when a plan switch creates the new purchase. |
-| `purchase.updated` | Status or fields change | A purchase has been modified (e.g. plan change, renewal, or reactivation — `cancelledAt` cleared and `autoRenew` restored). |
-| `purchase.cancelled` | Explicit cancel or period end | A purchase has been cancelled. |
-| `purchase.expired` | End date reached or plan switch | A purchase has expired naturally, or was expired by a plan switch replacing it with a new purchase. |
-| `purchase.suspended` | Payment overdue / trial expired | A purchase has been suspended due to non-payment. |
-
-<Info>
-**Reactivation**: When a pending cancellation is undone via `reactivateRenewal`, a `purchase.updated` event fires with `cancelledAt` cleared and `autoRenew` restored to `true`.
-
-**Plan switching**: When `activatePlan` is called with a different plan than the customer's current purchase, two events fire: `purchase.expired` for the old purchase and `purchase.created` for the new one.
-</Info>
-
-### Checkout Events
-
-| Event | Trigger | Description |
-|---|---|---|
-| `checkout_session.created` | Checkout session created via API or dashboard | A new checkout session has been created for a customer. |
+<Tip>
+By default an endpoint receives **all** events. To narrow it down, see
+[Choosing which events to receive](#choosing-which-events-to-receive).
+</Tip>
 
 ### Customer Events
 
-| Event | Trigger | Description |
-|---|---|---|
-| `customer.created` | Customer created via hosted auth, API, or SDK sync | A new customer record has been created. |
-| `customer.updated` | Customer details changed | A customer record has been updated. |
-| `customer.deleted` | Customer removed | A customer record has been deleted. |
+| Event | Description |
+|---|---|
+| `customer.created` | A new customer record has been created (hosted auth, API, or SDK sync). |
+| `customer.updated` | A customer record has been updated. |
+| `customer.deleted` | A customer record has been deleted. |
+
+### Purchase & Subscription Events
+
+The complete purchase/subscription state machine:
+
+| Event | Description |
+|---|---|
+| `purchase.created` | A new purchase (subscription or one-time) was created. Includes trial starts. |
+| `purchase.activated` | A purchase activated after its first successful payment. |
+| `purchase.updated` | A purchase was modified (generic change not covered by a more specific event). |
+| `purchase.trial_ending` | A trial is ending soon. |
+| `purchase.trial_converted` | A trial converted to a paid subscription. |
+| `purchase.suspended` | A purchase was suspended (trial ended, payment required). |
+| `purchase.past_due` | A recurring payment failed and dunning has started. |
+| `purchase.cancellation_scheduled` | Cancellation scheduled for the end of the billing period. |
+| `purchase.cancelled` | A purchase was cancelled. |
+| `purchase.reactivated` | A scheduled cancellation was reversed. |
+| `purchase.expired` | A purchase expired (naturally, or superseded by a plan switch). |
+| `purchase.renewed` | A subscription successfully renewed (recurring charge). |
+| `purchase.renewal_reminder` | The upcoming-renewal reminder window was reached. |
+| `purchase.refunded` | A purchase's entitlement was revoked by a full refund. |
+| `purchase.plan_changed` | A subscription was upgraded or downgraded to a new plan. |
+
+### Payment, Refund & Dispute Events
+
+| Event | Description |
+|---|---|
+| `payment.succeeded` | A payment was successfully processed. |
+| `payment.failed` | A payment attempt failed. |
+| `payment.refunded` | A refund was successfully processed. |
+| `payment.refund_failed` | A refund attempt failed. |
+| `payment.refund_pending` | A refund was initiated and is still in-flight. |
+| `payment.canceled` | A payment intent was canceled. |
+| `payment.disputed` | A chargeback/dispute was opened. |
+| `payment.dispute_closed` | A dispute was resolved (won or lost). |
+
+### Payout Events
+
+| Event | Description |
+|---|---|
+| `payout.paid` | A provider payout settled. |
+| `payout.failed` | A provider payout failed. |
+
+### Checkout Session Events
+
+| Event | Description |
+|---|---|
+| `checkout_session.created` | A hosted checkout session was created. |
+| `checkout_session.completed` | A hosted checkout session was completed (converted). |
+| `checkout_session.expired` | A hosted checkout session expired (abandoned). |
+
+### Credit Events
+
+| Event | Description |
+|---|---|
+| `customer.credit.topped_up` | A customer's credit balance was topped up. |
+| `customer.credit.low_balance` | A customer's credit balance is running low. |
+| `customer.credit.exhausted` | A customer's credit balance reached zero. |
+| `customer.credit.debited` | A customer's credit was debited by usage. |
+| `customer.credit.granted` | Free credit was granted to a customer. |
+| `customer.credit.adjusted` | A customer's credit balance was manually adjusted. |
+
+### Usage & Metering Events
+
+| Event | Description |
+|---|---|
+| `usage.charged` | A metered / usage-based charge was processed. |
+| `usage.recorded` | A metered usage event was recorded. |
+| `usage.reset` | Usage counters were reset for a new period. |
+
+### Catalog Events
+
+| Event | Description |
+|---|---|
+| `product.created` | A product was created. |
+| `product.updated` | A product was updated. |
+| `product.archived` | A product was archived. |
+| `plan.created` | A plan was created. |
+| `plan.updated` | A plan was updated. |
+| `plan.archived` | A plan was archived. |
+
+<Info>
+**Reactivation**: undoing a pending cancellation via `reactivateRenewal` emits
+`purchase.reactivated`.
+
+**Plan switching**: calling `activatePlan` with a different plan emits `purchase.expired`
+for the old purchase, `purchase.created` for the new one, and `purchase.plan_changed`.
+</Info>
+
+---
+
+## Choosing which events to receive
+
+By default, **every endpoint receives all event types**. You can subscribe an endpoint to
+a specific subset so your handler only gets the events it cares about.
+
+### In the Console
+
+Under **Settings → Webhooks**, expand an endpoint and pick **Selected events** to choose
+specific event types (grouped by category). Leave it on **All events** to receive
+everything — including any new event types SolvaPay adds later.
+
+### Via the API
+
+Pass `enabledEvents` when creating or updating an endpoint. An **empty or omitted** array
+means "all events"; a non-empty array subscribes to only those types.
+
+```bash
+# Subscribe to only payment + purchase lifecycle events
+curl -X POST https://api.solvapay.com/v1/webhook_endpoints \
+  -H "Authorization: Bearer $SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-app.com/api/webhooks/solvapay",
+    "enabledEvents": [
+      "payment.succeeded",
+      "payment.failed",
+      "purchase.created",
+      "purchase.cancelled",
+      "purchase.past_due"
+    ]
+  }'
+```
+
+<Tip>
+Subscribing to a subset is purely a delivery filter — it does not change the payload shape
+or signing. Endpoints left on "all events" automatically receive new event types as they
+are introduced, so you never miss a future event.
+</Tip>
 
 ---
 
@@ -510,8 +617,8 @@ SolvaPay emits the following business events. Only meaningful outcome events are
 
 This payload can include a `product` field with a product `reference`.
 
-SolvaPay only populates `product` when the customer is created through MCP Pay hosted OAuth
-for a product-linked client.
+SolvaPay only populates `product` when the customer is created through the no-code MCP integration's
+hosted OAuth for a product-linked client.
 
 To learn more about SDK customer syncing, see
 [`/sdks/typescript/setup/core-concepts`](/sdks/typescript/setup/core-concepts).
@@ -577,8 +684,8 @@ Other fields are not included since the record has been removed.
 
 ### Customer sync with the TypeScript SDK
 
-When you integrate with the TypeScript SDK (instead of MCP Pay hosted OAuth), sync your users
-with `ensureCustomer` or the Next.js `syncCustomer` helper.
+When you integrate with the TypeScript SDK (instead of the no-code MCP integration's hosted OAuth),
+sync your users with `ensureCustomer` or the Next.js `syncCustomer` helper.
 
 This flow is idempotent. SolvaPay first looks up a customer by `externalRef`, then creates one
 if none exists.
@@ -626,6 +733,185 @@ and [`/sdks/typescript/guides/nextjs`](/sdks/typescript/guides/nextjs).
       "product": "prod_ref_001",
       "plan": "plan_ref_001",
       "expires_at": 1740000900,
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+`checkout_session.completed` and `checkout_session.expired` carry the **same object shape**,
+with `status` set to `used` and `expired` respectively.
+
+### Purchase lifecycle events
+
+All `purchase.*` events share the purchase object shape shown under
+[`purchase.created`](#purchase-created); `status` reflects the new state. Two events add
+extra context:
+
+```json
+// purchase.past_due — a recurring charge failed; dunning has begun
+{
+  "type": "purchase.past_due",
+  "data": {
+    "object": {
+      "id": "pur_abc123",
+      "reference": "purchase_abc123",
+      "status": "past_due",
+      "customer": "cust_ref_001",
+      "plan": "plan_ref_001",
+      "product": "prod_ref_001",
+      "retryCount": 1,
+      "nextRetryAt": 1740018000,
+      "created": 1740000000
+    },
+    "previous_attributes": { "status": "active" }
+  }
+}
+```
+
+```json
+// purchase.plan_changed — upgrade/downgrade; previous_attributes shows the old plan
+{
+  "type": "purchase.plan_changed",
+  "data": {
+    "object": {
+      "id": "pur_def456",
+      "reference": "purchase_def456",
+      "status": "active",
+      "customer": "cust_ref_001",
+      "plan": "plan_pro_001",
+      "product": "prod_ref_001",
+      "created": 1740000000
+    },
+    "previous_attributes": { "plan": "plan_basic_001" }
+  }
+}
+```
+
+### Dispute & payout events
+
+```json
+// payment.disputed — a chargeback was opened (payment.dispute_closed has the same shape)
+{
+  "type": "payment.disputed",
+  "data": {
+    "object": {
+      "id": "dp_abc123",
+      "amount": 2999,
+      "currency": "usd",
+      "reason": "fraudulent",
+      "status": "needs_response",
+      "stripe_dispute": "dp_3abc...",
+      "stripe_charge": "ch_3abc...",
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+```json
+// payout.paid — a provider payout settled (payout.failed has the same shape)
+{
+  "type": "payout.paid",
+  "data": {
+    "object": {
+      "id": "po_abc123",
+      "amount": 184500,
+      "currency": "usd",
+      "status": "paid",
+      "stripe_payout": "po_3abc...",
+      "arrival_date": 1740086400,
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+### Credit events
+
+```json
+// customer.credit.debited — credits consumed by usage
+// (granted / adjusted / topped_up / low_balance / exhausted share this shape)
+{
+  "type": "customer.credit.debited",
+  "data": {
+    "object": {
+      "customerId": "cust_ref_001",
+      "providerId": "prov_001",
+      "credits": 120,
+      "amount": -5,
+      "productRef": "prod_ref_001"
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+`credits` is the running balance after the movement; `amount` is the signed delta.
+`customer.credit.low_balance` and `customer.credit.exhausted` fire automatically as the
+balance crosses the warning threshold and zero.
+
+### Usage & metering events
+
+```json
+// usage.recorded — a metered usage event was recorded
+{
+  "type": "usage.recorded",
+  "data": {
+    "object": {
+      "reference": "usg_abc123",
+      "customer": "cust_ref_001",
+      "product": "prod_ref_001",
+      "purchase": "purchase_abc123",
+      "quantity": 1,
+      "meterName": "api_requests",
+      "recordedAt": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+`usage.reset` fires when counters roll over for a new billing period.
+
+### Catalog events
+
+```json
+// product.created — product.updated / product.archived share this shape
+{
+  "type": "product.created",
+  "data": {
+    "object": {
+      "id": "prd_abc123",
+      "reference": "prod_ref_001",
+      "name": "AI Writing Assistant",
+      "status": "active",
+      "productType": "mcp",
+      "isMcpPay": true,
+      "created": 1740000000
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+```json
+// plan.created — plan.updated / plan.archived share this shape
+{
+  "type": "plan.created",
+  "data": {
+    "object": {
+      "id": "pln_abc123",
+      "reference": "plan_ref_001",
+      "name": "Pro",
+      "status": "active",
+      "kind": "recurring",
+      "price": 2999,
+      "currency": "usd",
+      "requiresPayment": true,
       "created": 1740000000
     },
     "previous_attributes": null

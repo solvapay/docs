@@ -1,6 +1,6 @@
 ---
 title: "Choose your path"
-description: "Choose between the CLI-first TypeScript SDK path and Console-hosted MCP Pay."
+description: "Choose between the CLI-first TypeScript SDK path and the Console-based no-code MCP integration."
 ---
 
 Use this page to choose your primary integration path before you build.
@@ -8,11 +8,11 @@ Use this page to choose your primary integration path before you build.
 ## Decide in 10 seconds
 
 - Choose **TypeScript SDK** if you want to add monetization in your own code.
-- Choose **MCP Pay** if you want SolvaPay to host auth, checkout, and paywall enforcement for your MCP server.
+- Choose the **no-code MCP integration** if you want SolvaPay to host auth, checkout, and paywall enforcement for your MCP server.
 
 ## Quick comparison
 
-| Feature | TypeScript SDK | MCP Pay |
+| Feature | TypeScript SDK | No-code MCP integration |
 |---|---|---|
 | Code changes required | Yes | None |
 | Fastest setup | `npx solvapay init` | Console setup |
@@ -43,9 +43,11 @@ After CLI setup, create or confirm your product and plans in the Console:
 - [Create your account](/get-started/create-account)
 - [Create a product](/get-started/create-product)
 
-## Path B: hosted MCP Pay (no-code)
+## Path B: no-code MCP integration
 
-MCP Pay is SolvaPay's hosted MCP auth and monetization solution for MCP servers.
+The no-code MCP integration is SolvaPay's hosted auth and monetization path for MCP servers. You
+keep ownership and hosting of your MCP server; SolvaPay sits in front of it as a reverse proxy and
+handles OAuth, paywall enforcement, and billing.
 
 ### Choose this path if you:
 
@@ -55,13 +57,13 @@ MCP Pay is SolvaPay's hosted MCP auth and monetization solution for MCP servers.
 
 ### Get started
 
-- [MCP Pay overview](/mcp-pay/overview)
-- [MCP Pay quick start](/mcp-pay/quick-start)
-- [Create a hosted MCP Pay product](/mcp-pay/create-hosted-mcp-pay-product)
+- [No-code MCP integration overview](/no-code-mcp/overview)
+- [No-code MCP quick start](/no-code-mcp/quick-start)
+- [Create a no-code MCP product](/no-code-mcp/create-no-code-mcp-product)
 
 ## Can I use both?
 
-Yes. Some teams use MCP Pay for MCP server access while using the SDK for web apps or APIs.
+Yes. Some teams use the no-code MCP integration for MCP server access while using the SDK for web apps or APIs.
 Both share the same plans, customers, and billing in your SolvaPay account.
 
 ## Using an AI coding agent?

@@ -1,6 +1,6 @@
 ---
 title: "Best Practices"
-description: "This guide covers recommended patterns for configuring your MCP Pay servers, structuring plans, and handling common scenarios."
+description: "This guide covers recommended patterns for configuring your no-code MCP servers, structuring plans, and handling common scenarios."
 ---
 
 ## Plan Configuration
@@ -143,10 +143,10 @@ AI agents can use this information to guide users naturally.
 ### API Key Protection
 
 If your origin server requires authentication:
-- Store the API key in MCP Pay settings (encrypted at rest)
+- Store the API key in the no-code MCP integration settings (encrypted at rest)
 - Never include it in client-facing URLs or responses
 - Rotate keys periodically
-- Use separate keys for MCP Pay vs direct access
+- Use separate keys for the no-code MCP integration vs direct access
 
 ### Origin Server Access
 
@@ -169,7 +169,7 @@ Consider restricting your origin server to only accept requests from SolvaPay:
 
 ### Dashboard Usage
 
-Regularly review the MCP Pay dashboard to:
+Regularly review the no-code MCP dashboard to:
 - Monitor active users and usage patterns
 - Identify popular and underused tools
 - Track revenue and purchase metrics
@@ -177,7 +177,7 @@ Regularly review the MCP Pay dashboard to:
 
 ## FAQ
 
-### Can I use MCP Pay with any MCP server?
+### Can I use the no-code MCP integration with any MCP server?
 
 Yes, as long as your MCP server is accessible via HTTPS. SolvaPay connects to your origin URL to discover tools and proxies requests at runtime.
 
@@ -187,7 +187,7 @@ Users authenticate via OAuth 2.0 using their Google or GitHub account. When they
 
 ### What MCP clients are supported?
 
-Any MCP client that supports OAuth 2.0 with PKCE can connect to MCP Pay servers. This includes Cursor, Claude Desktop, and other MCP-compatible tools. DCR support means clients can auto-configure themselves.
+Any MCP client that supports OAuth 2.0 with PKCE can connect to no-code MCP servers. This includes Cursor, Claude Desktop, and other MCP-compatible tools. DCR support means clients can auto-configure themselves.
 
 ### How are origin server API keys handled?
 
@@ -203,7 +203,7 @@ Yes, you can edit the MCP server configuration at any time. Changes take effect 
 
 ### How do I track usage and revenue?
 
-The MCP Pay dashboard shows transaction history, usage statistics, and revenue metrics. You can also view per-product stats from the product detail page.
+The no-code MCP dashboard shows transaction history, usage statistics, and revenue metrics. You can also view per-product stats from the product detail page.
 
 ### Can I customize the hosted pages?
 
@@ -211,11 +211,11 @@ All hosted pages (login, checkout, account portal) automatically display your pr
 
 ### Do I need to build payment or account pages?
 
-No. MCP Pay provides fully hosted checkout and account management pages. Customers can purchase plans, manage their purchases, and view billing history without you building any UI. All pages are white-labeled with your branding.
+No. The no-code MCP integration provides fully hosted checkout and account management pages. Customers can purchase plans, manage their purchases, and view billing history without you building any UI. All pages are white-labeled with your branding.
 
-### Can I migrate from MCP Pay to SDK integration later?
+### Can I migrate from the no-code path to SDK integration later?
 
-Yes. You can start with MCP Pay for quick setup and migrate to SDK integration if you need more control. Your plans, customers, and purchases remain intact—only the integration method changes.
+Yes. You can start with the no-code MCP integration for quick setup and migrate to SDK integration if you need more control. Your plans, customers, and purchases remain intact—only the integration method changes.
 
 ### How do I handle refunds?
 
@@ -256,9 +256,9 @@ If authenticated tool calls fail:
 
 ## Next Steps
 
-- [MCP Pay Overview](/mcp-pay/overview) - Review core concepts
-- [Quick Start](/mcp-pay/quick-start) - Set up your first product
-- [Authentication](/mcp-pay/authentication) - Deep dive into OAuth
+- [No-code MCP integration overview](/no-code-mcp/overview) - Review core concepts
+- [Quick Start](/no-code-mcp/quick-start) - Set up your first product
+- [Authentication](/no-code-mcp/authentication) - Deep dive into OAuth
 - [Meters](/meters/overview) - Meter definitions and auto-created tool meters
 - [Plans](/plans/overview) - Plan types and meter-based pricing
 - [Billing](/plans/billing) - Usage-based billing and end-of-period processing

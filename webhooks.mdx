@@ -326,7 +326,7 @@ The complete purchase/subscription state machine:
 | `checkout_session.completed` | A hosted checkout session was completed (converted). |
 | `checkout_session.expired` | A hosted checkout session expired (abandoned). |
 
-### Credit & Wallet Events
+### Credit Events
 
 | Event | Description |
 |---|---|
@@ -617,8 +617,8 @@ are introduced, so you never miss a future event.
 
 This payload can include a `product` field with a product `reference`.
 
-SolvaPay only populates `product` when the customer is created through MCP Pay hosted OAuth
-for a product-linked client.
+SolvaPay only populates `product` when the customer is created through the no-code MCP integration's
+hosted OAuth for a product-linked client.
 
 To learn more about SDK customer syncing, see
 [`/sdks/typescript/setup/core-concepts`](/sdks/typescript/setup/core-concepts).
@@ -684,8 +684,8 @@ Other fields are not included since the record has been removed.
 
 ### Customer sync with the TypeScript SDK
 
-When you integrate with the TypeScript SDK (instead of MCP Pay hosted OAuth), sync your users
-with `ensureCustomer` or the Next.js `syncCustomer` helper.
+When you integrate with the TypeScript SDK (instead of the no-code MCP integration's hosted OAuth),
+sync your users with `ensureCustomer` or the Next.js `syncCustomer` helper.
 
 This flow is idempotent. SolvaPay first looks up a customer by `externalRef`, then creates one
 if none exists.
@@ -830,7 +830,7 @@ extra context:
 }
 ```
 
-### Credit & wallet events
+### Credit events
 
 ```json
 // customer.credit.debited — credits consumed by usage

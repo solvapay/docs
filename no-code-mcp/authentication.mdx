@@ -1,6 +1,6 @@
 ---
 title: "Authentication"
-description: "MCP Pay includes a full OAuth 2.0 server with PKCE support, enabling MCP clients like Cursor, Claude Desktop, and other AI tools to securely connect to your paywalled MCP servers."
+description: "The no-code MCP integration includes a full OAuth 2.0 server with PKCE support, enabling MCP clients like Cursor, Claude Desktop, and other AI tools to securely connect to your paywalled MCP servers."
 ---
 
 ## Supported Authentication Providers
@@ -47,7 +47,7 @@ sequenceDiagram
 
 ## Dynamic Client Registration (DCR)
 
-MCP Pay supports **Dynamic Client Registration**, allowing MCP clients to automatically register themselves as OAuth clients. This means users can simply paste your proxy URL into their MCP client, and the client will handle all OAuth setup automatically.
+The no-code MCP integration supports **Dynamic Client Registration**, allowing MCP clients to automatically register themselves as OAuth clients. This means users can simply paste your proxy URL into their MCP client, and the client will handle all OAuth setup automatically.
 
 ### How DCR Works
 
@@ -107,7 +107,7 @@ MCP clients often use custom URL protocols for OAuth callbacks:
 - `claude://` - Claude Desktop
 - `vscode://` - VS Code extensions
 
-MCP Pay fully supports these custom protocols, ensuring seamless authentication across different MCP client applications. The OAuth server correctly handles redirects to these custom schemes.
+The no-code MCP integration fully supports these custom protocols, ensuring seamless authentication across different MCP client applications. The OAuth server correctly handles redirects to these custom schemes.
 
 ## Redirect URI allowlist
 
@@ -190,5 +190,5 @@ If Dynamic Client Registration fails:
 
 ## Next Steps
 
-- [Hosted Pages](/mcp-pay/hosted-pages) - Configure checkout and customer portal
-- [Best Practices](/mcp-pay/best-practices) - Plan configuration and security tips
+- [Hosted Pages](/no-code-mcp/hosted-pages) - Configure checkout and customer portal
+- [Best Practices](/no-code-mcp/best-practices) - Plan configuration and security tips

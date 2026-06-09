@@ -4,13 +4,13 @@ This file defines canonical ownership boundaries for SolvaPay docs content.
 
 ## Canonical sources
 
-- **Product docs**: authored in this repository (`get-started`, `mcp-pay`, `mcp-server`, `plans`, `webhooks`, `guides`)
+- **Product docs**: authored in this repository (`get-started`, `no-code-mcp`, `mcp-server`, `plans`, `webhooks`, `guides`)
 - **TypeScript SDK docs**: authored in `solvapay-sdk/docs`, synced into `sdks/typescript/**`
 - **HTTP API reference**: generated from backend OpenAPI and synced to `api-reference/openapi.json`
 
 ## Naming boundaries
 
-- **MCP Pay**: hosted MCP auth and monetization.
+- **No-code MCP integration**: hosted auth and monetization for MCP servers (the no-code path).
 - **Admin MCP Server**: provider account MCP operations.
 - **origin MCP server**: your own MCP endpoint that SolvaPay proxies or integrates with.
 

@@ -1,11 +1,15 @@
 ---
-title: "MCP Pay Overview"
-description: "MCP Pay is SolvaPay's hosted MCP auth and monetization solution for MCP servers."
+title: "No-code MCP integration overview"
+description: "The no-code MCP integration is SolvaPay's hosted auth and monetization path for MCP servers."
 ---
 
-MCP Pay is SolvaPay's hosted MCP auth and monetization solution.
+The no-code MCP integration is SolvaPay's hosted auth and monetization path.
 
-Use MCP Pay when you want SolvaPay to run auth, billing, checkout, and paywall enforcement for your MCP server.
+You keep ownership and hosting of your MCP server; SolvaPay sits in front of it as a reverse proxy
+and handles OAuth, paywall enforcement, and billing.
+
+Use the no-code path when you want SolvaPay to run auth, billing, checkout, and paywall enforcement
+for your MCP server.
 
 ## Product-first model
 
@@ -14,20 +18,20 @@ Every monetized offering starts as a **Product**. By default, new products are i
 - Available for **SDK Integration**
 - Active in **SolvaPay MCP Distribution**
 
-You can optionally enable **Hosted MCP Pay** when you want SolvaPay to run managed auth, identity,
-billing, and payment for your MCP server.
+You can optionally enable the **no-code MCP integration** when you want SolvaPay to run managed auth,
+identity, billing, and payment for your MCP server.
 
-## When to use MCP Pay
+## When to use the no-code path
 
-### Hosted MCP Pay product (no-code managed MCP)
+### No-code MCP product
 
 Use this when you want to connect an origin MCP server URL and let SolvaPay host authentication,
 authorization, billing pages, and paywall enforcement via a managed proxy endpoint.
 
-## How MCP Pay works
+## How it works
 
-When Hosted MCP Pay is enabled, SolvaPay acts as a reverse proxy between MCP clients and your
-origin MCP server.
+When the no-code MCP integration is enabled, SolvaPay acts as a reverse proxy between MCP clients
+and your origin MCP server.
 
 - **Authentication** - OAuth 2.0 with Google and GitHub sign-in
 - **Authorization** - Purchase-plan checks per tool
@@ -59,14 +63,14 @@ flowchart LR
 | **Product** | The core entity in SolvaPay used for monetization and plan assignment |
 | **Origin MCP server URL** | Your actual MCP endpoint that SolvaPay proxies to |
 | **Signup default plan** | The plan automatically assigned to new users |
-| **Server default plan** | The default plan used for tool access in Hosted MCP Pay unless overridden |
-| **Hosted MCP Pay** | Optional managed mode for auth, identity, billing, and payment |
+| **Server default plan** | The default plan used for tool access in the no-code MCP integration unless overridden |
+| **No-code MCP integration** | Optional managed mode for auth, identity, billing, and payment |
 | **Meter** | A [metric definition](/meters/overview) that tracks usage (e.g. `tool:search_documents`). Auto-created for each discovered MCP tool. |
 | **Meter event** | A [timestamped data point](/meters/events) recorded each time a tool is called. Powers quota enforcement and billing. |
 
 ## Tool-to-plan mapping semantics
 
-Hosted MCP access uses a clear precedence model:
+No-code MCP access uses a clear precedence model:
 
 - `noPlan: true` on a tool means the tool is public
 - otherwise, access is allowed when the customer's purchase plan matches:
@@ -93,12 +97,12 @@ For API-first setup, the `POST /v1/sdk/products/mcp/bootstrap` endpoint lets you
 
 After bootstrap, use `PUT /v1/sdk/products/:productRef/mcp/plans` to replace plans and remap tool
 access without recreating the product.
-See [Create a Hosted MCP Pay Product](/mcp-pay/create-hosted-mcp-pay-product) for request modes
+See [Create a no-code MCP product](/no-code-mcp/create-no-code-mcp-product) for request modes
 and examples.
 
 ## Next steps
 
-- [Quick start](/mcp-pay/quick-start) - Set up hosted MCP monetization
-- [Create a hosted MCP Pay product](/mcp-pay/create-hosted-mcp-pay-product) - Product flow for
-  no-code managed MCP
-- [Authentication](/mcp-pay/authentication) - OAuth and client connection details
+- [Quick start](/no-code-mcp/quick-start) - Set up no-code MCP monetization
+- [Create a no-code MCP product](/no-code-mcp/create-no-code-mcp-product) - Product flow for
+  the no-code path
+- [Authentication](/no-code-mcp/authentication) - OAuth and client connection details

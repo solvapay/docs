@@ -1,0 +1,65 @@
+---
+title: "June 2026 release"
+description: "OAuth consent for MCP customers, webhook subscriptions, receipts, plan updates, and SDK 1.2.0."
+---
+
+## OAuth consent for MCP customers
+
+MCP OAuth flows now include a hosted customer consent step before SolvaPay issues an
+authorization code. This gives customers a clear approval screen before an MCP client receives
+access.
+
+The consent flow is documented in the [No-code MCP integration authentication guide](/no-code-mcp/authentication)
+and the [TypeScript SDK MCP guide](/sdks/typescript/guides/mcp).
+
+## Webhook subscriptions and event catalog
+
+Webhook endpoints can now subscribe to specific event types instead of receiving every event. The
+event catalog now covers customer, purchase, payment, refund, dispute, payout, checkout, credit,
+usage, metering, and catalog events.
+
+You can configure subscriptions in the SolvaPay Console or through the webhook API. See the
+[webhooks guide](/webhooks) and [TypeScript webhook guide](/sdks/typescript/guides/webhooks) for
+event names, payload examples, and retry behavior.
+
+<Info>
+  Existing endpoints with no selected events continue to receive all events. Review endpoint
+  subscriptions if you want to reduce webhook volume.
+</Info>
+
+## Receipts and purchase management
+
+Customers can download receipt PDFs from the manage portal. Providers can also download receipts
+from purchase details in the SolvaPay Console.
+
+The Purchases page now includes plan, amount, and date filters. Purchase and transaction data also
+include the fields needed to show receipt availability and product references more consistently.
+
+## Plan and product updates
+
+Plan names are now required when you create a plan. Product plans are managed from the product
+Overview page in the SolvaPay Console, so plan setup and product details are in one place.
+
+Default plan rules are stricter: only free or usage-based plans can be marked as a default plan.
+
+<Warning>
+  If you create plans through the API or SDK, include a non-empty `name` field.
+</Warning>
+
+## SDK and CLI updates
+
+`solvapay@1.2.0` is available with initialization, scaffolding, and integration updates:
+
+- `solvapay init --product` can bind initialization to a product in non-interactive flows.
+- OpenAPI scaffolds now require an upstream base URL and include clearer setup guidance.
+- OpenAPI MCP scaffolds support multi-header API key auth schemes.
+- Webhook event types in `@solvapay/server` match the expanded backend event catalog.
+- `@solvapay/next` exports `processTopupPaymentIntent`.
+- MCP OAuth resource metadata handling was fixed in `@solvapay/mcp-core`.
+- Edge paywall usage tracking now waits for usage events to be recorded.
+
+## Documentation updates
+
+The docs now use **No-code MCP integration** for the hosted MCP path and include redirects for
+older URLs. The MCP SDK guide now leads with `createSolvaPayMcpServer` and `registerPayable`, and
+the webhook docs include the expanded event catalog and subscription model.

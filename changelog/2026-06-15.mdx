@@ -1,0 +1,87 @@
+---
+title: "June 15, 2026 release"
+description: "Multi-currency plans, provider credit grants, external identity linking, checkout and plan access fixes, and MCP tool metadata."
+---
+
+## Multi-currency plans
+
+Plans can now carry per-currency pricing. Recurring, usage, hybrid, and one-off plans support a
+`pricingOptions` array with a per-currency `price`, `basePrice`, and `setupFee`. Existing
+single-currency plans keep working unchanged — they are treated as a single default option, so no
+migration is required.
+
+- Checkout resolves the correct price for the customer's selected or detected currency.
+- Providers choose which currencies customers can pay top-ups in. The provider's default currency
+  is always allowed; the supported list holds only the additional pay currencies.
+- Customer-facing balance and checkout surfaces can display amounts in the provider's default
+  currency using a display exchange rate.
+
+See [Plans overview](/plans/overview) and [Billing](/plans/billing) for the updated pricing model.
+
+<Note>
+  When you expose a currency at checkout, make sure the plan has a matching `pricingOptions` entry.
+  A plan with no price for the selected currency rejects checkout with an explicit "currency not
+  supported" error that lists the available currencies.
+</Note>
+
+## Provider credit grants
+
+Providers can now assign credits to a customer without collecting payment, from the SolvaPay
+Console or through the TypeScript SDK.
+
+- Grant credits from the customer detail page in the SolvaPay Console.
+- Grant credits programmatically with the SDK. Grants are idempotent when you supply an
+  `Idempotency-Key`, which makes sign-up bonus flows safe to retry.
+- A new balance lookup returns a customer's credit balance along with display currency and
+  exchange-rate fields for presentation.
+- Usage tracking now returns a structured result showing how many credits were debited, the units
+  remaining, or the reason a debit was skipped — so you can confirm consumption after `trackUsage`.
+
+<Info>
+  Credit balances remain USD-normalized internally. Display currency and exchange-rate fields are
+  for presentation only.
+</Info>
+
+## External identity linking
+
+You can now link users from your own identity provider (for example, Auth0) to SolvaPay customers,
+so the same customer is recognized across SDK billing and MCP OAuth consent.
+
+- MCP OAuth sign-in reuses an existing customer when a stable external reference matches, instead
+  of creating a duplicate.
+- `ensureCustomer(externalRef)` is the canonical way to link a customer from your backend after
+  your own login completes.
+- A runnable Auth0 + Next.js example and a scaffold template are available to start from.
+
+See the [Customer linkage guide](/sdks/typescript/guides/customer-linkage) for the `externalRef`
+contract, the [custom auth guide](/sdks/typescript/guides/custom-auth) for the Auth0 adapters, and
+the [No-code MCP integration authentication guide](/no-code-mcp/authentication).
+
+<Warning>
+  Never forward identity-provider access tokens to SolvaPay APIs, and keep your secret key
+  server-side. Use a stable, deterministic `externalRef` (for example, the Auth0 `sub`).
+</Warning>
+
+## Checkout and plan access fixes
+
+- Credit top-ups no longer count as an active product plan. A customer who only topped up still
+  needs a plan purchase to gain plan access — top-ups and plan access are now independent paths.
+- New customers are enrolled into eligible free default plans when they complete MCP OAuth sign-in,
+  so they have plan access before their first tool call. Paid and usage-based default plans are not
+  auto-enrolled.
+- Checkout handles plan selection and switching a session to top-up mode more reliably, avoiding
+  mixed plan and top-up state.
+
+## MCP tool metadata
+
+For MCP apps, intent tools (`upgrade`, `topup`, and `manage_account`) are now annotated as
+read-only, so hosts treat them as view-openers rather than state-changing actions. UI-only
+transport tools are marked widget-accessible so an embedded view can call them on the ChatGPT Apps
+runtime.
+
+Update `@solvapay/mcp-core` to pick these up. See the
+[MCP app guide](/sdks/typescript/guides/mcp-app) for details.
+
+<Info>
+  Don't override the intent-tool annotations unless a tool genuinely changes external state.
+</Info>

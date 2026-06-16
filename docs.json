@@ -85,6 +85,7 @@
             "group": "Changelog",
             "icon": "clock-rotate-left",
             "pages": [
+              "changelog/2026-06-15",
               "changelog/2026-06-09",
               "changelog/2026-04-14"
             ]
@@ -111,6 +112,7 @@
               "sdks/typescript/guides/mcp",
               "sdks/typescript/guides/mcp-app",
               "sdks/typescript/guides/custom-auth",
+              "sdks/typescript/guides/customer-linkage",
               "sdks/typescript/guides/usage-events",
               "sdks/typescript/guides/purchase-management",
               "sdks/typescript/guides/webhooks",

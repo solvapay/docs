@@ -3,7 +3,12 @@ title: "Monetize an MCP server with SDK integration"
 description: "Use the SolvaPay TypeScript SDK to monetize an MCP server with full control over auth, paywall behavior, and tool access."
 ---
 
-Use this guide when you want to monetize an MCP server but keep implementation control in your own codebase.
+Use this guide when you want to monetize an MCP server and keep implementation control in your own codebase.
+
+<Note>
+  If you want SolvaPay to host auth, checkout, and paywall enforcement with no
+  code changes, use [MCP Pay](/guides/monetize-mcp-server-no-code) instead.
+</Note>
 
 ## Who this is for
 
@@ -13,7 +18,31 @@ Use this guide when you want to monetize an MCP server but keep implementation c
 
 ## What you will achieve
 
-By the end, your MCP server uses the SolvaPay SDK to enforce purchases and manage monetized tool access.
+By the end, your MCP server uses the SolvaPay SDK to enforce purchases and
+manage monetized tool access.
+
+## What the change looks like
+
+You wrap your existing tool handlers with `payable.mcp()`. Your business logic
+stays untouched — SolvaPay intercepts the call, checks for a valid purchase,
+and either runs your function or returns a checkout URL to the agent.
+
+```typescript
+// Before — unprotected tool
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  const { arguments: args } = request.params
+  return await createTask(args)
+})
+
+// After — protected with SolvaPay
+const solvaPay = createSolvaPay({ apiKey: process.env.SOLVAPAY_SECRET_KEY })
+const payable = solvaPay.payable({ product: 'prd_YOUR_PRODUCT_ID' })
+
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  const { arguments: args } = request.params
+  return await payable.mcp(createTask)(args)
+})
+```
 
 ## Prerequisites
 
@@ -26,7 +55,7 @@ Start from `createSolvaPayMcpServer` — the recommended factory that wires the 
 ## Steps
 
 1. Complete [SDK quick start](/sdks/typescript/setup/quick-start) to set up the base paywall flow.
-2. Follow the [MCP integration guide](/sdks/typescript/guides/mcp).
+2. Follow the [MCP integration guide](/sdks/typescript/guides/mcp) for the full implementation.
 3. Configure identity with [custom auth](/sdks/typescript/guides/custom-auth) if your server uses external auth.
 4. Add usage billing with [usage events](/sdks/typescript/guides/usage-events) where needed.
 5. Render a custom checkout or account UI inside the host iframe with the [MCP App integration guide](/sdks/typescript/guides/mcp-app).

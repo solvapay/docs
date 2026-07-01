@@ -1,0 +1,62 @@
+---
+title: "July 1, 2026 release"
+description: "Automatic credit top-up, unified provider onboarding and go-live, and console visibility for credit history and active plans."
+---
+
+## Automatic credit top-up
+
+Customers can keep their credit balance topped up automatically. When a balance falls below a
+threshold you set, SolvaPay charges a saved card and adds the top-up credits — no manual checkout.
+
+- Configure auto-recharge from the customer manage view or during checkout: set a balance
+  threshold and a fixed top-up amount, with an optional cap on the number of automatic recharges.
+- Off-session declines are surfaced explicitly instead of failing silently, so you can prompt the
+  customer to update their card.
+- Top-up credits are added at the moment the charge succeeds, so a recharged balance is available
+  immediately.
+
+For `@solvapay/react` integrators, the `AutoRecharge` component and `useTopup` / `TopupForm` now
+let you enable auto-recharge in the same top-up payment as the initial card charge — no separate
+card-setup step. See the [React guide](/sdks/typescript/guides/react).
+
+<Note>
+  Set the top-up amount to at least your threshold amount. Thresholds and top-up amounts are held
+  in your display currency and converted to credits at the live exchange rate when a recharge
+  triggers.
+</Note>
+
+## Provider onboarding and go-live
+
+Onboarding and go-live are now a single guided flow. You can connect an existing Stripe account or
+create a new one, complete identity and business verification with clearer validation, and track
+progress against a checklist.
+
+- **Connect an existing Stripe account** through OAuth, or create a new connected account — the
+  checklist adapts to the path you choose.
+- **Guided KYC** with stricter field validation and clearer verification errors, so submissions to
+  Stripe are less likely to bounce back.
+- **Go-live runs in the background** with a live status indicator, and your completed steps sync to
+  the home checklist and progress view.
+- EU/UK company accounts are prompted for a VAT number, and identity-document uploads are validated
+  up front (image formats only — PDFs are rejected for identity documents).
+
+See [Go live](/get-started/go-live) for the full walkthrough.
+
+<Info>
+  Sandbox and production onboarding are kept separate. Placeholder details from sandbox testing are
+  never carried into your live Stripe account.
+</Info>
+
+## Console visibility: credit history and active plans
+
+The SolvaPay Console now surfaces more at a glance.
+
+- **Credit history** appears on the provider dashboard, so you can see recent credit activity
+  without opening each customer.
+- **Active plan names** show on the customer list and customer detail pages, so you can tell which
+  plan each customer is on directly from the list.
+
+## Billing accuracy
+
+Reported financial totals are now footed against their line items, so the totals you see always add
+up to the sum of the underlying rows. See [Billing](/plans/billing).

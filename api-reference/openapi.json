@@ -5849,17 +5849,10 @@
             "description": "Include free recurring purchases and free auto-enrollments (default true)",
             "in": "query",
             "name": "includeFree",
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "string"
-              }
-            ],
             "required": false,
             "schema": {
-              "default": true
+              "default": true,
+              "type": "boolean"
             }
           }
         ],

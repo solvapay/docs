@@ -59,6 +59,226 @@
         ],
         "type": "object"
       },
+      "AutoRechargeConfigDto": {
+        "properties": {
+          "enabled": {
+            "description": "Whether auto-recharge is enabled",
+            "example": true,
+            "type": "boolean"
+          },
+          "failureCount": {
+            "description": "Consecutive failure count",
+            "example": 0,
+            "type": "number"
+          },
+          "fundingSourceType": {
+            "description": "Funding source type",
+            "enum": [
+              "saved_card",
+              "tokenized_card"
+            ],
+            "type": "string"
+          },
+          "inFlightPaymentIntentId": {
+            "description": "PaymentIntent ID of an in-flight recharge",
+            "type": "string"
+          },
+          "lastChargeAt": {
+            "description": "Timestamp of the last successful charge",
+            "type": "string"
+          },
+          "lockAcquiredAt": {
+            "description": "Timestamp the processing lock was acquired",
+            "type": "string"
+          },
+          "maxRecharges": {
+            "description": "Lifetime cap on automatic recharges",
+            "example": 12,
+            "type": "number"
+          },
+          "paymentMethodId": {
+            "description": "Saved payment method ID backing the recharge",
+            "type": "string"
+          },
+          "rechargeCount": {
+            "description": "Count of successful automatic recharges so far",
+            "example": 3,
+            "type": "number"
+          },
+          "status": {
+            "description": "Current config status",
+            "enum": [
+              "active",
+              "disabled",
+              "failed",
+              "completed",
+              "pending_setup"
+            ],
+            "type": "string"
+          },
+          "topup": {
+            "$ref": "#/components/schemas/AutoRechargeTopupDto"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/AutoRechargeTriggerDto"
+          },
+          "updatedAt": {
+            "description": "Last update timestamp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled",
+          "trigger",
+          "topup",
+          "fundingSourceType",
+          "status",
+          "failureCount",
+          "rechargeCount",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "AutoRechargeDisplayDto": {
+        "properties": {
+          "currency": {
+            "description": "Display currency code",
+            "example": "USD",
+            "type": "string"
+          },
+          "exchangeRate": {
+            "description": "Exchange rate used for display conversion",
+            "example": 1,
+            "type": "number"
+          },
+          "formatted": {
+            "$ref": "#/components/schemas/AutoRechargeDisplayFormattedDto"
+          },
+          "rateSource": {
+            "description": "Source of the exchange rate",
+            "example": "live",
+            "type": "string"
+          },
+          "thresholdAmountMajor": {
+            "description": "Threshold amount in display-currency major units",
+            "example": 5,
+            "type": "number"
+          },
+          "topupAmountMajor": {
+            "description": "Top-up amount in display-currency major units",
+            "example": 20,
+            "type": "number"
+          }
+        },
+        "required": [
+          "thresholdAmountMajor",
+          "topupAmountMajor",
+          "currency",
+          "formatted",
+          "exchangeRate",
+          "rateSource"
+        ],
+        "type": "object"
+      },
+      "AutoRechargeDisplayFormattedDto": {
+        "properties": {
+          "threshold": {
+            "description": "Formatted threshold amount",
+            "example": "$5.00",
+            "type": "string"
+          },
+          "topup": {
+            "description": "Formatted top-up amount",
+            "example": "$20.00",
+            "type": "string"
+          }
+        },
+        "required": [
+          "threshold",
+          "topup"
+        ],
+        "type": "object"
+      },
+      "AutoRechargeGetResponse": {
+        "properties": {
+          "config": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AutoRechargeConfigDto"
+              }
+            ],
+            "description": "Current auto-recharge config, or null when not configured",
+            "nullable": true
+          },
+          "display": {
+            "$ref": "#/components/schemas/AutoRechargeDisplayDto"
+          }
+        },
+        "type": "object"
+      },
+      "AutoRechargeTopupDto": {
+        "properties": {
+          "amountMinor": {
+            "description": "Top-up amount in currency minor units",
+            "example": 2000,
+            "type": "number"
+          },
+          "currency": {
+            "description": "ISO 4217 currency code",
+            "example": "USD",
+            "type": "string"
+          },
+          "mode": {
+            "description": "Top-up mode",
+            "enum": [
+              "fixed"
+            ],
+            "example": "fixed",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode",
+          "amountMinor",
+          "currency"
+        ],
+        "type": "object"
+      },
+      "AutoRechargeTriggerDto": {
+        "properties": {
+          "thresholdAmountMinor": {
+            "description": "Display-currency minor units for the balance threshold",
+            "example": 500,
+            "type": "number"
+          },
+          "type": {
+            "description": "Trigger kind",
+            "enum": [
+              "balance"
+            ],
+            "example": "balance",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "thresholdAmountMinor"
+        ],
+        "type": "object"
+      },
+      "AutoRechargeTriggeredResponse": {
+        "properties": {
+          "triggered": {
+            "description": "Whether the server initiated an auto-recharge charge after this debit (TOPUP credit lands via webhook)",
+            "example": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "triggered"
+        ],
+        "type": "object"
+      },
       "BulkCreateUsageRequest": {
         "properties": {
           "events": {
@@ -143,6 +363,53 @@
         ],
         "type": "object"
       },
+      "BulkUsageResponse": {
+        "properties": {
+          "inserted": {
+            "description": "Number of usage events inserted",
+            "example": 2,
+            "type": "number"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/BulkUsageResultResponse"
+            },
+            "type": "array"
+          },
+          "success": {
+            "example": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success",
+          "inserted",
+          "results"
+        ],
+        "type": "object"
+      },
+      "BulkUsageResultResponse": {
+        "properties": {
+          "creditDebit": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CreditDebitSuccessResponse"
+              },
+              {
+                "$ref": "#/components/schemas/CreditDebitSkippedResponse"
+              }
+            ]
+          },
+          "reference": {
+            "example": "usage_A1B2C3D4",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference"
+        ],
+        "type": "object"
+      },
       "CancelPurchaseRequest": {
         "properties": {
           "reason": {
@@ -156,6 +423,9 @@
           "customerRef": {
             "minLength": 1,
             "type": "string"
+          },
+          "includeCheckoutSession": {
+            "type": "boolean"
           },
           "meterName": {
             "type": "string"
@@ -238,6 +508,41 @@
                   "exclusiveMinimum": false,
                   "minimum": 0,
                   "type": "number"
+                },
+                "pricingOptions": {
+                  "items": {
+                    "properties": {
+                      "basePrice": {
+                        "exclusiveMinimum": false,
+                        "minimum": 0,
+                        "type": "number"
+                      },
+                      "currency": {
+                        "maxLength": 3,
+                        "minLength": 3,
+                        "type": "string"
+                      },
+                      "default": {
+                        "type": "boolean"
+                      },
+                      "price": {
+                        "exclusiveMinimum": false,
+                        "minimum": 0,
+                        "type": "number"
+                      },
+                      "setupFee": {
+                        "exclusiveMinimum": false,
+                        "minimum": 0,
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "currency",
+                      "price"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
                 },
                 "type": {
                   "enum": [
@@ -427,6 +732,42 @@
             "minimum": 100,
             "type": "integer"
           },
+          "autoRecharge": {
+            "properties": {
+              "currency": {
+                "type": "string"
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "maxRecharges": {
+                "exclusiveMinimum": true,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "thresholdAmountMajor": {
+                "exclusiveMaximum": false,
+                "exclusiveMinimum": true,
+                "maximum": 10000,
+                "minimum": 0,
+                "type": "number"
+              },
+              "topupAmountMajor": {
+                "exclusiveMaximum": false,
+                "exclusiveMinimum": true,
+                "maximum": 10000,
+                "minimum": 0,
+                "type": "number"
+              },
+              "triggerType": {
+                "enum": [
+                  "balance"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
           "currency": {
             "type": "string"
           },
@@ -460,7 +801,8 @@
           }
         },
         "required": [
-          "customerRef"
+          "customerRef",
+          "autoRecharge"
         ],
         "type": "object"
       },
@@ -532,6 +874,41 @@
           "price": {
             "type": "number"
           },
+          "pricingOptions": {
+            "items": {
+              "properties": {
+                "basePrice": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "currency": {
+                  "maxLength": 3,
+                  "minLength": 3,
+                  "type": "string"
+                },
+                "default": {
+                  "type": "boolean"
+                },
+                "price": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "setupFee": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "currency",
+                "price"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
           "rolloverUnusedUnits": {
             "type": "boolean"
           },
@@ -582,6 +959,7 @@
           }
         },
         "required": [
+          "name",
           "usageTracking",
           "limits",
           "metadata",
@@ -705,6 +1083,150 @@
         ],
         "type": "object"
       },
+      "CreditDebitSkippedResponse": {
+        "properties": {
+          "debited": {
+            "enum": [
+              false
+            ],
+            "type": "number"
+          },
+          "reason": {
+            "description": "Reason no credit debit was recorded",
+            "enum": [
+              "duplicate",
+              "no_product_ref",
+              "customer_not_found",
+              "no_active_purchase",
+              "plan_not_credit_based"
+            ],
+            "example": "duplicate",
+            "type": "string"
+          }
+        },
+        "required": [
+          "debited",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "CreditDebitSuccessResponse": {
+        "properties": {
+          "amount": {
+            "description": "Credits debited for this usage event",
+            "example": 10,
+            "type": "number"
+          },
+          "autoRecharge": {
+            "$ref": "#/components/schemas/AutoRechargeTriggeredResponse"
+          },
+          "debited": {
+            "enum": [
+              true
+            ],
+            "type": "number"
+          },
+          "unitsRemaining": {
+            "description": "Estimated remaining units after debit",
+            "example": 99,
+            "type": "number"
+          }
+        },
+        "required": [
+          "debited",
+          "amount",
+          "unitsRemaining"
+        ],
+        "type": "object"
+      },
+      "CustomerBalanceDisplayDto": {
+        "properties": {
+          "amountMajor": {
+            "description": "Balance amount in the display currency major units (e.g. dollars)",
+            "example": 42,
+            "type": "number"
+          },
+          "currency": {
+            "description": "ISO 4217 display currency code",
+            "example": "USD",
+            "type": "string"
+          },
+          "exchangeRate": {
+            "description": "Exchange rate applied from USD to the display currency",
+            "example": 1,
+            "type": "number"
+          },
+          "formatted": {
+            "description": "Human-readable formatted balance",
+            "example": "$42.00",
+            "type": "string"
+          },
+          "rateSource": {
+            "description": "Source of the exchange rate used",
+            "enum": [
+              "parity",
+              "db",
+              "fallback"
+            ],
+            "example": "parity",
+            "type": "string"
+          }
+        },
+        "required": [
+          "amountMajor",
+          "currency",
+          "formatted",
+          "exchangeRate",
+          "rateSource"
+        ],
+        "type": "object"
+      },
+      "CustomerBalanceResponse": {
+        "properties": {
+          "credits": {
+            "description": "Raw credit balance in credits (mils)",
+            "example": 4200,
+            "type": "number"
+          },
+          "creditsPerMinorUnit": {
+            "description": "Number of credits per minor currency unit",
+            "example": 100,
+            "type": "number"
+          },
+          "customerRef": {
+            "description": "Customer reference identifier",
+            "example": "cus_3c4d5e6f7g8h",
+            "type": "string"
+          },
+          "display": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CustomerBalanceDisplayDto"
+              }
+            ],
+            "description": "Formatted balance display block for the display currency"
+          },
+          "displayCurrency": {
+            "description": "ISO 4217 display currency code",
+            "example": "USD",
+            "type": "string"
+          },
+          "displayExchangeRate": {
+            "description": "Exchange rate from USD to the display currency",
+            "example": 1,
+            "type": "number"
+          }
+        },
+        "required": [
+          "customerRef",
+          "credits",
+          "displayCurrency",
+          "creditsPerMinorUnit",
+          "displayExchangeRate",
+          "display"
+        ],
+        "type": "object"
+      },
       "CustomerResponse": {
         "properties": {
           "email": {
@@ -739,6 +1261,22 @@
           "reference",
           "name",
           "email"
+        ],
+        "type": "object"
+      },
+      "DisableAutoRechargeResponse": {
+        "properties": {
+          "success": {
+            "description": "Always true on success",
+            "enum": [
+              true
+            ],
+            "example": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "success"
         ],
         "type": "object"
       },
@@ -799,6 +1337,54 @@
         ],
         "type": "object"
       },
+      "GrantCustomerCreditsRequest": {
+        "properties": {
+          "credits": {
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "reason": {
+            "maxLength": 256,
+            "type": "string"
+          }
+        },
+        "required": [
+          "credits"
+        ],
+        "type": "object"
+      },
+      "GrantCustomerCreditsResponse": {
+        "properties": {
+          "balance": {
+            "description": "Customer credit balance after the grant",
+            "type": "number"
+          },
+          "credits": {
+            "description": "Granted credit amount",
+            "type": "number"
+          },
+          "customerRef": {
+            "description": "Customer reference identifier",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Machine-readable grant reason",
+            "type": "string"
+          },
+          "success": {
+            "description": "Whether the grant was recorded",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success",
+          "customerRef",
+          "credits",
+          "balance"
+        ],
+        "type": "object"
+      },
       "LimitBalanceDto": {
         "properties": {
           "creditBalance": {
@@ -848,6 +1434,13 @@
           "price": {
             "description": "Price in smallest currency unit (e.g. cents)",
             "type": "number"
+          },
+          "pricingOptions": {
+            "description": "Per-currency price options for this plan",
+            "items": {
+              "$ref": "#/components/schemas/PlanPricingOptionDto"
+            },
+            "type": "array"
           },
           "reference": {
             "type": "string"
@@ -1042,6 +1635,41 @@
                   "minimum": 0,
                   "type": "number"
                 },
+                "pricingOptions": {
+                  "items": {
+                    "properties": {
+                      "basePrice": {
+                        "exclusiveMinimum": false,
+                        "minimum": 0,
+                        "type": "number"
+                      },
+                      "currency": {
+                        "maxLength": 3,
+                        "minLength": 3,
+                        "type": "string"
+                      },
+                      "default": {
+                        "type": "boolean"
+                      },
+                      "price": {
+                        "exclusiveMinimum": false,
+                        "minimum": 0,
+                        "type": "number"
+                      },
+                      "setupFee": {
+                        "exclusiveMinimum": false,
+                        "minimum": 0,
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "currency",
+                      "price"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
                 "type": {
                   "enum": [
                     "recurring",
@@ -1159,6 +1787,42 @@
         ],
         "type": "object"
       },
+      "OneTimePurchaseInfo": {
+        "properties": {
+          "amount": {
+            "description": "Amount in USD cents (normalised for aggregation)",
+            "example": 9900,
+            "type": "number"
+          },
+          "completedAt": {
+            "description": "When the one-time purchase was completed",
+            "example": "2025-10-27T10:00:00Z",
+            "type": "string"
+          },
+          "currency": {
+            "description": "ISO 4217 currency code of the customer-facing charge",
+            "example": "USD",
+            "type": "string"
+          },
+          "productRef": {
+            "description": "Product reference",
+            "example": "prd_abc123",
+            "type": "string"
+          },
+          "reference": {
+            "description": "Purchase reference",
+            "example": "pur_1A2B3C4D",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference",
+          "amount",
+          "currency",
+          "completedAt"
+        ],
+        "type": "object"
+      },
       "Plan": {
         "properties": {
           "accessExpiryDays": {
@@ -1252,6 +1916,13 @@
             "example": 2999,
             "type": "number"
           },
+          "pricingOptions": {
+            "description": "Per-currency price options for this plan",
+            "items": {
+              "$ref": "#/components/schemas/PlanPricingOptionDto"
+            },
+            "type": "array"
+          },
           "reference": {
             "description": "Plan reference",
             "example": "pln_1A2B3C4D",
@@ -1311,6 +1982,70 @@
         ],
         "type": "object"
       },
+      "PlanPricingOptionDto": {
+        "properties": {
+          "basePrice": {
+            "description": "Base price in smallest currency unit (hybrid plans)",
+            "example": 1999,
+            "type": "number"
+          },
+          "currency": {
+            "description": "ISO 4217 currency code",
+            "example": "USD",
+            "type": "string"
+          },
+          "default": {
+            "description": "Whether this is the default currency option for the plan",
+            "example": true,
+            "type": "boolean"
+          },
+          "price": {
+            "description": "Price in smallest currency unit (e.g. cents)",
+            "example": 2999,
+            "type": "number"
+          },
+          "setupFee": {
+            "description": "One-time setup fee in smallest currency unit",
+            "example": 500,
+            "type": "number"
+          }
+        },
+        "required": [
+          "currency",
+          "price"
+        ],
+        "type": "object"
+      },
+      "ProcessPaymentCancelled": {
+        "properties": {
+          "status": {
+            "enum": [
+              "cancelled"
+            ],
+            "example": "cancelled",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "ProcessPaymentFailed": {
+        "properties": {
+          "status": {
+            "enum": [
+              "failed"
+            ],
+            "example": "failed",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
       "ProcessPaymentIntentDto": {
         "properties": {
           "customerRef": {
@@ -1326,8 +2061,95 @@
           }
         },
         "required": [
-          "productRef",
           "customerRef"
+        ],
+        "type": "object"
+      },
+      "ProcessPaymentSucceededBare": {
+        "properties": {
+          "status": {
+            "enum": [
+              "succeeded"
+            ],
+            "example": "succeeded",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "ProcessPaymentSucceededOneTime": {
+        "properties": {
+          "oneTimePurchase": {
+            "$ref": "#/components/schemas/OneTimePurchaseInfo"
+          },
+          "status": {
+            "enum": [
+              "succeeded"
+            ],
+            "example": "succeeded",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "one-time"
+            ],
+            "example": "one-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "type",
+          "oneTimePurchase"
+        ],
+        "type": "object"
+      },
+      "ProcessPaymentSucceededRecurring": {
+        "properties": {
+          "purchase": {
+            "$ref": "#/components/schemas/PurchaseInfo"
+          },
+          "status": {
+            "enum": [
+              "succeeded"
+            ],
+            "example": "succeeded",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "recurring"
+            ],
+            "example": "recurring",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "type",
+          "purchase"
+        ],
+        "type": "object"
+      },
+      "ProcessPaymentTimeout": {
+        "properties": {
+          "message": {
+            "description": "Detail message describing the timeout",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "timeout"
+            ],
+            "example": "timeout",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
         ],
         "type": "object"
       },
@@ -1433,6 +2255,62 @@
         ],
         "type": "object"
       },
+      "PutAutoRechargeSdkDto": {
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "customerEmail": {
+            "format": "email",
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerRef": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "deferSetupIntent": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "maxRecharges": {
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "thresholdAmountMajor": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": true,
+            "maximum": 10000,
+            "minimum": 0,
+            "type": "number"
+          },
+          "topupAmountMajor": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": true,
+            "maximum": 10000,
+            "minimum": 0,
+            "type": "number"
+          },
+          "triggerType": {
+            "enum": [
+              "balance"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled",
+          "triggerType",
+          "currency",
+          "customerRef"
+        ],
+        "type": "object"
+      },
       "RecordBulkMeterEventsZodDto": {
         "properties": {
           "events": {
@@ -1506,6 +2384,32 @@
         ],
         "type": "object"
       },
+      "SaveAutoRechargeResponse": {
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/AutoRechargeConfigDto"
+          },
+          "display": {
+            "$ref": "#/components/schemas/AutoRechargeDisplayDto"
+          },
+          "publishableKey": {
+            "description": "Stripe publishable key for the resolved environment",
+            "type": "string"
+          },
+          "setupClientSecret": {
+            "description": "Stripe SetupIntent client secret for card collection",
+            "type": "string"
+          },
+          "stripeAccountId": {
+            "description": "Connected Stripe account ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "config"
+        ],
+        "type": "object"
+      },
       "SdkMerchantResponseDto": {
         "properties": {
           "country": {
@@ -1547,6 +2451,18 @@
             "example": "ACME INC",
             "type": "string"
           },
+          "supportedTopupCurrencies": {
+            "description": "Full set of currencies a customer may pay credit topups in, including the default currency. Omitted/single-entry means single-currency behavior.",
+            "example": [
+              "USD",
+              "EUR",
+              "GBP"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "supportEmail": {
             "example": "support@acme.com",
             "type": "string"
@@ -1563,6 +2479,155 @@
         "required": [
           "displayName",
           "legalName"
+        ],
+        "type": "object"
+      },
+      "SdkPaymentIntentListItem": {
+        "properties": {
+          "amount": {
+            "description": "Amount in the charge currency (minor units)",
+            "example": 4999,
+            "type": "number"
+          },
+          "clientSecret": {
+            "description": "Client secret used to confirm the payment on the client",
+            "example": "pi_1a2b3c4d5e6f7g8h_secret_xxx",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "Creation timestamp",
+            "example": "2025-10-11T10:30:00.000Z",
+            "type": "string"
+          },
+          "currency": {
+            "description": "ISO 4217 currency code",
+            "example": "usd",
+            "type": "string"
+          },
+          "planRef": {
+            "description": "Plan reference",
+            "example": "pln_2b3c4d5e6f7g",
+            "type": "string"
+          },
+          "processorPaymentId": {
+            "description": "Payment processor payment intent ID",
+            "example": "pi_1a2b3c4d5e6f7g8h",
+            "type": "string"
+          },
+          "status": {
+            "description": "Payment intent status",
+            "example": "succeeded",
+            "type": "string"
+          }
+        },
+        "required": [
+          "processorPaymentId",
+          "amount",
+          "currency",
+          "status"
+        ],
+        "type": "object"
+      },
+      "SdkPaymentIntentListResponse": {
+        "properties": {
+          "paymentIntents": {
+            "items": {
+              "$ref": "#/components/schemas/SdkPaymentIntentListItem"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "Number of payment intents returned",
+            "example": 1,
+            "type": "number"
+          }
+        },
+        "required": [
+          "paymentIntents",
+          "total"
+        ],
+        "type": "object"
+      },
+      "SdkPaymentIntentResponse": {
+        "properties": {
+          "accountId": {
+            "description": "Connected Stripe account ID (only present on create)",
+            "example": "acct_1A2B3C4D",
+            "type": "string"
+          },
+          "amount": {
+            "description": "Amount in the charge currency (minor units)",
+            "example": 4999,
+            "type": "number"
+          },
+          "clientSecret": {
+            "description": "Client secret used to confirm the payment on the client",
+            "example": "pi_1a2b3c4d5e6f7g8h_secret_AbCdEf123456",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "Creation timestamp",
+            "example": "2025-10-18T10:30:00.000Z",
+            "type": "string"
+          },
+          "currency": {
+            "description": "ISO 4217 currency code",
+            "example": "usd",
+            "type": "string"
+          },
+          "customerRef": {
+            "description": "Customer reference",
+            "example": "cus_3c4d5e6f7g8h",
+            "type": "string"
+          },
+          "exchangeRate": {
+            "description": "Exchange rate applied to the amount",
+            "example": 1,
+            "type": "number"
+          },
+          "expiresAt": {
+            "description": "Expiry timestamp of the payment intent",
+            "example": "2025-10-19T10:30:00.000Z",
+            "type": "string"
+          },
+          "originalAmount": {
+            "description": "Original amount in the payment currency (minor units)",
+            "example": 4999,
+            "type": "number"
+          },
+          "planRef": {
+            "description": "Plan reference",
+            "example": "pln_2b3c4d5e6f7g",
+            "type": "string"
+          },
+          "processorPaymentId": {
+            "description": "Payment processor payment intent ID",
+            "example": "pi_1a2b3c4d5e6f7g8h",
+            "type": "string"
+          },
+          "publishableKey": {
+            "description": "Stripe publishable key for the environment",
+            "example": "pk_test_...",
+            "type": "string"
+          },
+          "status": {
+            "description": "Payment intent status",
+            "example": "requires_payment_method",
+            "type": "string"
+          },
+          "transactionId": {
+            "description": "Ledger transaction ID",
+            "example": "507f1f77bcf86cd799439011",
+            "type": "string"
+          }
+        },
+        "required": [
+          "processorPaymentId",
+          "amount",
+          "currency",
+          "status",
+          "clientSecret",
+          "publishableKey"
         ],
         "type": "object"
       },
@@ -1795,7 +2860,7 @@
             "type": "string"
           },
           "isMcpPay": {
-            "description": "Whether this product uses MCP Pay proxy",
+            "description": "Whether this product uses the no-code MCP integration (SolvaPay reverse proxy)",
             "example": false,
             "type": "boolean"
           },
@@ -2080,6 +3145,41 @@
           "price": {
             "type": "number"
           },
+          "pricingOptions": {
+            "items": {
+              "properties": {
+                "basePrice": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "currency": {
+                  "maxLength": 3,
+                  "minLength": 3,
+                  "type": "string"
+                },
+                "default": {
+                  "type": "boolean"
+                },
+                "price": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "setupFee": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "currency",
+                "price"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
           "status": {
             "enum": [
               "active",
@@ -2175,6 +3275,33 @@
           "used",
           "overageUnits",
           "overageCost"
+        ],
+        "type": "object"
+      },
+      "UsageRecordResponse": {
+        "properties": {
+          "creditDebit": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CreditDebitSuccessResponse"
+              },
+              {
+                "$ref": "#/components/schemas/CreditDebitSkippedResponse"
+              }
+            ]
+          },
+          "reference": {
+            "example": "usage_A1B2C3D4",
+            "type": "string"
+          },
+          "success": {
+            "example": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success",
+          "reference"
         ],
         "type": "object"
       },
@@ -2367,9 +3494,225 @@
           "email"
         ],
         "type": "object"
+      },
+      "WebhookEventCategoryDto": {
+        "properties": {
+          "category": {
+            "description": "Category key.",
+            "example": "purchase",
+            "type": "string"
+          },
+          "description": {
+            "description": "Category description.",
+            "type": "string"
+          },
+          "events": {
+            "description": "Events in this category.",
+            "items": {
+              "$ref": "#/components/schemas/WebhookEventDefinitionDto"
+            },
+            "type": "array"
+          },
+          "label": {
+            "description": "Human-readable category label.",
+            "example": "Purchases & subscriptions",
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "label",
+          "description",
+          "events"
+        ],
+        "type": "object"
+      },
+      "WebhookEventDataDto": {
+        "properties": {
+          "object": {
+            "additionalProperties": true,
+            "description": "The resource that the event relates to.",
+            "type": "object"
+          },
+          "previous_attributes": {
+            "additionalProperties": true,
+            "description": "For *.updated events, the previous values of changed attributes.",
+            "nullable": true,
+            "type": "object"
+          }
+        },
+        "required": [
+          "object"
+        ],
+        "type": "object"
+      },
+      "WebhookEventDefinitionDto": {
+        "properties": {
+          "description": {
+            "description": "Human-readable description of the event.",
+            "type": "string"
+          },
+          "status": {
+            "description": "Emission status.",
+            "enum": [
+              "live",
+              "planned"
+            ],
+            "example": "live",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/WebhookEventType",
+            "example": "purchase.created"
+          }
+        },
+        "required": [
+          "type",
+          "description",
+          "status"
+        ],
+        "type": "object"
+      },
+      "WebhookEventDto": {
+        "properties": {
+          "api_version": {
+            "description": "API version that produced the event payload.",
+            "example": "2024-01-01",
+            "type": "string"
+          },
+          "created": {
+            "description": "Unix timestamp (seconds) when the event was created.",
+            "example": 1717000000,
+            "type": "number"
+          },
+          "data": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WebhookEventDataDto"
+              }
+            ],
+            "description": "Event payload envelope."
+          },
+          "id": {
+            "description": "Unique event ID.",
+            "example": "evt_1A2B3C4D",
+            "type": "string"
+          },
+          "livemode": {
+            "description": "True for live-mode events, false for sandbox.",
+            "example": true,
+            "type": "boolean"
+          },
+          "request": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WebhookEventRequestDto"
+              }
+            ],
+            "description": "Context about the triggering API request."
+          },
+          "type": {
+            "$ref": "#/components/schemas/WebhookEventType",
+            "example": "purchase.created"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "created",
+          "api_version",
+          "data",
+          "livemode",
+          "request"
+        ],
+        "type": "object"
+      },
+      "WebhookEventRequestDto": {
+        "properties": {
+          "id": {
+            "description": "ID of the API request that triggered the event.",
+            "nullable": true,
+            "type": "object"
+          },
+          "idempotency_key": {
+            "description": "Idempotency key of the triggering request.",
+            "nullable": true,
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "idempotency_key"
+        ],
+        "type": "object"
+      },
+      "WebhookEventType": {
+        "description": "Event type.",
+        "enum": [
+          "customer.created",
+          "customer.updated",
+          "customer.deleted",
+          "purchase.created",
+          "purchase.activated",
+          "purchase.updated",
+          "purchase.trial_ending",
+          "purchase.trial_converted",
+          "purchase.suspended",
+          "purchase.past_due",
+          "purchase.cancellation_scheduled",
+          "purchase.cancelled",
+          "purchase.reactivated",
+          "purchase.expired",
+          "purchase.renewed",
+          "purchase.renewal_reminder",
+          "purchase.refunded",
+          "purchase.plan_changed",
+          "payment.succeeded",
+          "payment.failed",
+          "payment.refunded",
+          "payment.refund_failed",
+          "payment.refund_pending",
+          "payment.canceled",
+          "payment.disputed",
+          "payment.dispute_closed",
+          "payout.paid",
+          "payout.failed",
+          "checkout_session.created",
+          "checkout_session.completed",
+          "checkout_session.expired",
+          "customer.credit.topped_up",
+          "customer.credit.low_balance",
+          "customer.credit.exhausted",
+          "customer.credit.debited",
+          "customer.credit.granted",
+          "customer.credit.adjusted",
+          "customer.credit.auto_topup_failed",
+          "usage.charged",
+          "usage.recorded",
+          "usage.reset",
+          "product.created",
+          "product.updated",
+          "product.archived",
+          "plan.created",
+          "plan.updated",
+          "plan.archived"
+        ],
+        "type": "string"
       }
     },
     "securitySchemes": {
+      "api_key": {
+        "description": "Provider secret API key supplied in the Authorization header.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "bearer": {
+        "bearerFormat": "JWT",
+        "description": "Dashboard session JWT issued after provider/operator login.",
+        "scheme": "bearer",
+        "type": "http"
+      },
       "OAuth2": {
         "flows": {
           "authorizationCode": {
@@ -2383,6 +3726,12 @@
           }
         },
         "type": "oauth2"
+      },
+      "SecretKey": {
+        "bearerFormat": "JWT",
+        "description": "Provider secret API key (sk_live_… / sk_test_…) supplied as a Bearer token.",
+        "scheme": "bearer",
+        "type": "http"
       }
     }
   },
@@ -2396,6 +3745,7 @@
   "paths": {
     "/v1/sdk/activate": {
       "post": {
+        "description": "Activates a specific plan on a product for a customer. Usage-based (PAYG) plans activate eagerly (returning an active purchase so the SDK can proceed to the top-up step), while free, recurring, and hybrid plans keep strict semantics and may return `payment_required` or `topup_required`.",
         "operationId": "ActivateSdkController_activate",
         "parameters": [],
         "requestBody": {
@@ -2417,16 +3767,134 @@
                 }
               }
             },
-            "description": ""
+            "description": "Plan activation result"
           }
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
+        "summary": "Activate a plan for a customer",
         "tags": [
           "Activation"
+        ]
+      }
+    },
+    "/v1/sdk/auto-recharge": {
+      "delete": {
+        "description": "Disables auto-recharge for the given customer. Idempotent.",
+        "operationId": "AutoRechargeSdkController_deleteAutoRecharge",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customerRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisableAutoRechargeResponse"
+                }
+              }
+            },
+            "description": "Auto-recharge was disabled."
+          },
+          "400": {
+            "description": "customerRef query parameter is required"
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Disable auto-recharge for a customer",
+        "tags": [
+          "Auto Recharge"
+        ]
+      },
+      "get": {
+        "description": "Returns the stored auto-recharge configuration (and display block) for the given customer, or a null config when none is set.",
+        "operationId": "AutoRechargeSdkController_getAutoRecharge",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customerRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoRechargeGetResponse"
+                }
+              }
+            },
+            "description": "Current auto-recharge config, if present."
+          },
+          "400": {
+            "description": "customerRef query parameter is required"
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Get auto-recharge config for a customer",
+        "tags": [
+          "Auto Recharge"
+        ]
+      },
+      "put": {
+        "description": "Persists the auto-recharge configuration for a customer. When no reusable card is on file, a Stripe SetupIntent client secret is returned so the caller can collect one.",
+        "operationId": "AutoRechargeSdkController_putAutoRecharge",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutAutoRechargeSdkDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveAutoRechargeResponse"
+                }
+              }
+            },
+            "description": "Saved auto-recharge config and optional SetupIntent details."
+          },
+          "400": {
+            "description": "customerRef is required, or customer email is required to configure auto-recharge"
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Set or update auto-recharge config for a customer",
+        "tags": [
+          "Auto Recharge"
         ]
       }
     },
@@ -2462,7 +3930,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Create a checkout session",
@@ -2809,12 +4277,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "example": {
-                    "credits": 4200,
-                    "creditsPerMinorUnit": 100,
-                    "customerRef": "cus_3c4d5e6f7g8h",
-                    "displayCurrency": "USD"
-                  }
+                  "$ref": "#/components/schemas/CustomerBalanceResponse"
                 }
               }
             },
@@ -2841,6 +4304,67 @@
           }
         ],
         "summary": "Get customer credit balance",
+        "tags": [
+          "Customers"
+        ]
+      }
+    },
+    "/v1/sdk/customers/{reference}/credits": {
+      "post": {
+        "description": "Adds credits to a customer balance. Use Idempotency-Key to make grants safe to retry.",
+        "operationId": "CustomerSdkController_grantCredits",
+        "parameters": [
+          {
+            "description": "Customer reference identifier",
+            "in": "path",
+            "name": "reference",
+            "required": true,
+            "schema": {
+              "example": "cus_3c4d5e6f7g8h",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Provider-scoped idempotency key for safe grant retries",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantCustomerCreditsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrantCustomerCreditsResponse"
+                }
+              }
+            },
+            "description": "Credits granted successfully"
+          },
+          "404": {
+            "description": "Customer not found"
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Grant credits to a customer",
         "tags": [
           "Customers"
         ]
@@ -3039,7 +4563,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Check usage limits for a customer and product",
@@ -3065,7 +4589,7 @@
             "description": "Merchant identity"
           },
           "404": {
-            "description": "Provider not found"
+            "description": "Provider not found in the requested environment. Body includes a `code` (`provider_not_found_in_environment`), the `requestedEnvironment`, and `providerExistsInSandbox` so the SDK / CLI can branch on the recovery path."
           }
         },
         "security": [
@@ -3113,11 +4637,14 @@
           },
           "400": {
             "description": "Invalid meter name or meter is archived"
+          },
+          "404": {
+            "description": "Customer not found"
           }
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Record a meter event",
@@ -3164,11 +4691,14 @@
           },
           "400": {
             "description": "Invalid meter name or meter is archived"
+          },
+          "404": {
+            "description": "One or more customers not found"
           }
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Record meter events in bulk",
@@ -3208,20 +4738,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "example": {
-                    "paymentIntents": [
-                      {
-                        "amount": 4999,
-                        "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_xxx",
-                        "createdAt": "2025-10-11T10:30:00.000Z",
-                        "currency": "usd",
-                        "planRef": "pln_2b3c4d5e6f7g",
-                        "processorPaymentId": "pi_1a2b3c4d5e6f7g8h",
-                        "status": "succeeded"
-                      }
-                    ],
-                    "total": 1
-                  }
+                  "$ref": "#/components/schemas/SdkPaymentIntentListResponse"
                 }
               }
             },
@@ -3268,20 +4785,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "example": {
-                    "amount": 4999,
-                    "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_AbCdEf123456",
-                    "createdAt": "2025-10-18T10:30:00.000Z",
-                    "currency": "usd",
-                    "customerRef": "cus_3c4d5e6f7g8h",
-                    "exchangeRate": 1,
-                    "expiresAt": "2025-10-19T10:30:00.000Z",
-                    "originalAmount": 4999,
-                    "planRef": "pln_2b3c4d5e6f7g",
-                    "processorPaymentId": "pi_1a2b3c4d5e6f7g8h",
-                    "publishableKey": "pk_test_...",
-                    "status": "requires_payment_method"
-                  }
+                  "$ref": "#/components/schemas/SdkPaymentIntentResponse"
                 }
               }
             },
@@ -3315,7 +4819,7 @@
     },
     "/v1/sdk/payment-intents/{processorPaymentId}/process": {
       "post": {
-        "description": "Processes a payment intent that has been confirmed on the client side. Polls the database for payment intent status to become succeeded (up to 10 seconds). Returns the current status of the payment intent.",
+        "description": "Processes a payment intent that has been confirmed on the client side. Polls the database for payment intent status to become succeeded. Returns the current status of the payment intent; on success, the response is enriched with the Purchase row created by the webhook handler.",
         "operationId": "PaymentIntentSdkController_processPaymentIntent",
         "parameters": [
           {
@@ -3344,57 +4848,34 @@
           "200": {
             "content": {
               "application/json": {
-                "examples": {
-                  "cancelled": {
-                    "description": "Payment intent cancelled",
-                    "value": {
-                      "status": "cancelled"
-                    }
-                  },
-                  "failed": {
-                    "description": "Payment intent failed",
-                    "value": {
-                      "status": "failed"
-                    }
-                  },
-                  "succeeded": {
-                    "description": "Payment intent confirmed successfully",
-                    "value": {
-                      "status": "succeeded"
-                    }
-                  },
-                  "timeout": {
-                    "description": "Timeout waiting for payment intent confirmation",
-                    "value": {
-                      "message": "Timeout while waiting for payment intent confirmation, try again later. This could be due to payment webhooks not being configured correctly.",
-                      "status": "timeout"
-                    }
-                  }
-                },
                 "schema": {
-                  "properties": {
-                    "message": {
-                      "description": "Optional message, only present for timeout status",
-                      "example": "Timeout while waiting for payment intent confirmation, try again later. This could be due to payment webhooks not being configured correctly.",
-                      "type": "string"
-                    },
-                    "status": {
-                      "description": "Payment intent status",
-                      "enum": [
-                        "succeeded",
-                        "timeout",
-                        "failed",
-                        "cancelled"
-                      ],
-                      "example": "succeeded",
-                      "type": "string"
-                    }
+                  "discriminator": {
+                    "propertyName": "status"
                   },
-                  "type": "object"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProcessPaymentSucceededRecurring"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ProcessPaymentSucceededOneTime"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ProcessPaymentSucceededBare"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ProcessPaymentTimeout"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ProcessPaymentFailed"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ProcessPaymentCancelled"
+                    }
+                  ]
                 }
               }
             },
-            "description": "Payment intent status"
+            "description": "Payment intent status with optional purchase enrichment on success"
           },
           "400": {
             "content": {
@@ -3442,12 +4923,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "example": {
-                    "amount": 4999,
-                    "clientSecret": "pi_1a2b3c4d5e6f7g8h_secret_xxx",
-                    "currency": "usd",
-                    "planRef": "pln_2b3c4d5e6f7g"
-                  }
+                  "$ref": "#/components/schemas/SdkPaymentIntentResponse"
                 }
               }
             },
@@ -3562,7 +5038,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Get the default payment method for a customer",
@@ -3601,7 +5077,7 @@
     },
     "/v1/sdk/products": {
       "get": {
-        "description": "Retrieves a paginated list of products for the authenticated provider. Supports filtering by status, search term, and MCP Pay flag.",
+        "description": "Retrieves a paginated list of products for the authenticated provider. Supports filtering by status, search term, and no-code MCP integration flag.",
         "operationId": "ProductSdkController_listProducts",
         "parameters": [
           {
@@ -3648,7 +5124,7 @@
             }
           },
           {
-            "description": "Filter MCP Pay products",
+            "description": "Filter no-code MCP integration products",
             "in": "query",
             "name": "isMcpPay",
             "required": false,
@@ -3659,12 +5135,39 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "limit": {
+                      "description": "Applied page size (clamped to 1-100)",
+                      "type": "number"
+                    },
+                    "offset": {
+                      "description": "Applied pagination offset",
+                      "type": "number"
+                    },
+                    "products": {
+                      "items": {
+                        "$ref": "#/components/schemas/SdkProductResponse"
+                      },
+                      "type": "array"
+                    },
+                    "total": {
+                      "description": "Total number of products matching the filters",
+                      "type": "number"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
             "description": "Products retrieved successfully"
           }
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "List products",
@@ -3703,7 +5206,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Create a product",
@@ -3730,6 +5233,27 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "action": {
+                      "description": "Outcome of the delete: hard delete in sandbox, soft-delete or deactivation in live depending on existing purchases",
+                      "enum": [
+                        "deleted",
+                        "deactivated",
+                        "soft_deleted"
+                      ],
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
             "description": "Product deleted or deactivated successfully"
           },
           "404": {
@@ -3738,7 +5262,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Delete a product",
@@ -3778,7 +5302,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Get a product by reference",
@@ -3828,7 +5352,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Update a product",
@@ -3879,7 +5403,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Clone a product",
@@ -3934,7 +5458,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Configure MCP plans on an MCP product",
@@ -3945,6 +5469,7 @@
     },
     "/v1/sdk/products/{productRef}/plans": {
       "get": {
+        "description": "Retrieves the plans belonging to a product, paginated in-memory. Returns SDK-shaped plans with money serialized to wire units and unsupported plan types normalised to \"recurring\".",
         "operationId": "PlanSdkController_listPlans",
         "parameters": [
           {
@@ -3953,10 +5478,12 @@
             "name": "productRef",
             "required": true,
             "schema": {
+              "example": "prd_1A2B3C4D",
               "type": "string"
             }
           },
           {
+            "description": "Max results (default 50)",
             "in": "query",
             "name": "limit",
             "required": false,
@@ -3965,6 +5492,7 @@
             }
           },
           {
+            "description": "Pagination offset (default 0)",
             "in": "query",
             "name": "offset",
             "required": false,
@@ -4017,6 +5545,7 @@
         ]
       },
       "post": {
+        "description": "Creates a plan under the product. Unfinished pricing fields (setup fee, trial days, rollover, tiers, etc.) are stripped from SDK input, and unsupported plan types fall back to \"recurring\".",
         "operationId": "PlanSdkController_createPlan",
         "parameters": [
           {
@@ -4025,6 +5554,7 @@
             "name": "productRef",
             "required": true,
             "schema": {
+              "example": "prd_1A2B3C4D",
               "type": "string"
             }
           }
@@ -4067,6 +5597,7 @@
     },
     "/v1/sdk/products/{productRef}/plans/{planRef}": {
       "delete": {
+        "description": "Removes a plan from the product.",
         "operationId": "PlanSdkController_deletePlan",
         "parameters": [
           {
@@ -4075,6 +5606,7 @@
             "name": "productRef",
             "required": true,
             "schema": {
+              "example": "prd_1A2B3C4D",
               "type": "string"
             }
           },
@@ -4084,12 +5616,25 @@
             "name": "planRef",
             "required": true,
             "schema": {
+              "example": "pln_1A2B3C4D",
               "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
             "description": "Plan deleted successfully"
           },
           "404": {
@@ -4107,6 +5652,7 @@
         ]
       },
       "get": {
+        "description": "Retrieves a single plan by reference or ID within the given product.",
         "operationId": "PlanSdkController_getPlan",
         "parameters": [
           {
@@ -4115,6 +5661,7 @@
             "name": "productRef",
             "required": true,
             "schema": {
+              "example": "prd_1A2B3C4D",
               "type": "string"
             }
           },
@@ -4124,6 +5671,7 @@
             "name": "planRef",
             "required": true,
             "schema": {
+              "example": "pln_1A2B3C4D",
               "type": "string"
             }
           }
@@ -4154,6 +5702,7 @@
         ]
       },
       "put": {
+        "description": "Updates a plan under the product. Unfinished pricing fields are stripped from SDK input, and unsupported plan types fall back to \"recurring\".",
         "operationId": "PlanSdkController_updatePlan",
         "parameters": [
           {
@@ -4162,6 +5711,7 @@
             "name": "productRef",
             "required": true,
             "schema": {
+              "example": "prd_1A2B3C4D",
               "type": "string"
             }
           },
@@ -4171,6 +5721,7 @@
             "name": "planRef",
             "required": true,
             "schema": {
+              "example": "pln_1A2B3C4D",
               "type": "string"
             }
           }
@@ -4243,7 +5794,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Bootstrap MCP product integration",
@@ -4293,6 +5844,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "Include free recurring purchases and free auto-enrollments (default true)",
+            "in": "query",
+            "name": "includeFree",
+            "required": false,
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -4316,7 +5877,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "List purchases for provider",
@@ -4358,7 +5919,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Get a purchase by reference",
@@ -4417,7 +5978,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Cancel a purchase",
@@ -4469,7 +6030,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Reactivate a cancelled purchase",
@@ -4491,6 +6052,15 @@
             "schema": {
               "example": "cus_3C4D5E6F",
               "type": "string"
+            }
+          },
+          {
+            "description": "Include free auto-enrollments (default true for customer-scoped views)",
+            "in": "query",
+            "name": "includeFree",
+            "required": false,
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -4518,7 +6088,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Get purchases for a customer",
@@ -4567,7 +6137,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Get purchases for a product",
@@ -4596,17 +6166,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "properties": {
-                    "reference": {
-                      "example": "usage_A1B2C3D4",
-                      "type": "string"
-                    },
-                    "success": {
-                      "example": true,
-                      "type": "boolean"
-                    }
-                  },
-                  "type": "object"
+                  "$ref": "#/components/schemas/UsageRecordResponse"
                 }
               }
             },
@@ -4618,7 +6178,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Record a usage event",
@@ -4644,6 +6204,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkUsageResponse"
+                }
+              }
+            },
             "description": "Bulk usage events processed"
           },
           "400": {
@@ -4652,7 +6219,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Record bulk usage events",
@@ -4696,12 +6263,71 @@
         },
         "security": [
           {
-            "bearer": []
+            "SecretKey": []
           }
         ],
         "summary": "Get user info and purchase status",
         "tags": [
           "User Info"
+        ]
+      }
+    },
+    "/v1/sdk/webhooks/event-schema": {
+      "get": {
+        "description": "Returns a representative example of the signed webhook payload every endpoint receives. Useful when building and type-checking a webhook handler; the live `type` will be one of the values from `event-types`.",
+        "operationId": "WebhookSdkController_getEventSchema",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookEventDto"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Get the webhook event envelope schema",
+        "tags": [
+          "Webhooks"
+        ]
+      }
+    },
+    "/v1/sdk/webhooks/event-types": {
+      "get": {
+        "description": "Returns the catalog of webhook event types you can subscribe to, grouped by category. Use these `type` values when configuring an endpoint’s `enabledEvents`.",
+        "operationId": "WebhookSdkController_listEventTypes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WebhookEventCategoryDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "List webhook event types",
+        "tags": [
+          "Webhooks"
         ]
       }
     }

@@ -1,0 +1,114 @@
+---
+title: "July 11, 2026 release"
+description: "Business checkout with Stripe Tax and seller VAT, confirmed-payment success gating, hidden enterprise plans, PAYG visibility fixes, product-status API removal, and Console refinements."
+---
+
+## Business checkout and VAT
+
+Hosted credit top-up now supports business buyers end-to-end. Consumers and businesses see
+correctly calculated tax at checkout, and receipts show the tax breakdown with the seller's tax
+identifier.
+
+- Business buyers can enter company name, tax identifier, and billing address on the hosted
+  top-up page. Business details are persisted on the customer for subsequent purchases.
+- Stripe Tax calculates the correct tax on both consumer and business top-ups. The full billing
+  address (line 1, city, state, and postal code) is forwarded so jurisdictions that need finer
+  location data — notably US ZIP-based rates — resolve correctly.
+- Stripe tax validation errors surface with mapped messages instead of a generic checkout error.
+- Provider seller details capture VAT numbers with per-country field labels for GB, SE, and DE,
+  and are shown on checkout and receipts. Sandbox providers get deterministic VAT placeholders
+  automatically.
+
+<Note>
+  Receipts now include the seller's VAT number, the applied tax rate, and the tax treatment
+  (inclusive or exclusive). Set your VAT number under provider details before going live in
+  regions that require it.
+</Note>
+
+## Confirmed payments before success
+
+Hosted checkout now waits for a real payment confirmation before showing the success screen.
+Previously, success could show while Stripe was still processing the intent, so refreshes could
+surface a still-processing charge. The success screen is now gated on the actual confirmation
+webhook.
+
+For `@solvapay/react` integrators, `@solvapay/react@1.5.0` gates payment success on real
+confirmation in the SDK as well. This is a minor release with backwards-compatible Card Element
+shims. See the [React guide](/sdks/typescript/guides/react).
+
+## Hidden enterprise plans
+
+Providers can now create plans that are hidden from every customer-facing surface and grantable
+only through direct assignment. Use this for enterprise or negotiated deals that shouldn't appear
+in checkout, the SDK catalog, or product listings.
+
+- Mark a plan as hidden when creating it in the SolvaPay Console.
+- Hidden plans are filtered out of the SDK catalog, checkout eligibility, and product responses.
+- Assign a hidden plan directly to a customer from the Console. Direct assignment stamps a new
+  `admin_assignment` purchase origin and activates the plan without collecting payment.
+- Existing plans without the field remain visible.
+
+## Plan and product visibility on customers
+
+The customer list and detail pages now show plan and product context at a glance.
+
+- Active plan names appear alongside each customer, and a **Product** column shows the products
+  those active plans belong to.
+- Pay-as-you-go plans now show the real plan name and credit usage on the customer manage page
+  instead of a generic "unlimited" label.
+- Zero-amount PAYG purchases are included in customer reads, so PAYG activation no longer
+  disappears from the manage page or looks unactivated in the SDK.
+
+## Product status removed from the API
+
+Product status (`active`, `inactive`, `suspended`) is no longer part of the public product API or
+SDK types. Product visibility is now controlled through soft-delete and Console-side filters
+only.
+
+- `SdkProductResponse` no longer includes `status`.
+- Product update DTOs no longer accept `status`.
+- The `suspended` value has been dropped; the internal status union is narrowed to
+  `active | inactive` for soft-delete only.
+- Plan status is unchanged.
+
+<Warning>
+  If your integration reads `product.status` from SDK responses or sends `status` when updating
+  products, remove that code. Product status stays internal — use soft-delete via the delete
+  product endpoint instead.
+</Warning>
+
+## Validation improvements
+
+Form validation is now consistent between the SolvaPay Console and the backend.
+
+- URL fields across the Console (webhook endpoints, redirect URLs, and site metadata) use a
+  single shared validator that matches the backend contract.
+- Plan pricing bounds and post-paid usage plans validate correctly on both sides — the Console
+  no longer rejects post-paid usage plans that the backend accepts.
+- Customer creation no longer requires a `name` — the field is optional to match the backend
+  schema.
+- Plan fields sent from the Console are persisted rather than being dropped by the update DTO.
+
+## Sign-in reliability
+
+Passwordless sign-in rate limiting is now keyed per account rather than per IP. Users on
+shared egress IPs — corporate NATs, CGNATs, or coworking spaces — will no longer trip each
+other's login and OTP throttles.
+
+## Console refinements
+
+- **Checkout PaymentElement** — tabs layout restored on checkout and credits, with tightened
+  icon and title spacing in checkout cards.
+- **Customer detail page** — redesigned overview and action tiles for a cleaner information
+  hierarchy.
+- **Sidebar** — collapsed left menu shows hover tooltips on chevrons and the collapse button,
+  and cleans up icon-only mode.
+- **Mobile responsiveness** — provider and operations UIs render correctly on narrow screens,
+  including the OTP input.
+
+## Under the hood
+
+- OpenAPI reference resynced with the backend spec, including a fix to emit a valid boolean
+  schema for the `includeFree` query parameter.
+- Auto-recharge and credit top-up flows are now documented in the SDK guides. See
+  [React guide](/sdks/typescript/guides/react).

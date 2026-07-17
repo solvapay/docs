@@ -1,0 +1,63 @@
+---
+title: "July 17, 2026 release"
+description: "Auto-recharge goes GA with a monthly spend cap, @solvapay/server 2.0.0, business checkout for SDK integrators, and the customer.credit.auto_topup_failed webhook."
+---
+
+## Auto-recharge with monthly spend cap
+
+Auto-recharge is now generally available for SDK integrators. When a customer's credit balance
+falls below a threshold, SolvaPay charges their saved card off-session for a fixed top-up amount
+and mints the credits — no manual checkout. An optional **monthly spend cap** limits how much
+auto-recharge can spend per UTC calendar month.
+
+- Configure per customer with a balance threshold, a fixed top-up amount, and an optional
+  `maxMonthlySpendMajor` cap. When the next recharge would exceed the cap, the charge is skipped
+  and resumes automatically when the UTC month rolls over.
+- `@solvapay/react` ships a drop-in `<AutoRecharge>` component and a `useAutoRecharge` hook, plus
+  headless `TopupForm` parts for custom top-up UIs.
+- `@solvapay/next` adds one-liner route helpers: `getAutoRecharge`, `saveAutoRecharge`,
+  `disableAutoRecharge`, `createTopupPaymentIntent`, and `processTopupPaymentIntent`.
+- Auto-recharge can be staged with the customer's first top-up (`deferCardSetup`), so the card is
+  saved on that charge and no separate setup step is needed.
+
+See the new [Auto-recharge guide](/sdks/typescript/guides/auto-recharge) for the full flow.
+
+<Warning>
+  **Breaking change in `@solvapay/server` 2.0.0.** The monthly spend cap replaces the lifetime
+  recharge-count cap. Rename `AutoRechargeInput.maxRecharges` to `maxMonthlySpendMajor`, and read
+  `maxMonthlySpendMinor` / `monthlySpendMinor` / `monthlySpendPeriod` on the stored config instead
+  of `maxRecharges` / `rechargeCount`. Configs no longer flip to `completed` when the cap is hit —
+  status stays `active` and charges resume the next UTC month. See the
+  [migration notes](/sdks/typescript/guides/auto-recharge#monthly-spend-cap).
+</Warning>
+
+## Business checkout for SDK integrators
+
+Business buyers can now purchase plans and credit top-ups through your own checkout with correct
+tax treatment — the same capability the hosted pages gained on July 11.
+
+- `PaymentForm.BusinessDetails` and `TopupForm.BusinessDetails` collect company name, country, and
+  tax ID with country-aware labels, attach them to the payment intent automatically, and block
+  confirmation until the tax-updated amount applies.
+- `attachBusinessDetails` (`@solvapay/next`) and `attachBusinessDetailsCore` (`@solvapay/server`)
+  trigger Stripe Tax and return a `TaxBreakdown` with the subtotal, tax amount, rate, and
+  treatment — including `reverse_charge` for valid EU cross-border B2B purchases.
+- MCP apps get the same capability through the `attach_business_details` tool; the embedded
+  checkout views in `@solvapay/react/mcp` call it automatically.
+
+See the new [Business checkout guide](/sdks/typescript/guides/business-checkout).
+
+## New webhook: failed auto top-ups
+
+`customer.credit.auto_topup_failed` fires when an off-session auto-recharge charge declines. The
+payload carries the `customerRef`, the `paymentIntentId` (or `null` when the charge was declined
+before an intent was created), and the decline `reason`. Use it to prompt the customer to update
+their payment method. See [Webhooks](/webhooks#credit-events).
+
+## Package versions
+
+| Package | Version |
+| --- | --- |
+| `@solvapay/server` | 2.0.0 |
+| `@solvapay/react` | 1.6.0 |
+| `@solvapay/next` | 1.3.0 |

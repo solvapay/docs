@@ -145,12 +145,26 @@ All plan types share these base fields:
 | `price` | `number` | Base price in smallest currency unit (e.g. cents) for recurring/one-time plans |
 | `currency` | `string` | ISO 4217 currency code for recurring/one-time plans |
 | `status` | `enum` | `active`, `inactive`, or `archived` |
+| `hidden` | `boolean` | When `true`, the plan is excluded from every customer-facing surface and can only be granted by direct assignment |
 | `requiresPayment` | `boolean` | Server-derived. `true` when the plan's pricing requires payment (based on `price`, `creditsPerUnit`, and plan `type`) |
 | `default` | `boolean` | Whether this is the product's default plan |
 | `maxActiveUsers` | `number?` | Maximum concurrent users on this plan |
 | `accessExpiryDays` | `number?` | Days until access expires |
 | `features` | `object` | Provider-defined feature flags |
 | `metadata` | `object` | Arbitrary provider-defined metadata |
+
+## Hidden plans
+
+Mark a plan as hidden to keep it off every customer-facing surface — use this for enterprise or
+negotiated deals that shouldn't appear publicly.
+
+- Create hidden plans in the SolvaPay Console by enabling the hidden option on the plan form.
+- Hidden plans are filtered out of the SDK catalog, checkout eligibility, and product responses.
+  Customers cannot self-select them.
+- Assign a hidden plan to a customer from the Console customer page. Direct assignment activates
+  the plan without collecting payment and stamps the purchase with the `admin_assignment` origin —
+  the only origin allowed to activate a hidden plan.
+- Plans without the field remain visible; only `hidden: true` changes behavior.
 
 ## Plans Are Embedded in Products
 

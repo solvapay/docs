@@ -257,7 +257,7 @@ function verify(body: string, header: string, secret: string): boolean {
 
 ## Event Types
 
-SolvaPay emits **46 event types** spanning the full lifecycle — from customer and
+SolvaPay emits **47 event types** spanning the full lifecycle — from customer and
 purchase creation through payments, refunds, disputes, payouts, credits, metered usage,
 and catalog changes. The canonical list is also available programmatically from
 `GET /v1/sdk/webhooks/event-types` and is what powers both the SDK `WebhookEventType`
@@ -336,6 +336,7 @@ The complete purchase/subscription state machine:
 | `customer.credit.debited` | A customer's credit was debited by usage. |
 | `customer.credit.granted` | Free credit was granted to a customer. |
 | `customer.credit.adjusted` | A customer's credit balance was manually adjusted. |
+| `customer.credit.auto_topup_failed` | An automatic credit top-up charge failed. |
 
 ### Usage & Metering Events
 
@@ -853,6 +854,26 @@ extra context:
 `credits` is the running balance after the movement; `amount` is the signed delta.
 `customer.credit.low_balance` and `customer.credit.exhausted` fire automatically as the
 balance crosses the warning threshold and zero.
+
+```json
+// customer.credit.auto_topup_failed — an off-session auto-recharge charge declined
+{
+  "type": "customer.credit.auto_topup_failed",
+  "data": {
+    "object": {
+      "customerRef": "cust_ref_001",
+      "paymentIntentId": "pi_3abc...",
+      "reason": "Your card was declined."
+    },
+    "previous_attributes": null
+  }
+}
+```
+
+`paymentIntentId` is `null` when the charge was declined before a payment intent was
+created. Use this event to notify the customer to update their payment method — after
+repeated declines the auto-recharge config's status flips to `failed` and no further
+charges are attempted until the card is updated.
 
 ### Usage & metering events
 

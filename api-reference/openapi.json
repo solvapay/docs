@@ -4,12 +4,15 @@
       "ActivatePlanDto": {
         "properties": {
           "customerRef": {
+            "maxLength": 20,
             "type": "string"
           },
           "planRef": {
+            "maxLength": 20,
             "type": "string"
           },
           "productRef": {
+            "maxLength": 20,
             "type": "string"
           }
         },
@@ -91,19 +94,24 @@
             "description": "Timestamp the processing lock was acquired",
             "type": "string"
           },
-          "maxRecharges": {
-            "description": "Lifetime cap on automatic recharges",
-            "example": 12,
+          "maxMonthlySpendMinor": {
+            "description": "Optional monthly spend cap in topup.currency minor units",
+            "example": 10000,
             "type": "number"
+          },
+          "monthlySpendMinor": {
+            "description": "Successful auto-recharge spend in the current UTC month",
+            "example": 4500,
+            "type": "number"
+          },
+          "monthlySpendPeriod": {
+            "description": "UTC YYYY-MM period key for monthlySpendMinor",
+            "example": "2026-07",
+            "type": "string"
           },
           "paymentMethodId": {
             "description": "Saved payment method ID backing the recharge",
             "type": "string"
-          },
-          "rechargeCount": {
-            "description": "Count of successful automatic recharges so far",
-            "example": 3,
-            "type": "number"
           },
           "status": {
             "description": "Current config status",
@@ -111,7 +119,6 @@
               "active",
               "disabled",
               "failed",
-              "completed",
               "pending_setup"
             ],
             "type": "string"
@@ -134,7 +141,7 @@
           "fundingSourceType",
           "status",
           "failureCount",
-          "rechargeCount",
+          "monthlySpendMinor",
           "updatedAt"
         ],
         "type": "object"
@@ -297,6 +304,7 @@
                   "type": "string"
                 },
                 "customerRef": {
+                  "maxLength": 20,
                   "minLength": 1,
                   "type": "string"
                 },
@@ -329,9 +337,11 @@
                   "type": "string"
                 },
                 "productRef": {
+                  "maxLength": 20,
                   "type": "string"
                 },
                 "purchaseRef": {
+                  "maxLength": 20,
                   "type": "string"
                 },
                 "timestamp": {
@@ -410,6 +420,34 @@
         ],
         "type": "object"
       },
+      "BusinessDetailsDto": {
+        "properties": {
+          "businessName": {
+            "description": "Legal business name",
+            "type": "string"
+          },
+          "country": {
+            "description": "ISO 3166-1 alpha-2 country code",
+            "type": "string"
+          },
+          "customerRef": {
+            "description": "Customer reference to persist business tax details on the customer record",
+            "type": "string"
+          },
+          "isBusiness": {
+            "description": "Whether the purchase is on behalf of a business",
+            "type": "boolean"
+          },
+          "taxId": {
+            "description": "Tax / VAT identification number",
+            "type": "string"
+          }
+        },
+        "required": [
+          "isBusiness"
+        ],
+        "type": "object"
+      },
       "CancelPurchaseRequest": {
         "properties": {
           "reason": {
@@ -421,6 +459,7 @@
       "CheckLimitRequest": {
         "properties": {
           "customerRef": {
+            "maxLength": 20,
             "minLength": 1,
             "type": "string"
           },
@@ -431,6 +470,7 @@
             "type": "string"
           },
           "productRef": {
+            "maxLength": 20,
             "minLength": 1,
             "type": "string"
           },
@@ -448,6 +488,7 @@
         "properties": {
           "name": {
             "minLength": 1,
+            "pattern": "^[\\p{L}\\p{N} .,'\"&\\/()+:\\-]*$",
             "type": "string"
           }
         },
@@ -619,13 +660,16 @@
       "CreateCheckoutSessionRequest": {
         "properties": {
           "customerRef": {
+            "maxLength": 20,
             "minLength": 1,
             "type": "string"
           },
           "planRef": {
+            "maxLength": 20,
             "type": "string"
           },
           "productRef": {
+            "maxLength": 20,
             "minLength": 1,
             "type": "string"
           },
@@ -665,11 +709,17 @@
       },
       "CreateCustomerRequest": {
         "properties": {
+          "description": {
+            "maxLength": 1000,
+            "pattern": "^[\\p{L}\\p{N}\\s.,'\"&\\/()+:%;?!@#_[\\]\\-]*$",
+            "type": "string"
+          },
           "email": {
             "format": "email",
             "type": "string"
           },
           "externalRef": {
+            "maxLength": 50,
             "type": "string"
           },
           "metadata": {
@@ -677,10 +727,23 @@
             "type": "object"
           },
           "name": {
+            "maxLength": 100,
+            "pattern": "^[\\p{L}\\p{N} .,'\"&\\/()+:\\-]*$",
             "type": "string"
           },
           "telephone": {
-            "type": "string"
+            "oneOf": [
+              {
+                "pattern": "^\\+[1-9]\\d{6,14}$",
+                "type": "string"
+              },
+              {
+                "enum": [
+                  ""
+                ],
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
@@ -692,10 +755,12 @@
       "CreateCustomerSessionRequest": {
         "properties": {
           "customerRef": {
+            "maxLength": 20,
             "minLength": 1,
             "type": "string"
           },
           "productRef": {
+            "maxLength": 20,
             "type": "string"
           }
         },
@@ -740,10 +805,12 @@
               "enabled": {
                 "type": "boolean"
               },
-              "maxRecharges": {
+              "maxMonthlySpendMajor": {
+                "exclusiveMaximum": false,
                 "exclusiveMinimum": true,
+                "maximum": 10000,
                 "minimum": 0,
-                "type": "integer"
+                "type": "number"
               },
               "thresholdAmountMajor": {
                 "exclusiveMaximum": false,
@@ -772,6 +839,7 @@
             "type": "string"
           },
           "customerRef": {
+            "maxLength": 20,
             "minLength": 1,
             "type": "string"
           },
@@ -780,6 +848,7 @@
             "type": "string"
           },
           "planRef": {
+            "maxLength": 20,
             "minLength": 1,
             "type": "string"
           },
@@ -787,6 +856,7 @@
             "type": "string"
           },
           "productRef": {
+            "maxLength": 20,
             "minLength": 1,
             "type": "string"
           },
@@ -809,12 +879,16 @@
       "CreatePlanRequest": {
         "properties": {
           "accessExpiryDays": {
-            "type": "number"
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "integer"
           },
           "autoRenew": {
             "type": "boolean"
           },
           "basePrice": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
             "type": "number"
           },
           "billingCycle": {
@@ -834,8 +908,23 @@
             ],
             "type": "string"
           },
+          "billingStrategy": {
+            "properties": {
+              "type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "cancellationNoticeDays": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "integer"
+          },
           "creditsPerUnit": {
-            "type": "number"
+            "exclusiveMinimum": false,
+            "minimum": 1,
+            "type": "integer"
           },
           "currency": {
             "type": "string"
@@ -844,6 +933,8 @@
             "type": "boolean"
           },
           "description": {
+            "maxLength": 500,
+            "pattern": "^[\\p{L}\\p{N}\\s.,'\"&\\/()+:%;?!@#_[\\]\\-]*$",
             "type": "string"
           },
           "features": {
@@ -851,27 +942,67 @@
             "type": "object"
           },
           "freeUnits": {
-            "type": "number"
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "fulfillment": {
+            "properties": {
+              "deliveryMethod": {
+                "type": "string"
+              },
+              "estimatedDelivery": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "hidden": {
+            "type": "boolean"
           },
           "limit": {
-            "type": "number"
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "integer"
           },
           "limits": {
             "additionalProperties": true,
             "type": "object"
           },
           "maxActiveUsers": {
-            "type": "number"
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "integer"
           },
           "metadata": {
             "additionalProperties": true,
             "type": "object"
           },
           "name": {
-            "minLength": 1,
+            "maxLength": 200,
+            "minLength": 2,
+            "pattern": "^[\\p{L}\\p{N} .,'\"&\\/()+:\\-]*$",
             "type": "string"
           },
+          "overagePolicy": {
+            "properties": {
+              "allowOverage": {
+                "type": "boolean"
+              },
+              "maxOverage": {
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
           "price": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 10000000,
+            "minimum": 0,
             "type": "number"
           },
           "pricingOptions": {
@@ -909,10 +1040,42 @@
             },
             "type": "array"
           },
+          "prorationPolicy": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "method": {
+                "enum": [
+                  "proportional",
+                  "full",
+                  "none"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "returnPolicy": {
+            "properties": {
+              "allowed": {
+                "type": "boolean"
+              },
+              "conditions": {
+                "type": "string"
+              },
+              "period": {
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
           "rolloverUnusedUnits": {
             "type": "boolean"
           },
           "setupFee": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
             "type": "number"
           },
           "status": {
@@ -923,8 +1086,18 @@
             ],
             "type": "string"
           },
+          "taxBehavior": {
+            "enum": [
+              "auto",
+              "inclusive",
+              "exclusive"
+            ],
+            "type": "string"
+          },
           "trialDays": {
-            "type": "number"
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "integer"
           },
           "type": {
             "enum": [
@@ -956,6 +1129,20 @@
               }
             },
             "type": "object"
+          },
+          "warranty": {
+            "properties": {
+              "duration": {
+                "type": "number"
+              },
+              "terms": {
+                "type": "string"
+              },
+              "unit": {
+                "type": "string"
+              }
+            },
+            "type": "object"
           }
         },
         "required": [
@@ -963,7 +1150,13 @@
           "usageTracking",
           "limits",
           "metadata",
-          "features"
+          "features",
+          "overagePolicy",
+          "billingStrategy",
+          "prorationPolicy",
+          "returnPolicy",
+          "fulfillment",
+          "warranty"
         ],
         "type": "object"
       },
@@ -978,12 +1171,16 @@
                 "type": "string"
               },
               "validityPeriod": {
-                "type": "number"
+                "exclusiveMinimum": true,
+                "minimum": 0,
+                "type": "integer"
               }
             },
             "type": "object"
           },
           "description": {
+            "maxLength": 1000,
+            "pattern": "^[\\p{L}\\p{N}\\s.,'\"&\\/()+:%;?!@#_[\\]\\-]*$",
             "type": "string"
           },
           "imageUrl": {
@@ -997,10 +1194,21 @@
             "type": "object"
           },
           "name": {
-            "minLength": 1,
+            "maxLength": 100,
+            "minLength": 2,
+            "pattern": "^[\\p{L}\\p{N} .,'\"&\\/()+:\\-]*$",
             "type": "string"
           },
           "productType": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "taxBehavior": {
+            "enum": [
+              "auto",
+              "inclusive",
+              "exclusive"
+            ],
             "type": "string"
           }
         },
@@ -1026,6 +1234,7 @@
             "type": "string"
           },
           "customerRef": {
+            "maxLength": 20,
             "minLength": 1,
             "type": "string"
           },
@@ -1058,9 +1267,11 @@
             "type": "string"
           },
           "productRef": {
+            "maxLength": 20,
             "type": "string"
           },
           "purchaseRef": {
+            "maxLength": 20,
             "type": "string"
           },
           "timestamp": {
@@ -1346,6 +1557,7 @@
           },
           "reason": {
             "maxLength": 256,
+            "pattern": "^[\\p{L}\\p{N}\\s.,'\"&\\/()+:%;?!@#_[\\]\\-]*$",
             "type": "string"
           }
         },
@@ -1577,8 +1789,6 @@
             "type": "string"
           },
           "originUrl": {
-            "format": "uri",
-            "minLength": 1,
             "type": "string"
           },
           "plans": {
@@ -1877,6 +2087,11 @@
             "example": 100,
             "type": "number"
           },
+          "hidden": {
+            "description": "Whether the plan is hidden from customer-facing surfaces. When true, the plan does not appear in checkout or the SDK catalog and can only be granted via direct assignment (enterprise plans).",
+            "example": false,
+            "type": "boolean"
+          },
           "isActive": {
             "description": "Whether the plan is active (derived from status)",
             "example": true,
@@ -1948,6 +2163,15 @@
             "example": "active",
             "type": "string"
           },
+          "taxBehavior": {
+            "description": "Tax inclusion behavior for business checkout",
+            "enum": [
+              "auto",
+              "inclusive",
+              "exclusive"
+            ],
+            "type": "string"
+          },
           "trialDays": {
             "description": "Free trial period in days",
             "example": 14,
@@ -1975,6 +2199,7 @@
           "price",
           "currency",
           "requiresPayment",
+          "hidden",
           "isActive",
           "status",
           "createdAt",
@@ -2049,19 +2274,37 @@
       "ProcessPaymentIntentDto": {
         "properties": {
           "customerRef": {
+            "maxLength": 20,
             "minLength": 1,
             "type": "string"
           },
           "planRef": {
+            "maxLength": 20,
             "type": "string"
           },
           "productRef": {
+            "maxLength": 20,
             "minLength": 1,
             "type": "string"
           }
         },
         "required": [
           "customerRef"
+        ],
+        "type": "object"
+      },
+      "ProcessPaymentProcessing": {
+        "properties": {
+          "status": {
+            "enum": [
+              "processing"
+            ],
+            "example": "processing",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
         ],
         "type": "object"
       },
@@ -2277,10 +2520,12 @@
           "enabled": {
             "type": "boolean"
           },
-          "maxRecharges": {
+          "maxMonthlySpendMajor": {
+            "exclusiveMaximum": false,
             "exclusiveMinimum": true,
+            "maximum": 10000,
             "minimum": 0,
-            "type": "integer"
+            "type": "number"
           },
           "thresholdAmountMajor": {
             "exclusiveMaximum": false,
@@ -2317,6 +2562,7 @@
             "items": {
               "properties": {
                 "customerRef": {
+                  "maxLength": 20,
                   "minLength": 1,
                   "type": "string"
                 },
@@ -2325,6 +2571,7 @@
                   "type": "string"
                 },
                 "productRef": {
+                  "maxLength": 20,
                   "type": "string"
                 },
                 "properties": {
@@ -2356,6 +2603,7 @@
       "RecordMeterEventZodDto": {
         "properties": {
           "customerRef": {
+            "maxLength": 20,
             "minLength": 1,
             "type": "string"
           },
@@ -2364,6 +2612,7 @@
             "type": "string"
           },
           "productRef": {
+            "maxLength": 20,
             "type": "string"
           },
           "properties": {
@@ -2412,6 +2661,11 @@
       },
       "SdkMerchantResponseDto": {
         "properties": {
+          "companyNumber": {
+            "description": "Company registration number (EIN, Companies House No, Org No)",
+            "example": "HRB12345",
+            "type": "string"
+          },
           "country": {
             "description": "ISO-3166 alpha-2 country code of the merchant",
             "example": "US",
@@ -2471,8 +2725,18 @@
             "example": "https://acme.com/support",
             "type": "string"
           },
+          "taxId": {
+            "description": "Tax identification number (US: EIN)",
+            "example": "12-3456789",
+            "type": "string"
+          },
           "termsUrl": {
             "example": "https://acme.com/terms",
+            "type": "string"
+          },
+          "vatNumber": {
+            "description": "VAT identification number (UK/EU)",
+            "example": "DE123456789",
             "type": "string"
           }
         },
@@ -2672,6 +2936,11 @@
             "example": 1000,
             "type": "number"
           },
+          "hidden": {
+            "description": "Whether the plan is hidden from the customer-facing catalog. Enterprise plans (true) do not appear in checkout or the SDK catalog and can only be granted via direct assignment.",
+            "example": false,
+            "type": "boolean"
+          },
           "isActive": {
             "description": "Whether the plan is active",
             "example": true,
@@ -2742,6 +3011,7 @@
           "price",
           "currency",
           "requiresPayment",
+          "hidden",
           "isActive",
           "status",
           "createdAt",
@@ -2920,10 +3190,10 @@
         "required": [
           "reference",
           "name",
-          "status",
           "balance",
           "totalTransactions",
           "isMcpPay",
+          "status",
           "createdAt",
           "updatedAt"
         ],
@@ -3066,19 +3336,38 @@
       },
       "UpdateCustomerRequest": {
         "properties": {
+          "description": {
+            "maxLength": 1000,
+            "pattern": "^[\\p{L}\\p{N}\\s.,'\"&\\/()+:%;?!@#_[\\]\\-]*$",
+            "type": "string"
+          },
           "email": {
             "format": "email",
             "type": "string"
           },
           "externalRef": {
+            "maxLength": 50,
             "type": "string"
           },
           "metadata": {},
           "name": {
+            "maxLength": 100,
+            "pattern": "^[\\p{L}\\p{N} .,'\"&\\/()+:\\-]*$",
             "type": "string"
           },
           "telephone": {
-            "type": "string"
+            "oneOf": [
+              {
+                "pattern": "^\\+[1-9]\\d{6,14}$",
+                "type": "string"
+              },
+              {
+                "enum": [
+                  ""
+                ],
+                "type": "string"
+              }
+            ]
           }
         },
         "type": "object"
@@ -3086,7 +3375,12 @@
       "UpdatePlanRequest": {
         "properties": {
           "accessExpiryDays": {
-            "type": "number"
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "autoRenew": {
+            "type": "boolean"
           },
           "billingCycle": {
             "enum": [
@@ -3105,8 +3399,23 @@
             ],
             "type": "string"
           },
+          "billingStrategy": {
+            "properties": {
+              "type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "cancellationNoticeDays": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "integer"
+          },
           "creditsPerUnit": {
-            "type": "number"
+            "exclusiveMinimum": false,
+            "minimum": 1,
+            "type": "integer"
           },
           "currency": {
             "type": "string"
@@ -3115,6 +3424,8 @@
             "type": "boolean"
           },
           "description": {
+            "maxLength": 500,
+            "pattern": "^[\\p{L}\\p{N}\\s.,'\"&\\/()+:%;?!@#_[\\]\\-]*$",
             "type": "string"
           },
           "features": {
@@ -3122,27 +3433,67 @@
             "type": "object"
           },
           "freeUnits": {
-            "type": "number"
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "fulfillment": {
+            "properties": {
+              "deliveryMethod": {
+                "type": "string"
+              },
+              "estimatedDelivery": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "hidden": {
+            "type": "boolean"
           },
           "limit": {
-            "type": "number"
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "integer"
           },
           "limits": {
             "additionalProperties": true,
             "type": "object"
           },
           "maxActiveUsers": {
-            "type": "number"
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "integer"
           },
           "metadata": {
             "additionalProperties": true,
             "type": "object"
           },
           "name": {
-            "minLength": 1,
+            "maxLength": 200,
+            "minLength": 2,
+            "pattern": "^[\\p{L}\\p{N} .,'\"&\\/()+:\\-]*$",
             "type": "string"
           },
+          "overagePolicy": {
+            "properties": {
+              "allowOverage": {
+                "type": "boolean"
+              },
+              "maxOverage": {
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
           "price": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 10000000,
+            "minimum": 0,
             "type": "number"
           },
           "pricingOptions": {
@@ -3180,6 +3531,39 @@
             },
             "type": "array"
           },
+          "prorationPolicy": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "method": {
+                "enum": [
+                  "proportional",
+                  "full",
+                  "none"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "returnPolicy": {
+            "properties": {
+              "allowed": {
+                "type": "boolean"
+              },
+              "conditions": {
+                "type": "string"
+              },
+              "period": {
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
+          "rolloverUnusedUnits": {
+            "type": "boolean"
+          },
           "status": {
             "enum": [
               "active",
@@ -3187,12 +3571,40 @@
               "archived"
             ],
             "type": "string"
+          },
+          "taxBehavior": {
+            "enum": [
+              "auto",
+              "inclusive",
+              "exclusive"
+            ],
+            "type": "string"
+          },
+          "warranty": {
+            "properties": {
+              "duration": {
+                "type": "number"
+              },
+              "terms": {
+                "type": "string"
+              },
+              "unit": {
+                "type": "string"
+              }
+            },
+            "type": "object"
           }
         },
         "required": [
           "limits",
           "features",
-          "metadata"
+          "metadata",
+          "overagePolicy",
+          "billingStrategy",
+          "prorationPolicy",
+          "returnPolicy",
+          "fulfillment",
+          "warranty"
         ],
         "type": "object"
       },
@@ -3207,12 +3619,16 @@
                 "type": "string"
               },
               "validityPeriod": {
-                "type": "number"
+                "exclusiveMinimum": true,
+                "minimum": 0,
+                "type": "integer"
               }
             },
             "type": "object"
           },
           "description": {
+            "maxLength": 1000,
+            "pattern": "^[\\p{L}\\p{N}\\s.,'\"&\\/()+:%;?!@#_[\\]\\-]*$",
             "type": "string"
           },
           "imageUrl": {
@@ -3223,16 +3639,20 @@
             "type": "object"
           },
           "name": {
+            "maxLength": 100,
+            "minLength": 2,
+            "pattern": "^[\\p{L}\\p{N} .,'\"&\\/()+:\\-]*$",
             "type": "string"
           },
           "productType": {
+            "maxLength": 100,
             "type": "string"
           },
-          "status": {
+          "taxBehavior": {
             "enum": [
-              "active",
-              "inactive",
-              "suspended"
+              "auto",
+              "inclusive",
+              "exclusive"
             ],
             "type": "string"
           }
@@ -3396,10 +3816,12 @@
       "UserInfoRequest": {
         "properties": {
           "customerRef": {
+            "maxLength": 20,
             "minLength": 1,
             "type": "string"
           },
           "productRef": {
+            "maxLength": 20,
             "minLength": 1,
             "type": "string"
           }
@@ -3745,7 +4167,7 @@
   "paths": {
     "/v1/sdk/activate": {
       "post": {
-        "description": "Activates a specific plan on a product for a customer. Usage-based (PAYG) plans activate eagerly (returning an active purchase so the SDK can proceed to the top-up step), while free, recurring, and hybrid plans keep strict semantics and may return `payment_required` or `topup_required`.",
+        "description": "Activates a specific plan on a product for a customer. Usage-based (PAYG) plans are topup-first: a zero-balance customer receives `topup_required` and only activates after a successful top-up, while free plans activate immediately and paid recurring / hybrid plans return `payment_required`.",
         "operationId": "ActivateSdkController_activate",
         "parameters": [],
         "requestBody": {
@@ -4817,6 +5239,53 @@
         ]
       }
     },
+    "/v1/sdk/payment-intents/{processorPaymentId}/business-details": {
+      "post": {
+        "description": "Applies business or consumer tax location to a payment intent and returns the calculated tax breakdown.",
+        "operationId": "PaymentIntentSdkController_attachBusinessDetails",
+        "parameters": [
+          {
+            "description": "Stripe payment intent ID (pi_…)",
+            "in": "path",
+            "name": "processorPaymentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessDetailsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Business details applied and tax breakdown returned"
+          },
+          "400": {
+            "description": "Invalid request or business details"
+          },
+          "404": {
+            "description": "Payment intent not found"
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "Attach business tax details to a payment intent",
+        "tags": [
+          "Payment Intents"
+        ]
+      }
+    },
     "/v1/sdk/payment-intents/{processorPaymentId}/process": {
       "post": {
         "description": "Processes a payment intent that has been confirmed on the client side. Polls the database for payment intent status to become succeeded. Returns the current status of the payment intent; on success, the response is enriched with the Purchase row created by the webhook handler.",
@@ -4861,6 +5330,9 @@
                     },
                     {
                       "$ref": "#/components/schemas/ProcessPaymentSucceededBare"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ProcessPaymentProcessing"
                     },
                     {
                       "$ref": "#/components/schemas/ProcessPaymentTimeout"
@@ -5117,8 +5589,7 @@
             "schema": {
               "enum": [
                 "active",
-                "inactive",
-                "suspended"
+                "inactive"
               ],
               "type": "string"
             }
@@ -5833,6 +6304,7 @@
             "name": "productRef",
             "required": false,
             "schema": {
+              "maxLength": 20,
               "type": "string"
             }
           },
@@ -5842,6 +6314,7 @@
             "name": "customerRef",
             "required": false,
             "schema": {
+              "maxLength": 20,
               "type": "string"
             }
           },

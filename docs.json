@@ -85,6 +85,7 @@
             "group": "Changelog",
             "icon": "clock-rotate-left",
             "pages": [
+              "changelog/2026-07-17",
               "changelog/2026-07-11",
               "changelog/2026-07-01",
               "changelog/2026-06-15",
@@ -117,6 +118,8 @@
               "sdks/typescript/guides/customer-linkage",
               "sdks/typescript/guides/usage-events",
               "sdks/typescript/guides/purchase-management",
+              "sdks/typescript/guides/auto-recharge",
+              "sdks/typescript/guides/business-checkout",
               "sdks/typescript/guides/webhooks",
               "sdks/typescript/guides/examples"
             ]

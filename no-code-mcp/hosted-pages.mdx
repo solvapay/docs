@@ -28,8 +28,26 @@ When customers need to upgrade to or purchase a paid plan, they're directed to a
 2. SolvaPay generates a checkout session with available plans
 3. Customer selects a plan and enters payment details
 4. Payment is processed through your connected Stripe account
-5. Purchase is activated immediately
+5. The success screen appears once the payment is confirmed
 6. Customer is redirected back to their MCP client
+
+The success screen is gated on the actual payment confirmation — it never shows while Stripe is
+still processing the charge, so a refresh cannot surface a still-processing payment as complete.
+
+### Credit top-ups
+
+Pay-as-you-go plans use a hosted top-up page where customers choose an amount and pay to add
+credits.
+
+- **Change amount** — after continuing to payment, customers can go back with the
+  **← Change amount** link to pick a different amount. The entered amount is preserved.
+- **Business purchases** — customers buying as a business can enter their company name, country,
+  and tax identifier (VAT number or EIN) directly on the top-up page. Stripe Tax calculates the
+  correct tax — including reverse charge for eligible EU cross-border B2B purchases — and the
+  final amount updates before the customer confirms. Business details are saved on the customer,
+  so returning buyers don't re-enter them.
+- **Confirmed success** — like checkout, the top-up success screen waits for the payment
+  confirmation before showing, and credits are minted when the charge succeeds.
 
 ### Upgrade via Virtual Tools
 

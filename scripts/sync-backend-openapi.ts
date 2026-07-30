@@ -5,8 +5,48 @@ import path from 'node:path'
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const TARGET_FILE = path.join(ROOT, 'api-reference', 'openapi.json')
-const SOURCE_URL =
-  process.env.BACKEND_OPENAPI_URL?.trim() || 'https://api-dev.solvapay.com/v1/openapi.json'
+
+// The backend was split from a single monolith into independent NestJS services,
+// each of which serves only its own slice of the API at its own
+// `/v1/openapi.json`. There is no longer one aggregated document to fetch, so we
+// pull every service that owns `/v1/sdk/*` routes and merge them. Only these
+// five expose external SDK operations today (identity/mcp-registry/operations
+// serve none), which is why they are the default local sources.
+const DEFAULT_LOCAL_SOURCES = [
+  'http://localhost:3002/v1/openapi.json', // provider-service
+  'http://localhost:3003/v1/openapi.json', // payment-service
+  'http://localhost:3004/v1/openapi.json', // billing-service
+  'http://localhost:3005/v1/openapi.json', // commerce-service
+  'http://localhost:3008/v1/openapi.json', // webhook-service
+]
+
+// Canonical top-level metadata for the aggregated public doc. The per-service
+// specs each carry their own service title and no public `servers`, so we impose
+// the same header the monolith's DocumentBuilder produced instead of leaking a
+// single service's identity into the merged document.
+const DOC_INFO = {
+  title: 'SolvaPay REST API',
+  description: 'The SolvaPay REST API specification',
+  version: '1.0',
+  contact: {},
+}
+
+const resolveSources = (): string[] => {
+  const multi = process.env.BACKEND_OPENAPI_URLS?.trim()
+  if (multi) {
+    return multi
+      .split(/[\s,]+/)
+      .map(entry => entry.trim())
+      .filter(Boolean)
+  }
+
+  const single = process.env.BACKEND_OPENAPI_URL?.trim()
+  if (single) {
+    return [single]
+  }
+
+  return DEFAULT_LOCAL_SOURCES
+}
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -365,33 +405,152 @@ const rewritePublicOauthUrls = (value: unknown): { next: unknown; rewrites: numb
   return { next, rewrites }
 }
 
+interface MergeResult {
+  paths: Record<string, unknown>
+  schemas: Record<string, unknown>
+  securitySchemes: Record<string, unknown>
+  keptExternalOperations: number
+  conflicts: string[]
+}
+
+/**
+ * Merge the SDK slice of every source spec into one document. Each source is
+ * first reduced to `/v1/sdk/*` operations (via `filterExternalOperations`), then
+ * only the schemas reachable from those operations are imported (a service's
+ * internal, non-SDK DTOs are ignored — otherwise an orphan DTO in one service
+ * could shadow the real definition owned by another). Services own disjoint
+ * paths, so path collisions are unexpected and reported. Shared DTOs (e.g. error
+ * envelopes) may legitimately repeat across services — identical duplicates are
+ * silently deduped; genuine shape conflicts between two *referenced* definitions
+ * are surfaced.
+ */
+const reachableSchemaNames = (
+  paths: unknown,
+  schemas: Record<string, unknown>,
+): Set<string> => {
+  const reachable = new Set<string>()
+  collectSchemaRefs(paths, reachable)
+  const queue = [...reachable]
+  while (queue.length > 0) {
+    const name = queue.pop()!
+    const schema = schemas[name]
+    if (!schema) continue
+    const nested = new Set<string>()
+    collectSchemaRefs(schema, nested)
+    for (const ref of nested) {
+      if (!reachable.has(ref)) {
+        reachable.add(ref)
+        queue.push(ref)
+      }
+    }
+  }
+  return reachable
+}
+const mergeSources = (sources: Array<{ url: string; doc: Record<string, unknown> }>): MergeResult => {
+  const paths: Record<string, unknown> = {}
+  const schemas: Record<string, unknown> = {}
+  const securitySchemes: Record<string, unknown> = {}
+  const conflicts: string[] = []
+  let keptExternalOperations = 0
+
+  for (const { url, doc } of sources) {
+    const { keptOperations } = filterExternalOperations(doc)
+    keptExternalOperations += keptOperations
+
+    const docPaths = isRecord(doc.paths) ? doc.paths : {}
+    for (const [pathKey, pathItem] of Object.entries(docPaths)) {
+      if (pathKey in paths) {
+        conflicts.push(`duplicate path "${pathKey}" (also in ${url})`)
+        continue
+      }
+      paths[pathKey] = pathItem
+    }
+
+    const components = isRecord(doc.components) ? doc.components : {}
+
+    const docSchemas = isRecord(components.schemas) ? components.schemas : {}
+    const reachable = reachableSchemaNames(doc.paths, docSchemas)
+    for (const [name, schema] of Object.entries(docSchemas)) {
+      if (!reachable.has(name)) continue
+      if (name in schemas) {
+        if (JSON.stringify(schemas[name]) !== JSON.stringify(schema)) {
+          conflicts.push(`schema "${name}" has conflicting shapes (also in ${url})`)
+        }
+        continue
+      }
+      schemas[name] = schema
+    }
+
+    const docSecurity = isRecord(components.securitySchemes) ? components.securitySchemes : {}
+    for (const [name, scheme] of Object.entries(docSecurity)) {
+      if (!(name in securitySchemes)) {
+        securitySchemes[name] = scheme
+      }
+    }
+  }
+
+  return { paths, schemas, securitySchemes, keptExternalOperations, conflicts }
+}
+
+const findUnresolvedRefs = (spec: Record<string, unknown>): string[] => {
+  const refs = new Set<string>()
+  collectSchemaRefs(spec.paths, refs)
+  collectSchemaRefs(isRecord(spec.components) ? spec.components.schemas : undefined, refs)
+  const schemas =
+    isRecord(spec.components) && isRecord(spec.components.schemas) ? spec.components.schemas : {}
+  return [...refs].filter(name => !(name in schemas))
+}
+
 const main = async (): Promise<void> => {
-  const source = await fetchOpenApi(SOURCE_URL)
-  const {
-    keptOperations: keptExternalOperations,
-    removedOperations: removedNonExternalOperations,
-    removedPaths: removedNonExternalPaths,
-  } = filterExternalOperations(source)
+  const sources = resolveSources()
+  const fetched: Array<{ url: string; doc: Record<string, unknown> }> = []
+  for (const url of sources) {
+    fetched.push({ url, doc: await fetchOpenApi(url) })
+  }
+
+  const merged = mergeSources(fetched)
+
+  const spec: Record<string, unknown> = {
+    openapi: (fetched[0]?.doc.openapi as string) || '3.0.0',
+    info: DOC_INFO,
+    servers: [],
+    tags: [],
+    paths: merged.paths,
+    components: {
+      schemas: merged.schemas,
+      securitySchemes: merged.securitySchemes,
+    },
+  }
+  assertOpenApiShape(spec)
+
   const {
     removedOperations: removedDeprecatedOperations,
     removedPaths: removedDeprecatedPaths,
-  } = filterDeprecatedOperations(source)
-  const prunedSchemas = pruneUnreferencedSchemas(source)
-  const sanitizedSchemaFields = sanitizeNonStandardSchemaFields(source)
-  const removedIncompatibleResponses = sanitizeMintlifyIncompatibleResponses(source)
+  } = filterDeprecatedOperations(spec)
+  const prunedSchemas = pruneUnreferencedSchemas(spec)
+  const sanitizedSchemaFields = sanitizeNonStandardSchemaFields(spec)
+  const removedIncompatibleResponses = sanitizeMintlifyIncompatibleResponses(spec)
   const { next: rewrittenPublicUrls, rewrites: rewrittenPublicUrlCount } = rewritePublicOauthUrls(
-    source,
+    spec,
   )
   assertOpenApiShape(rewrittenPublicUrls)
+
+  const unresolvedRefs = findUnresolvedRefs(rewrittenPublicUrls)
+  if (unresolvedRefs.length > 0) {
+    throw new Error(`Merged spec has unresolved schema refs: ${unresolvedRefs.join(', ')}`)
+  }
 
   const stable = sortDeep(rewrittenPublicUrls)
   await fs.mkdir(path.dirname(TARGET_FILE), { recursive: true })
   await fs.writeFile(TARGET_FILE, `${JSON.stringify(stable, null, 2)}\n`, 'utf-8')
 
-  console.log(`Source: ${SOURCE_URL}`)
-  console.log(`Kept external operations (/v1/sdk/*): ${keptExternalOperations}`)
-  console.log(`Filtered non-external operations: ${removedNonExternalOperations}`)
-  console.log(`Removed empty paths after external filter: ${removedNonExternalPaths}`)
+  console.log(`Sources (${fetched.length}):`)
+  for (const { url } of fetched) console.log(`  - ${url}`)
+  console.log(`Kept external operations (/v1/sdk/*): ${merged.keptExternalOperations}`)
+  if (merged.conflicts.length > 0) {
+    console.warn(`Merge conflicts (${merged.conflicts.length}):`)
+    for (const conflict of merged.conflicts) console.warn(`  ! ${conflict}`)
+  }
   console.log(`Filtered deprecated operations: ${removedDeprecatedOperations}`)
   console.log(`Removed empty paths after deprecated filter: ${removedDeprecatedPaths}`)
   console.log(`Pruned unreachable schemas: ${prunedSchemas}`)

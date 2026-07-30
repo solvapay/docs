@@ -219,8 +219,19 @@
           },
           "display": {
             "$ref": "#/components/schemas/AutoRechargeDisplayDto"
+          },
+          "validation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AutoRechargeValidationMetaResponse"
+              }
+            ],
+            "description": "Validation metadata for the auto-recharge form (always present)"
           }
         },
+        "required": [
+          "validation"
+        ],
         "type": "object"
       },
       "AutoRechargeTopupDto": {
@@ -283,6 +294,31 @@
         },
         "required": [
           "triggered"
+        ],
+        "type": "object"
+      },
+      "AutoRechargeValidationMetaResponse": {
+        "properties": {
+          "maxAmountMajor": {
+            "description": "Maximum display-currency major units accepted for threshold/top-up",
+            "example": 10000,
+            "type": "number"
+          },
+          "stripeMinimumMinorByCurrency": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Stripe minimum charge in minor units, keyed by ISO 4217 currency",
+            "example": {
+              "GBP": 30,
+              "USD": 50
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "stripeMinimumMinorByCurrency",
+          "maxAmountMajor"
         ],
         "type": "object"
       },
@@ -430,8 +466,37 @@
             "description": "ISO 3166-1 alpha-2 country code",
             "type": "string"
           },
+          "customerCity": {
+            "description": "Billing city",
+            "type": "string"
+          },
+          "customerCountry": {
+            "description": "ISO 3166-1 alpha-2 billing country (non-business consumers)",
+            "type": "string"
+          },
+          "customerLine1": {
+            "description": "Billing address line 1",
+            "type": "string"
+          },
+          "customerLine2": {
+            "description": "Billing address line 2",
+            "type": "string"
+          },
+          "customerName": {
+            "description": "Customer full name",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "customerPostalCode": {
+            "description": "Billing postal code (required by Stripe Tax for US)",
+            "type": "string"
+          },
           "customerRef": {
-            "description": "Customer reference to persist business tax details on the customer record",
+            "description": "Customer reference to persist business tax details on the customer record. Only honored by the payment-intent business-details endpoint; ignored on the checkout-session endpoint.",
+            "type": "string"
+          },
+          "customerState": {
+            "description": "Billing state/region",
             "type": "string"
           },
           "isBusiness": {
@@ -440,6 +505,15 @@
           },
           "taxId": {
             "description": "Tax / VAT identification number",
+            "type": "string"
+          },
+          "taxIdType": {
+            "description": "Tax ID type",
+            "enum": [
+              "eu_vat",
+              "gb_vat",
+              "us_ein"
+            ],
             "type": "string"
           }
         },
@@ -747,8 +821,7 @@
           }
         },
         "required": [
-          "email",
-          "metadata"
+          "email"
         ],
         "type": "object"
       },
@@ -871,292 +944,7 @@
           }
         },
         "required": [
-          "customerRef",
-          "autoRecharge"
-        ],
-        "type": "object"
-      },
-      "CreatePlanRequest": {
-        "properties": {
-          "accessExpiryDays": {
-            "exclusiveMinimum": false,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "autoRenew": {
-            "type": "boolean"
-          },
-          "basePrice": {
-            "exclusiveMinimum": false,
-            "minimum": 0,
-            "type": "number"
-          },
-          "billingCycle": {
-            "enum": [
-              "weekly",
-              "monthly",
-              "quarterly",
-              "yearly",
-              "custom"
-            ],
-            "type": "string"
-          },
-          "billingModel": {
-            "enum": [
-              "pre-paid",
-              "post-paid"
-            ],
-            "type": "string"
-          },
-          "billingStrategy": {
-            "properties": {
-              "type": {
-                "type": "string"
-              }
-            },
-            "type": "object"
-          },
-          "cancellationNoticeDays": {
-            "exclusiveMinimum": false,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "creditsPerUnit": {
-            "exclusiveMinimum": false,
-            "minimum": 1,
-            "type": "integer"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "default": {
-            "type": "boolean"
-          },
-          "description": {
-            "maxLength": 500,
-            "pattern": "^[\\p{L}\\p{N}\\s.,'\"&\\/()+:%;?!@#_[\\]\\-]*$",
-            "type": "string"
-          },
-          "features": {
-            "additionalProperties": true,
-            "type": "object"
-          },
-          "freeUnits": {
-            "exclusiveMinimum": false,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "fulfillment": {
-            "properties": {
-              "deliveryMethod": {
-                "type": "string"
-              },
-              "estimatedDelivery": {
-                "type": "string"
-              },
-              "type": {
-                "type": "string"
-              }
-            },
-            "type": "object"
-          },
-          "hidden": {
-            "type": "boolean"
-          },
-          "limit": {
-            "exclusiveMinimum": false,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "limits": {
-            "additionalProperties": true,
-            "type": "object"
-          },
-          "maxActiveUsers": {
-            "exclusiveMinimum": false,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "metadata": {
-            "additionalProperties": true,
-            "type": "object"
-          },
-          "name": {
-            "maxLength": 200,
-            "minLength": 2,
-            "pattern": "^[\\p{L}\\p{N} .,'\"&\\/()+:\\-]*$",
-            "type": "string"
-          },
-          "overagePolicy": {
-            "properties": {
-              "allowOverage": {
-                "type": "boolean"
-              },
-              "maxOverage": {
-                "type": "number"
-              }
-            },
-            "type": "object"
-          },
-          "price": {
-            "exclusiveMaximum": false,
-            "exclusiveMinimum": false,
-            "maximum": 10000000,
-            "minimum": 0,
-            "type": "number"
-          },
-          "pricingOptions": {
-            "items": {
-              "properties": {
-                "basePrice": {
-                  "exclusiveMinimum": false,
-                  "minimum": 0,
-                  "type": "number"
-                },
-                "currency": {
-                  "maxLength": 3,
-                  "minLength": 3,
-                  "type": "string"
-                },
-                "default": {
-                  "type": "boolean"
-                },
-                "price": {
-                  "exclusiveMinimum": false,
-                  "minimum": 0,
-                  "type": "number"
-                },
-                "setupFee": {
-                  "exclusiveMinimum": false,
-                  "minimum": 0,
-                  "type": "number"
-                }
-              },
-              "required": [
-                "currency",
-                "price"
-              ],
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "prorationPolicy": {
-            "properties": {
-              "enabled": {
-                "type": "boolean"
-              },
-              "method": {
-                "enum": [
-                  "proportional",
-                  "full",
-                  "none"
-                ],
-                "type": "string"
-              }
-            },
-            "type": "object"
-          },
-          "returnPolicy": {
-            "properties": {
-              "allowed": {
-                "type": "boolean"
-              },
-              "conditions": {
-                "type": "string"
-              },
-              "period": {
-                "type": "number"
-              }
-            },
-            "type": "object"
-          },
-          "rolloverUnusedUnits": {
-            "type": "boolean"
-          },
-          "setupFee": {
-            "exclusiveMinimum": false,
-            "minimum": 0,
-            "type": "number"
-          },
-          "status": {
-            "enum": [
-              "active",
-              "inactive",
-              "archived"
-            ],
-            "type": "string"
-          },
-          "taxBehavior": {
-            "enum": [
-              "auto",
-              "inclusive",
-              "exclusive"
-            ],
-            "type": "string"
-          },
-          "trialDays": {
-            "exclusiveMinimum": false,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "type": {
-            "enum": [
-              "recurring",
-              "usage-based",
-              "one-time",
-              "hybrid"
-            ],
-            "type": "string"
-          },
-          "usageTracking": {
-            "properties": {
-              "granularity": {
-                "enum": [
-                  "hourly",
-                  "daily",
-                  "weekly",
-                  "monthly"
-                ],
-                "type": "string"
-              },
-              "method": {
-                "enum": [
-                  "automatic",
-                  "manual",
-                  "hybrid"
-                ],
-                "type": "string"
-              }
-            },
-            "type": "object"
-          },
-          "warranty": {
-            "properties": {
-              "duration": {
-                "type": "number"
-              },
-              "terms": {
-                "type": "string"
-              },
-              "unit": {
-                "type": "string"
-              }
-            },
-            "type": "object"
-          }
-        },
-        "required": [
-          "name",
-          "usageTracking",
-          "limits",
-          "metadata",
-          "features",
-          "overagePolicy",
-          "billingStrategy",
-          "prorationPolicy",
-          "returnPolicy",
-          "fulfillment",
-          "warranty"
+          "customerRef"
         ],
         "type": "object"
       },
@@ -1213,9 +1001,7 @@
           }
         },
         "required": [
-          "name",
-          "config",
-          "metadata"
+          "name"
         ],
         "type": "object"
       },
@@ -1289,7 +1075,6 @@
         },
         "required": [
           "customerRef",
-          "metadata",
           "timestamp"
         ],
         "type": "object"
@@ -1931,8 +1716,7 @@
           }
         },
         "required": [
-          "originUrl",
-          "metadata"
+          "originUrl"
         ],
         "type": "object"
       },
@@ -2163,15 +1947,6 @@
             "example": "active",
             "type": "string"
           },
-          "taxBehavior": {
-            "description": "Tax inclusion behavior for business checkout",
-            "enum": [
-              "auto",
-              "inclusive",
-              "exclusive"
-            ],
-            "type": "string"
-          },
           "trialDays": {
             "description": "Free trial period in days",
             "example": 14,
@@ -2196,9 +1971,6 @@
         "required": [
           "type",
           "reference",
-          "price",
-          "currency",
-          "requiresPayment",
           "hidden",
           "isActive",
           "status",
@@ -2628,8 +2400,7 @@
         },
         "required": [
           "meterName",
-          "customerRef",
-          "properties"
+          "customerRef"
         ],
         "type": "object"
       },
@@ -2656,6 +2427,238 @@
         },
         "required": [
           "config"
+        ],
+        "type": "object"
+      },
+      "SdkCreatePlanRequest": {
+        "properties": {
+          "accessExpiryDays": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "billingCycle": {
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "yearly",
+              "custom"
+            ],
+            "type": "string"
+          },
+          "billingModel": {
+            "enum": [
+              "pre-paid",
+              "post-paid"
+            ],
+            "type": "string"
+          },
+          "billingStrategy": {
+            "properties": {
+              "type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "creditsPerUnit": {
+            "exclusiveMinimum": false,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "description": {
+            "maxLength": 500,
+            "pattern": "^[\\p{L}\\p{N}\\s.,'\"&\\/()+:%;?!@#_[\\]\\-]*$",
+            "type": "string"
+          },
+          "features": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "freeUnits": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "fulfillment": {
+            "properties": {
+              "deliveryMethod": {
+                "type": "string"
+              },
+              "estimatedDelivery": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "limit": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "limits": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "maxActiveUsers": {
+            "exclusiveMinimum": false,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 2,
+            "pattern": "^[\\p{L}\\p{N} .,'\"&\\/()+:\\-]*$",
+            "type": "string"
+          },
+          "overagePolicy": {
+            "properties": {
+              "allowOverage": {
+                "type": "boolean"
+              },
+              "maxOverage": {
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
+          "price": {
+            "exclusiveMaximum": false,
+            "exclusiveMinimum": false,
+            "maximum": 10000000,
+            "minimum": 0,
+            "type": "number"
+          },
+          "pricingOptions": {
+            "items": {
+              "properties": {
+                "basePrice": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "currency": {
+                  "maxLength": 3,
+                  "minLength": 3,
+                  "type": "string"
+                },
+                "default": {
+                  "type": "boolean"
+                },
+                "price": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "setupFee": {
+                  "exclusiveMinimum": false,
+                  "minimum": 0,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "currency",
+                "price"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "returnPolicy": {
+            "properties": {
+              "allowed": {
+                "type": "boolean"
+              },
+              "conditions": {
+                "type": "string"
+              },
+              "period": {
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "inactive",
+              "archived"
+            ],
+            "type": "string"
+          },
+          "taxBehavior": {
+            "enum": [
+              "auto",
+              "inclusive",
+              "exclusive"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "recurring",
+              "usage-based",
+              "one-time",
+              "hybrid"
+            ],
+            "type": "string"
+          },
+          "usageTracking": {
+            "properties": {
+              "granularity": {
+                "enum": [
+                  "hourly",
+                  "daily",
+                  "weekly",
+                  "monthly"
+                ],
+                "type": "string"
+              },
+              "method": {
+                "enum": [
+                  "automatic",
+                  "manual",
+                  "hybrid"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "warranty": {
+            "properties": {
+              "duration": {
+                "type": "number"
+              },
+              "terms": {
+                "type": "string"
+              },
+              "unit": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "name"
         ],
         "type": "object"
       },
@@ -2926,6 +2929,11 @@
             "example": "$",
             "type": "string"
           },
+          "description": {
+            "description": "Plan description",
+            "example": "Best for teams getting started",
+            "type": "string"
+          },
           "features": {
             "additionalProperties": true,
             "description": "Plan features",
@@ -2966,6 +2974,11 @@
             "example": "mtr_1A2B3C4D",
             "type": "string"
           },
+          "name": {
+            "description": "Plan name",
+            "example": "Starter",
+            "type": "string"
+          },
           "price": {
             "description": "Plan price in cents",
             "example": 2999,
@@ -3001,6 +3014,17 @@
             "example": 14,
             "type": "number"
           },
+          "type": {
+            "description": "Plan type",
+            "enum": [
+              "recurring",
+              "one-time",
+              "usage-based",
+              "hybrid"
+            ],
+            "example": "recurring",
+            "type": "string"
+          },
           "updatedAt": {
             "description": "Last update timestamp",
             "type": "string"
@@ -3008,6 +3032,7 @@
         },
         "required": [
           "reference",
+          "type",
           "price",
           "currency",
           "requiresPayment",
@@ -3270,6 +3295,19 @@
             "description": "Next billing date",
             "type": "string"
           },
+          "origin": {
+            "description": "How the purchase originated",
+            "enum": [
+              "paid",
+              "free_default",
+              "manual",
+              "one_time",
+              "credit_topup",
+              "admin_assignment"
+            ],
+            "example": "paid",
+            "type": "string"
+          },
           "originalAmount": {
             "description": "Original amount in the payment currency (cents/pence)",
             "example": 10000,
@@ -3302,6 +3340,11 @@
             "example": "pur_1A2B3C4D",
             "type": "string"
           },
+          "requiresPayment": {
+            "description": "Whether the purchase requires payment",
+            "example": false,
+            "type": "boolean"
+          },
           "startDate": {
             "description": "Start date",
             "type": "string"
@@ -3323,8 +3366,6 @@
         "required": [
           "reference",
           "customerRef",
-          "customerEmail",
-          "productRef",
           "status",
           "amount",
           "currency",
@@ -3334,53 +3375,12 @@
         ],
         "type": "object"
       },
-      "UpdateCustomerRequest": {
-        "properties": {
-          "description": {
-            "maxLength": 1000,
-            "pattern": "^[\\p{L}\\p{N}\\s.,'\"&\\/()+:%;?!@#_[\\]\\-]*$",
-            "type": "string"
-          },
-          "email": {
-            "format": "email",
-            "type": "string"
-          },
-          "externalRef": {
-            "maxLength": 50,
-            "type": "string"
-          },
-          "metadata": {},
-          "name": {
-            "maxLength": 100,
-            "pattern": "^[\\p{L}\\p{N} .,'\"&\\/()+:\\-]*$",
-            "type": "string"
-          },
-          "telephone": {
-            "oneOf": [
-              {
-                "pattern": "^\\+[1-9]\\d{6,14}$",
-                "type": "string"
-              },
-              {
-                "enum": [
-                  ""
-                ],
-                "type": "string"
-              }
-            ]
-          }
-        },
-        "type": "object"
-      },
-      "UpdatePlanRequest": {
+      "SdkUpdatePlanRequest": {
         "properties": {
           "accessExpiryDays": {
             "exclusiveMinimum": false,
             "minimum": 0,
             "type": "integer"
-          },
-          "autoRenew": {
-            "type": "boolean"
           },
           "billingCycle": {
             "enum": [
@@ -3406,11 +3406,6 @@
               }
             },
             "type": "object"
-          },
-          "cancellationNoticeDays": {
-            "exclusiveMinimum": false,
-            "minimum": 0,
-            "type": "integer"
           },
           "creditsPerUnit": {
             "exclusiveMinimum": false,
@@ -3531,22 +3526,6 @@
             },
             "type": "array"
           },
-          "prorationPolicy": {
-            "properties": {
-              "enabled": {
-                "type": "boolean"
-              },
-              "method": {
-                "enum": [
-                  "proportional",
-                  "full",
-                  "none"
-                ],
-                "type": "string"
-              }
-            },
-            "type": "object"
-          },
           "returnPolicy": {
             "properties": {
               "allowed": {
@@ -3560,9 +3539,6 @@
               }
             },
             "type": "object"
-          },
-          "rolloverUnusedUnits": {
-            "type": "boolean"
           },
           "status": {
             "enum": [
@@ -3595,17 +3571,44 @@
             "type": "object"
           }
         },
-        "required": [
-          "limits",
-          "features",
-          "metadata",
-          "overagePolicy",
-          "billingStrategy",
-          "prorationPolicy",
-          "returnPolicy",
-          "fulfillment",
-          "warranty"
-        ],
+        "type": "object"
+      },
+      "UpdateCustomerRequest": {
+        "properties": {
+          "description": {
+            "maxLength": 1000,
+            "pattern": "^[\\p{L}\\p{N}\\s.,'\"&\\/()+:%;?!@#_[\\]\\-]*$",
+            "type": "string"
+          },
+          "email": {
+            "format": "email",
+            "type": "string"
+          },
+          "externalRef": {
+            "maxLength": 50,
+            "type": "string"
+          },
+          "metadata": {},
+          "name": {
+            "maxLength": 100,
+            "pattern": "^[\\p{L}\\p{N} .,'\"&\\/()+:\\-]*$",
+            "type": "string"
+          },
+          "telephone": {
+            "oneOf": [
+              {
+                "pattern": "^\\+[1-9]\\d{6,14}$",
+                "type": "string"
+              },
+              {
+                "enum": [
+                  ""
+                ],
+                "type": "string"
+              }
+            ]
+          }
+        },
         "type": "object"
       },
       "UpdateProductRequest": {
@@ -3657,10 +3660,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "config",
-          "metadata"
-        ],
         "type": "object"
       },
       "UsageBillingDto": {
@@ -3737,11 +3736,9 @@
             "type": "string"
           },
           "features": {
-            "items": {
-              "type": "string"
-            },
+            "additionalProperties": true,
             "nullable": true,
-            "type": "array"
+            "type": "object"
           },
           "limits": {
             "additionalProperties": true,
@@ -3763,8 +3760,6 @@
           }
         },
         "required": [
-          "reference",
-          "price",
           "currency",
           "type"
         ],
@@ -3778,7 +3773,12 @@
             "type": "string"
           },
           "plan": {
-            "$ref": "#/components/schemas/UserInfoPlanDto"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserInfoPlanDto"
+              }
+            ],
+            "nullable": true
           },
           "planType": {
             "example": "recurring",
@@ -3802,14 +3802,18 @@
             "type": "string"
           },
           "usage": {
-            "$ref": "#/components/schemas/UserInfoUsageDto"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserInfoUsageDto"
+              }
+            ],
+            "nullable": true
           }
         },
         "required": [
           "reference",
           "status",
-          "productName",
-          "planType"
+          "productName"
         ],
         "type": "object"
       },
@@ -3835,7 +3839,12 @@
       "UserInfoResponse": {
         "properties": {
           "purchase": {
-            "$ref": "#/components/schemas/UserInfoPurchaseDto"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserInfoPurchaseDto"
+              }
+            ],
+            "nullable": true
           },
           "status": {
             "description": "Human-readable status summary",
@@ -3843,7 +3852,12 @@
             "type": "string"
           },
           "user": {
-            "$ref": "#/components/schemas/UserInfoUserDto"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserInfoUserDto"
+              }
+            ],
+            "nullable": true
           },
           "verifyUrl": {
             "description": "Customer portal session URL",
@@ -4134,20 +4148,6 @@
         "description": "Dashboard session JWT issued after provider/operator login.",
         "scheme": "bearer",
         "type": "http"
-      },
-      "OAuth2": {
-        "flows": {
-          "authorizationCode": {
-            "authorizationUrl": "https://api.solvapay.com/v1/customer/auth/authorize",
-            "scopes": {
-              "email": "Email address",
-              "openid": "OpenID Connect scope",
-              "profile": "Profile information"
-            },
-            "tokenUrl": "https://api.solvapay.com/v1/customer/auth/token"
-          }
-        },
-        "type": "oauth2"
       },
       "SecretKey": {
         "bearerFormat": "JWT",
@@ -6034,7 +6034,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreatePlanRequest"
+                "$ref": "#/components/schemas/SdkCreatePlanRequest"
               }
             }
           },
@@ -6201,7 +6201,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdatePlanRequest"
+                "$ref": "#/components/schemas/SdkUpdatePlanRequest"
               }
             }
           },

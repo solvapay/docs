@@ -1,11 +1,11 @@
 ---
 title: "Go live"
-description: "Once you've tested your integration in sandbox mode, you're ready to switch to Live mode and start accepting real payments."
+description: "Once you've tested your integration in sandbox, you're ready to switch to production and start accepting real payments."
 ---
 
 ## Go-live checklist
 
-Before you can switch to live mode, complete these steps:
+Before you can switch to production, complete these steps:
 
 ### Required
 
@@ -28,25 +28,25 @@ If you have not finished payment account setup yet, return to **Settings > Payme
 - **Connect existing Stripe account**
 - **Create new Stripe account** and finish business details, KYC, and bank account
 
-## Switch to live mode
+## Switch to production
 
 Once your checklist is complete:
 
-1. Open the SolvaPay console
-2. Find the **Sandbox/Live toggle**
-3. Click to switch to **Live** mode
+1. Open the SolvaPay Console
+2. Find the **Sandbox/Production toggle**
+3. Click to switch to **Production**
 4. Confirm the switch
 
 That's it. Your integration is now processing real payments.
 
-## What changes in live mode
+## What changes in production
 
-| Aspect | Sandbox | Live |
-|--------|---------|------|
-| Payments | Test mode (no real charges) | Real charges processed |
+| Aspect | Sandbox | Production |
+|--------|---------|------------|
+| Payments | No real charges | Real charges processed |
 | Stripe credentials | Test keys | Live keys |
-| Customer data | Test data | Live data |
-| Webhooks | Test events | Real events |
+| Customer data | Sandbox data | Production data |
+| Webhooks | Sandbox events | Real events |
 
 Your proxy URLs and API endpoints remain the same. The mode switch happens at the account level.
 
@@ -55,18 +55,18 @@ Your proxy URLs and API endpoints remain the same. The mode switch happens at th
 You can switch back to sandbox mode at any time to:
 
 - Test new features or plans
-- Debug issues without affecting live mode usage
+- Debug issues without affecting production usage
 - Train team members
 
 This is available after live activation, whether you activated by connecting an existing Stripe account or completing setup for a new Stripe account.
 
-Your sandbox and live data are kept separate. Switching modes doesn't affect existing customers or purchases in either environment.
+Your sandbox and production data are kept separate. Switching modes doesn't affect existing customers or purchases in either environment.
 
 ## After going live
 
 ### Monitor your first transactions
 
-- Check the dashboard for real-time usage and revenue
+- Check the Console for real-time usage and revenue
 - Verify webhook events are being received
 - Monitor Stripe for successful payments
 

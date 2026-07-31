@@ -5,7 +5,7 @@ description: "Meters define how usage is measured and aggregated for billing and
 
 Meters are the foundation of usage tracking in SolvaPay. A meter defines **what** to measure and **how** to aggregate usage data. Usage records are the **raw data points** recorded against those definitions and stored in the Usage timeseries collection.
 
-Every provider automatically gets a `requests` meter when created. This meter is the only meter in the system — it tracks all billable request activity and powers limit enforcement, usage billing, and analytics.
+Every provider automatically gets a `requests` meter when created. This is the only meter definition seeded by default — it tracks all billable request activity and powers limit enforcement, usage billing, and analytics. MCP tool calls additionally record usage under per-tool `tool:{toolName}` meter names.
 
 ## How Meters Work
 
@@ -66,7 +66,7 @@ This meter is auto-configured per provider and cannot be archived. It is seeded 
 
 ## Aggregation
 
-The `requests` meter uses `count` aggregation, which counts each usage record as one unit. SolvaPay also supports `sum` aggregation for meters that accumulate numeric values (e.g. tokens consumed), though only the `requests` meter is currently in use.
+The `requests` meter uses `count` aggregation, which counts each usage record as one unit. SolvaPay also supports `sum` aggregation for meters that accumulate numeric values (e.g. tokens consumed). `requests` is the only seeded meter *definition*; MCP tool calls also record usage under `tool:{toolName}` meter names.
 
 | Aggregation | Behavior |
 |-------------|----------|

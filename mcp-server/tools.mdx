@@ -1,6 +1,6 @@
 ---
 title: "Tools"
-description: "Complete reference for the 32 tools exposed by the SolvaPay MCP Server, organised across 8 domains."
+description: "Complete reference for the 31 tools exposed by the SolvaPay MCP Server, organised across 7 domains."
 ---
 
 The SolvaPay MCP Server gives AI agents — and any MCP-compatible client — full
@@ -19,10 +19,9 @@ be omitted and will either use a sensible default or be ignored.
 | [Plan Management](#plan-management) | `create_plan` · `get_plan` · `list_plans` · `list_plans_for_product` · `update_plan` · `delete_plan` | 6 |
 | [Purchase Management](#purchase-management) | `list_purchases` · `get_purchase` · `get_purchases_by_customer` · `get_purchases_by_product` · `cancel_renewal` · `check_limits` | 6 |
 | [Payment & Checkout](#payment--checkout) | `create_checkout_session` · `create_customer_session` | 2 |
-| [Revenue](#revenue) | `get_product_balance` | 1 |
 | [Usage Tracking](#usage-tracking) | `record_usage` · `record_bulk_usage` | 2 |
 | [Transactions & Refunds](#transactions--refunds) | `list_transactions` · `get_transaction` · `get_transaction_stats` · `create_refund` | 4 |
-| | **Total** | **32** |
+| | **Total** | **31** |
 
 ---
 
@@ -304,20 +303,6 @@ Generates a URL where the customer can manage their billing, payment methods, an
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `customerRef` | string | Yes | Customer reference |
-
----
-
-## Revenue
-
-| Tool | Description |
-|---|---|
-| `get_product_balance` | Get revenue for a specific product |
-
-### get_product_balance
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `productRef` | string | Yes | Product reference |
 
 ---
 

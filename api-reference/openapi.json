@@ -657,7 +657,7 @@
                           },
                           "kind": {
                             "enum": [
-                              "cadence"
+                              "billingCycle"
                             ],
                             "type": "string"
                           }
@@ -1019,7 +1019,7 @@
                         "properties": {
                           "kind": {
                             "enum": [
-                              "default"
+                              "autoAssigned"
                             ],
                             "type": "string"
                           },
@@ -1036,7 +1036,7 @@
                         "properties": {
                           "kind": {
                             "enum": [
-                              "enterprise"
+                              "hidden"
                             ],
                             "type": "string"
                           },
@@ -1436,7 +1436,7 @@
                     },
                     "kind": {
                       "enum": [
-                        "cadence"
+                        "billingCycle"
                       ],
                       "type": "string"
                     }
@@ -1798,7 +1798,7 @@
                   "properties": {
                     "kind": {
                       "enum": [
-                        "default"
+                        "autoAssigned"
                       ],
                       "type": "string"
                     },
@@ -1815,7 +1815,7 @@
                   "properties": {
                     "kind": {
                       "enum": [
-                        "enterprise"
+                        "hidden"
                       ],
                       "type": "string"
                     },
@@ -2571,7 +2571,7 @@
                           },
                           "kind": {
                             "enum": [
-                              "cadence"
+                              "billingCycle"
                             ],
                             "type": "string"
                           }
@@ -2933,7 +2933,7 @@
                         "properties": {
                           "kind": {
                             "enum": [
-                              "default"
+                              "autoAssigned"
                             ],
                             "type": "string"
                           },
@@ -2950,7 +2950,7 @@
                         "properties": {
                           "kind": {
                             "enum": [
-                              "enterprise"
+                              "hidden"
                             ],
                             "type": "string"
                           },
@@ -4413,7 +4413,7 @@
                     },
                     "kind": {
                       "enum": [
-                        "cadence"
+                        "billingCycle"
                       ],
                       "type": "string"
                     }
@@ -4775,7 +4775,7 @@
                   "properties": {
                     "kind": {
                       "enum": [
-                        "default"
+                        "autoAssigned"
                       ],
                       "type": "string"
                     },
@@ -4792,7 +4792,7 @@
                   "properties": {
                     "kind": {
                       "enum": [
-                        "enterprise"
+                        "hidden"
                       ],
                       "type": "string"
                     },

@@ -62,6 +62,22 @@
         ],
         "type": "object"
       },
+      "AttachBusinessDetailsResponse": {
+        "properties": {
+          "taxBreakdown": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaxBreakdownDto"
+              }
+            ],
+            "description": "Calculated tax breakdown"
+          }
+        },
+        "required": [
+          "taxBreakdown"
+        ],
+        "type": "object"
+      },
       "AutoRechargeConfigDto": {
         "properties": {
           "enabled": {
@@ -163,7 +179,12 @@
           },
           "rateSource": {
             "description": "Source of the exchange rate",
-            "example": "live",
+            "enum": [
+              "parity",
+              "db",
+              "fallback"
+            ],
+            "example": "db",
             "type": "string"
           },
           "thresholdAmountMajor": {
@@ -2016,8 +2037,8 @@
       "CreditDebitSuccessResponse": {
         "properties": {
           "amount": {
-            "description": "Credits debited for this usage event",
-            "example": 10,
+            "description": "Credits debited for this usage event (credits are USD-pegged at 100 credits per minor unit, so a 1¢/unit charge debits 100 credits/unit)",
+            "example": 100,
             "type": "number"
           },
           "autoRecharge": {
@@ -2087,7 +2108,7 @@
       "CustomerBalanceResponse": {
         "properties": {
           "credits": {
-            "description": "Raw credit balance in credits (mils)",
+            "description": "Raw credit balance in credits (100 credits = 1 minor currency unit)",
             "example": 4200,
             "type": "number"
           },
@@ -2292,7 +2313,7 @@
       "LimitBalanceDto": {
         "properties": {
           "creditBalance": {
-            "description": "Credit balance in mils",
+            "description": "Credit balance in credits (100 credits = 1 minor currency unit)",
             "type": "number"
           },
           "creditsPerUnit": {
@@ -2409,7 +2430,7 @@
             "type": "string"
           },
           "creditBalance": {
-            "description": "Credit balance in mils (for pre-paid usage-based plans)",
+            "description": "Credit balance in credits (100 credits = 1 minor currency unit), for pre-paid usage-based plans",
             "type": "number"
           },
           "creditsPerUnit": {
@@ -2441,7 +2462,7 @@
             "description": "Product the limit check applies to"
           },
           "remaining": {
-            "description": "Remaining usage units before hitting the limit",
+            "description": "Remaining usage units before hitting the limit. `-1` means unlimited (no finite cap).",
             "example": 997,
             "type": "number"
           },
@@ -3035,6 +3056,7 @@
             "description": "Created or updated MCP server identity",
             "example": {
               "defaultPlanRef": "pln_FREE123",
+              "id": "507f1f77bcf86cd799439011",
               "mcpProxyUrl": "https://acme-docs.mcp.solvapay.com/mcp",
               "reference": "mcp_ABC123",
               "subdomain": "acme-docs",
@@ -3716,7 +3738,7 @@
       "SdkPaymentIntentListItem": {
         "properties": {
           "amount": {
-            "description": "Amount in the charge currency (minor units)",
+            "description": "Amount in USD minor units (ledger/normalised); `currency` is the presentment currency",
             "example": 4999,
             "type": "number"
           },
@@ -3731,7 +3753,7 @@
             "type": "string"
           },
           "currency": {
-            "description": "ISO 4217 currency code",
+            "description": "ISO 4217 presentment (charge) currency code",
             "example": "usd",
             "type": "string"
           },
@@ -3747,6 +3769,16 @@
           },
           "status": {
             "description": "Payment intent status",
+            "enum": [
+              "pending",
+              "requires_payment_method",
+              "requires_confirmation",
+              "requires_action",
+              "processing",
+              "succeeded",
+              "failed",
+              "cancelled"
+            ],
             "example": "succeeded",
             "type": "string"
           }
@@ -3787,7 +3819,7 @@
             "type": "string"
           },
           "amount": {
-            "description": "Amount in the charge currency (minor units)",
+            "description": "Amount in USD minor units (ledger/normalised). The charge-currency amount is `originalAmount` paired with `currency`.",
             "example": 4999,
             "type": "number"
           },
@@ -3802,7 +3834,7 @@
             "type": "string"
           },
           "currency": {
-            "description": "ISO 4217 currency code",
+            "description": "ISO 4217 presentment (charge) currency code — pairs with `originalAmount`",
             "example": "usd",
             "type": "string"
           },
@@ -3812,7 +3844,7 @@
             "type": "string"
           },
           "exchangeRate": {
-            "description": "Exchange rate applied to the amount",
+            "description": "Exchange rate applied to convert to USD",
             "example": 1,
             "type": "number"
           },
@@ -3822,7 +3854,7 @@
             "type": "string"
           },
           "originalAmount": {
-            "description": "Original amount in the payment currency (minor units)",
+            "description": "Charge-currency amount in minor units (the currency the customer is billed in)",
             "example": 4999,
             "type": "number"
           },
@@ -3843,6 +3875,16 @@
           },
           "status": {
             "description": "Payment intent status",
+            "enum": [
+              "pending",
+              "requires_payment_method",
+              "requires_confirmation",
+              "requires_action",
+              "processing",
+              "succeeded",
+              "failed",
+              "cancelled"
+            ],
             "example": "requires_payment_method",
             "type": "string"
           },
@@ -3876,6 +3918,11 @@
           "currencySymbol": {
             "description": "Currency symbol",
             "example": "$",
+            "type": "string"
+          },
+          "description": {
+            "description": "Plan description",
+            "example": "Best for teams getting started",
             "type": "string"
           },
           "features": {
@@ -3952,12 +3999,6 @@
       },
       "SdkPlanSnapshotDto": {
         "properties": {
-          "billingCycle": {
-            "description": "Derived billing cycle",
-            "example": "monthly",
-            "nullable": true,
-            "type": "string"
-          },
           "currency": {
             "description": "Currency code",
             "example": "USD",
@@ -3968,16 +4009,6 @@
             "description": "Plan features",
             "nullable": true,
             "type": "object"
-          },
-          "includedUnits": {
-            "description": "Derived included units for the metered allowance (0 = unlimited/none)",
-            "example": 5000,
-            "type": "number"
-          },
-          "meterRef": {
-            "description": "Meter key referenced by the plan options",
-            "example": "requests",
-            "type": "string"
           },
           "name": {
             "description": "Plan name captured at purchase time",
@@ -4000,11 +4031,6 @@
           "reference": {
             "description": "Plan reference",
             "example": "pln_1A2B3C4D",
-            "type": "string"
-          },
-          "type": {
-            "description": "Derived plan type",
-            "example": "recurring",
             "type": "string"
           }
         },
@@ -4269,6 +4295,73 @@
           "startDate",
           "isRecurring",
           "createdAt"
+        ],
+        "type": "object"
+      },
+      "TaxBreakdownDto": {
+        "properties": {
+          "currency": {
+            "description": "ISO 4217 currency code",
+            "type": "string"
+          },
+          "inclusive": {
+            "description": "Whether tax is included in the listed price",
+            "type": "boolean"
+          },
+          "subtotal": {
+            "description": "Pre-tax amount in minor units",
+            "type": "number"
+          },
+          "taxAmount": {
+            "description": "Tax amount in minor units",
+            "type": "number"
+          },
+          "taxRate": {
+            "description": "Tax rate as a decimal (e.g. 0.25 for 25%)",
+            "type": "number"
+          },
+          "taxType": {
+            "description": "Stripe tax type (e.g. vat, sales_tax, gst)",
+            "enum": [
+              "amusement_tax",
+              "communications_tax",
+              "gst",
+              "hst",
+              "igst",
+              "jct",
+              "lease_tax",
+              "pst",
+              "qst",
+              "retail_delivery_fee",
+              "rst",
+              "sales_tax",
+              "service_tax",
+              "vat"
+            ],
+            "type": "string"
+          },
+          "total": {
+            "description": "Total amount in minor units",
+            "type": "number"
+          },
+          "treatment": {
+            "enum": [
+              "reverse_charge",
+              "standard",
+              "none",
+              "not_collecting"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "subtotal",
+          "taxAmount",
+          "taxRate",
+          "treatment",
+          "total",
+          "currency",
+          "inclusive"
         ],
         "type": "object"
       },
@@ -4959,6 +5052,8 @@
           },
           "limits": {
             "additionalProperties": true,
+            "deprecated": true,
+            "description": "Deprecated: always null. Limit data now lives in the plan snapshot options (`kind: \"limit\"`).",
             "nullable": true,
             "type": "object"
           },
@@ -5091,8 +5186,8 @@
       "UserInfoUsageDto": {
         "properties": {
           "meterRef": {
-            "description": "Meter reference",
-            "example": "meter_ABC123",
+            "description": "Meter key referenced by the plan options",
+            "example": "requests",
             "nullable": true,
             "type": "string"
           },
@@ -5106,6 +5201,7 @@
             "type": "number"
           },
           "total": {
+            "description": "Included allowance for the period. `0` means unlimited / no finite cap.",
             "example": 1000,
             "type": "number"
           },
@@ -5230,7 +5326,7 @@
         "properties": {
           "api_version": {
             "description": "API version that produced the event payload.",
-            "example": "2024-01-01",
+            "example": "2025-10-01",
             "type": "string"
           },
           "created": {
@@ -5539,7 +5635,7 @@
     },
     "/v1/sdk/checkout-sessions": {
       "post": {
-        "description": "Creates a hosted checkout session for a customer to purchase a product plan. Returns a session ID and checkout URL for redirect.",
+        "description": "Creates a hosted checkout session for a customer to purchase a product plan, or to top up credits (`purpose: \"credit_topup\"`, which skips `productRef`). Returns a session ID and checkout URL for redirect.",
         "operationId": "CheckoutSessionSdkController_createCheckoutSession",
         "parameters": [],
         "requestBody": {
@@ -6244,7 +6340,7 @@
     },
     "/v1/sdk/meter-events": {
       "post": {
-        "description": "Records a single usage event against a named meter.",
+        "description": "Records a single usage event against a named meter. When the customer is on a metered plan, credits are also debited for the event (the debit is not surfaced in the response).",
         "operationId": "MeterEventsSdkController_recordEvent",
         "parameters": [],
         "requestBody": {
@@ -6294,7 +6390,7 @@
     },
     "/v1/sdk/meter-events/bulk": {
       "post": {
-        "description": "Persists each event with recordUsage (same shape as single POST), after shared meter/customer checks.",
+        "description": "Persists the events with bulkRecordUsage (which records each event like the single POST), after shared meter/customer checks.",
         "operationId": "MeterEventsSdkController_recordBulkEvents",
         "parameters": [],
         "requestBody": {
@@ -6395,7 +6491,7 @@
         ]
       },
       "post": {
-        "description": "Creates a new payment intent for a customer to purchase a plan. Requires an idempotency key to prevent duplicate charges. Returns client secret and publishable key needed for frontend integration.",
+        "description": "Creates a new payment intent for a customer to purchase a plan, top up credits (`purpose: \"credit_topup\"`), or bill usage (`purpose: \"usage_billing\"`) with an explicit `amount`/`currency`. Requires an idempotency key to prevent duplicate charges. Returns client secret and publishable key needed for frontend integration.",
         "operationId": "PaymentIntentSdkController_createPaymentIntent",
         "parameters": [
           {
@@ -6483,6 +6579,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachBusinessDetailsResponse"
+                }
+              }
+            },
             "description": "Business details applied and tax breakdown returned"
           },
           "400": {
@@ -6623,9 +6726,9 @@
               "application/json": {
                 "schema": {
                   "example": {
-                    "code": "PAYMENT_INTENT_NOT_FOUND",
-                    "error": "Payment intent not found",
-                    "success": false
+                    "error": "Not Found",
+                    "message": "Payment intent not found",
+                    "statusCode": 404
                   }
                 }
               }
@@ -7157,7 +7260,7 @@
     },
     "/v1/sdk/products/{productRef}/plans": {
       "get": {
-        "description": "Retrieves the plans belonging to a product, paginated in-memory. Returns SDK-shaped plans with money serialized to wire units and unsupported plan types normalised to \"recurring\".",
+        "description": "Retrieves the plans belonging to a product, paginated in-memory. Returns SDK-shaped plans with option money serialized to integer minor units; hidden plans are excluded. The `type` field is derived from each plan's composable options.",
         "operationId": "PlanSdkController_listPlans",
         "parameters": [
           {
@@ -7233,7 +7336,7 @@
         ]
       },
       "post": {
-        "description": "Creates a plan under the product. Unfinished pricing fields (setup fee, trial days, rollover, tiers, etc.) are stripped from SDK input, and unsupported plan types fall back to \"recurring\".",
+        "description": "Creates a plan under the product from its composable pricing `options[]` (charges, billing cycle, tiers, limits, entitlements, trials, discounts, rollovers). Options are validated for cross-option coherence and rejected with 400 if invalid; money fields are integer minor units.",
         "operationId": "PlanSdkController_createPlan",
         "parameters": [
           {
@@ -7390,7 +7493,7 @@
         ]
       },
       "put": {
-        "description": "Updates a plan under the product. Unfinished pricing fields are stripped from SDK input, and unsupported plan types fall back to \"recurring\".",
+        "description": "Updates a plan under the product. Provided `options[]` replace the plan pricing and are validated for cross-option coherence (400 if invalid); money fields are integer minor units.",
         "operationId": "PlanSdkController_updatePlan",
         "parameters": [
           {

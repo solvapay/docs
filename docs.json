@@ -44,7 +44,7 @@
             ]
           },
           {
-            "group": "No-code MCP integration",
+            "group": "Managed MCP",
             "icon": "credit-card",
             "pages": [
               "no-code-mcp/overview",

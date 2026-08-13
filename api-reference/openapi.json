@@ -4078,7 +4078,7 @@
             "type": "string"
           },
           "isMcpPay": {
-            "description": "Whether this product uses the no-code MCP integration (SolvaPay reverse proxy)",
+            "description": "Whether this product uses the Managed MCP integration (SolvaPay reverse proxy)",
             "example": false,
             "type": "boolean"
           },
@@ -6869,7 +6869,7 @@
     },
     "/v1/sdk/products": {
       "get": {
-        "description": "Retrieves a paginated list of products for the authenticated provider. Supports filtering by status, search term, and no-code MCP integration flag.",
+        "description": "Retrieves a paginated list of products for the authenticated provider. Supports filtering by status, search term, and Managed MCP integration flag.",
         "operationId": "ProductSdkController_listProducts",
         "parameters": [
           {
@@ -6915,7 +6915,7 @@
             }
           },
           {
-            "description": "Filter no-code MCP integration products",
+            "description": "Filter Managed MCP integration products",
             "in": "query",
             "name": "isMcpPay",
             "required": false,

@@ -1902,6 +1902,9 @@
           "imageUrl": {
             "type": "string"
           },
+          "isManagedMcp": {
+            "type": "boolean"
+          },
           "isMcpPay": {
             "type": "boolean"
           },
@@ -4077,8 +4080,14 @@
             "description": "URL to the product image",
             "type": "string"
           },
-          "isMcpPay": {
+          "isManagedMcp": {
             "description": "Whether this product uses the Managed MCP integration (SolvaPay reverse proxy)",
+            "example": false,
+            "type": "boolean"
+          },
+          "isMcpPay": {
+            "deprecated": true,
+            "description": "Deprecated alias of isManagedMcp. Prefer isManagedMcp; still emitted for wire compatibility.",
             "example": false,
             "type": "boolean"
           },
@@ -4140,6 +4149,7 @@
           "name",
           "balance",
           "totalTransactions",
+          "isManagedMcp",
           "isMcpPay",
           "status",
           "createdAt",
@@ -6916,6 +6926,16 @@
           },
           {
             "description": "Filter Managed MCP integration products",
+            "in": "query",
+            "name": "isManagedMcp",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "deprecated": true,
+            "description": "Deprecated alias of isManagedMcp",
             "in": "query",
             "name": "isMcpPay",
             "required": false,

@@ -14,7 +14,7 @@
 - Use **product** for monetized offering, not "service"
 - Use **plan** for pricing tier, not "subscription plan" unless needed for clarity
 - Use **purchase** for completed checkout, and **checkout** for in-progress payment flow
-- Use **No-code MCP integration** for the hosted auth and monetization path for MCP servers (nav/section label); use **the no-code path** as body shorthand. Do not use the retired "MCP Pay" brand
+- Use **Managed MCP** for the managed auth and monetization path for MCP servers (nav/section label); use **Managed MCP** or **the managed path** as body shorthand. Do not use the retired "MCP Pay" or "Hosted MCP" names
 - Use **MCP Server** for SolvaPay's MCP integration docs (preserve exact casing)
 - Use **TypeScript SDK** for `@solvapay/*` package docs
 - Use **sandbox** and **production** (not "test mode" / "live mode")
@@ -37,7 +37,7 @@
 
 Document:
 - Public SolvaPay product flows: onboarding, products, plans, purchases, hosted pages, webhooks
-- No-code MCP integration setup and operations
+- Managed MCP setup and operations
 - MCP Server setup, tools, and usage patterns
 - TypeScript SDK integration and practical implementation guidance
 - End-user troubleshooting and error resolution steps

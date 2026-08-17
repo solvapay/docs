@@ -15,8 +15,8 @@ Always configure a free/default plan that provides:
 
 A well-designed free tier converts trial users to paid customers.
 
-If your onboarding goal is frictionless adoption, you can start with an unlimited free tier by
-setting `freeUnits: 0` on the free plan. This keeps access auth-protected while removing usage
+If your onboarding goal is frictionless adoption, start with an unlimited free tier by setting
+`limit.cap` to `0` on the free plan. This keeps access auth-protected while removing usage
 caps for early users.
 
 ### Start free, add paid plans later
@@ -63,33 +63,33 @@ Included allowances are enforced through [meters](/plans/glossary) — every MCP
 
 1. Each MCP tool gets an auto-created meter (e.g. `tool:search_documents`)
 2. Every tool invocation records a usage event (fire-and-forget, non-blocking)
-3. Usage-based and hybrid plans automatically track requests and define a `limit`
-4. On each request, SolvaPay queries the meter timeseries to check current usage against the plan's included cap
+3. Usage-based and hybrid plans track requests through a per-unit `charge` and an optional `limit`
+4. On each request, SolvaPay queries the meter timeseries and compares it to the plan's included cap
 
 ### Included settings
 
-| Setting | Plan field | Description |
-|---------|-----------|-------------|
-| **Hard cap** | `limit` | Maximum requests per billing period (`0` = unlimited) |
-| **Included** | `freeUnits` | Requests included before overage. `0` is the unlimited sentinel (`LimitOption.cap === 0`) |
-| **Credits per request** | `creditsPerUnit` | Credits deducted per request for prepaid usage |
-| **Overage policy** | `overagePolicy` | Whether to allow usage beyond the included cap (hybrid plans) |
+| Setting | Option | Description |
+|---------|--------|-------------|
+| **Included** | `limit.cap` | Requests included per period. `0` is unlimited |
+| **On exceed** | `limit.onExceed` | `block` stops access; `charge` bills overage at the per-request rate |
+| **Usage rate** | `charge` with `per: "unit"` | Money per request (minor units). Not a credit count |
+| **Wallet** | `prepaid` | Minimum top-up and low-balance threshold for the credit wallet |
 
-See [Plans and billing glossary](/plans/glossary) for the credit peg, meter noun, and `freeUnits: 0` sentinel.
+See [Plans](/plans/overview) for compositions and [Plans and billing glossary](/plans/glossary) for the credit peg and `cap: 0` sentinel.
 
 ### Overage options
 
-1. **Hard limit** (`limit` with no overage policy) - Block requests when included usage is exhausted. The paywall response includes a checkout URL.
-2. **Soft limit** (hybrid plan with `overagePolicy.allowOverage: true`) - Allow continued use, charge overage at `overageRate` per request up to `maxOverage`
-3. **Unlimited** (`limit: 0`) - No cap on usage
+1. **Hard cap** (`onExceed: "block"`) — stop requests when included usage is exhausted. The paywall includes a checkout URL.
+2. **Overage** (`onExceed: "charge"`) — keep serving and bill usage beyond the included cap at the per-request rate
+3. **Unlimited** (`cap: 0`) — no included cap
+4. **Pay-as-you-go** — omit `limit`; every request is billed
 
 ### Included recommendations
 
-- **Free tier:** Hard limit to prevent abuse (e.g. `limit: 100`, `freeUnits: 100`)
-- **Paid tiers:** Usage-based with generous included usage or hybrid with overage
-- **Enterprise:** `limit: 0` (unlimited) or very high limits
-- **Unlimited free tier option:** Set free-plan `freeUnits: 0` when you intentionally want unlimited
-  free usage. That `0` is the unlimited sentinel, not "zero included".
+- **Free tier:** Hard cap to prevent abuse (`limit.cap: 100`, `onExceed: "block"`)
+- **Paid tiers:** Usage-based with generous included usage, or hybrid with overage (`onExceed: "charge"`)
+- **Enterprise:** `limit.cap: 0` (unlimited) or a very high cap
+- **Unlimited free tier:** `limit.cap: 0` means unlimited, not "zero included"
 
 ## Tool Assignment Patterns
 
@@ -262,5 +262,5 @@ If authenticated tool calls fail:
 - [Quick start](/no-code-mcp/quick-start) - Set up your first product
 - [Authentication](/no-code-mcp/authentication) - Deep dive into OAuth
 - [Plans and billing glossary](/plans/glossary) - Credits, meter noun, included vs wallet remaining
-- [Plans](/plans/overview) - Plan types and meter-based pricing
+- [Plans](/plans/overview) — compose pricing from options
 - [Billing](/plans/billing) - Usage-based billing and end-of-period processing

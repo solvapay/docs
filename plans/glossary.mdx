@@ -42,6 +42,8 @@ Two leftover counts exist. Do not mix them.
 
 The stored included cap is `LimitOption.cap`. Copy says **included**, not "limit" or "quota".
 
+Recurring, usage-based, hybrid, and one-time are **derived labels** from `options[]`, not stored plan types. See [Plans](/plans/overview).
+
 `LimitOption.cap === 0` means unlimited. Commerce emits that sentinel on the wire as `freeUnits: 0`. A missing limit option is pay-as-you-go (no included allowance), not unlimited.
 
 ## Overage

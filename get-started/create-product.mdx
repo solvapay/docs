@@ -34,16 +34,14 @@ Fill in:
 Add one or more pricing options (plans) for this product.
 Click **Add pricing option** to create each plan inline.
 
-Set the values needed for your billing model:
+Pick a template to seed the plan, then compose the options you need:
 
-- **Price** (and **currency** for recurring/one-time plans, or **credits per unit** for usage-based plans)
-- **Billing cycle** when applicable
-- **Meter** for usage-based tracking
-- **Limits** and included usage
-- **Features** (optional) — provider-defined feature flags
+- **Price** and **currency** (flat, per-request, or per-seat)
+- **Billing cycle** when the plan renews
+- **Meter** and **included** usage for metered plans
+- **Benefits** (optional) — feature flags on the plan
 
-You can add multiple plans (for example: Free, Pro, Enterprise). Plans are created as part of
-the product. See [Plans documentation](/plans/overview) for plan types and detailed configuration.
+Templates (Recurring, Usage-based, One-time, Hybrid, Blank) only start the `options[]` list. They are not stored types. See [Plans](/plans/overview) for compositions that derive those labels.
 
 After adding your pricing options, you can either click **Create product** to finish, or continue to the optional integration step.
 
@@ -70,4 +68,4 @@ After creation, your product is active and visible on the product detail page. F
 - [TypeScript SDK CLI setup](/sdks/typescript/setup/cli) — fastest setup for TypeScript projects
 - [SDK quick start](/sdks/typescript/setup/quick-start) — protect your first endpoint
 - [Test in sandbox](/get-started/test-in-sandbox) — validate purchases and usage before go-live
-- [Plans](/plans/overview) — detailed plan type and pricing configuration
+- [Plans](/plans/overview) — compose pricing from options

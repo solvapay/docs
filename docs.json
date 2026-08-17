@@ -60,7 +60,8 @@
             "icon": "tags",
             "pages": [
               "plans/overview",
-              "plans/billing"
+              "plans/billing",
+              "plans/glossary"
             ]
           },
           {

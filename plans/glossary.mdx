@@ -1,0 +1,83 @@
+---
+title: "Plans and billing glossary"
+description: "What a credit is, how meters name usage, and the difference between included allowance and wallet coverage."
+---
+
+SolvaPay splits **what gets counted** from **what gets spent**. The meter supplies the display noun. Credits are only the prepaid wallet.
+
+## Credits
+
+A credit is a prepaid wallet unit. **100 credits = 1 USD cent.**
+
+| Term | Meaning |
+| --- | --- |
+| Credit balance | How many credits the customer holds |
+| Top-up | One payment that adds credits (`purpose: 'credit_topup'`) |
+| Auto-recharge | The setting that tops up the wallet when the balance is low |
+
+Credits are never a count of activity. Usage rates in the console and customer UI are **money per meter noun** (`$0.02 / request`). Credits stay on the balance widget and ledger.
+
+## Meter noun
+
+A meter defines what to count. Every provider is seeded with one meter:
+
+| Field | Seeded default |
+| --- | --- |
+| `name` | `requests` |
+| `displayName` | Requests |
+| `unit` | `requests` |
+
+MCP tool calls also record usage under `tool:{toolName}` meter names. Custom meters may use another noun (`documents`, `tokens`). Copy uses that noun: "1,000 requests included", not "1,000 units".
+
+A usage event is one recorded data point against a meter. The HTTP path stays `POST /v1/sdk/meter-events`.
+
+## Included vs remaining
+
+Two leftover counts exist. Do not mix them.
+
+| Count | Wire field | Meaning |
+| --- | --- | --- |
+| Included remaining | `LimitResponse.remaining` | Leftover **included allowance** toward the plan cap. `-1` means unlimited |
+| Wallet coverage | `remainingUnits` | How many metered items the **credit balance** still covers (`balance / creditsPerUnit`) |
+
+The stored included cap is `LimitOption.cap`. Copy says **included**, not "limit" or "quota".
+
+`LimitOption.cap === 0` means unlimited. Commerce emits that sentinel on the wire as `freeUnits: 0`. A missing limit option is pay-as-you-go (no included allowance), not unlimited.
+
+## Overage
+
+Overage is usage beyond the included allowance, charged per meter noun. A plan with no included cap is pure pay-as-you-go: every counted item is billed at the per-request rate.
+
+## Activation and paywall
+
+`POST /v1/sdk/activate` follows the plan shape:
+
+| Plan | Result |
+| --- | --- |
+| Free | `activated` immediately |
+| Usage-based (metered, no billing cycle) | `activated` immediately. A zero balance is not an activation gate |
+| Paid recurring, hybrid, or one-time | `payment_required` — complete checkout before the plan activates |
+
+A usage plan's empty wallet surfaces later as `topup_required` at usage time, not at activation.
+
+## Credit minting
+
+Credits mint when the charge succeeds. The webhook is an idempotent backstop, not the primary booking path.
+
+## Words to avoid
+
+| Avoid | Use instead |
+| --- | --- |
+| Units (generic) | The meter noun (`requests`, or the meter's `unit`) |
+| Quota | Included |
+| Consumption (as a noun) | Usage |
+| Calls / messages (as a stand-in) | The meter noun, unless that meter’s `unit` really is "calls" |
+| Automatic top-up (on the setting) | Auto-recharge |
+
+Wire identifiers (`units`, `CHARGE_PERS = 'unit'`, `customer.credit.auto_topup_failed`) stay as published.
+
+## Next steps
+
+- [Plans](/plans/overview) — plan types and configuration
+- [Billing](/plans/billing) — cycles, renewals, and usage on a purchase
+- [Usage events](/sdks/typescript/guides/usage-events) — record usage from the TypeScript SDK

@@ -10,7 +10,7 @@ description: "This guide covers recommended patterns for configuring your Manage
 Always configure a free/default plan that provides:
 
 - **Basic tools for discovery** - Let users try your service
-- **Limited quota** - Prevent abuse while allowing evaluation
+- **Limited included usage** - Prevent abuse while allowing evaluation
 - **Clear upgrade path** - Make it obvious how to get more
 
 A well-designed free tier converts trial users to paid customers.
@@ -33,10 +33,10 @@ This lets you avoid pricing lock-in before you understand usage patterns.
 
 Structure your plans by tool access to create clear value differentiation:
 
-| Plan | Tools | Quota | Price |
-|------|-------|-------|-------|
-| **Free** | `basic_search`, `list_items` | 100 calls/month | $0 |
-| **Pro** | All Free + `advanced_search`, `export` | 10,000 calls/month | $19/month |
+| Plan | Tools | Included | Price |
+|------|-------|----------|-------|
+| **Free** | `basic_search`, `list_items` | 100 requests/month | $0 |
+| **Pro** | All Free + `advanced_search`, `export` | 10,000 requests/month | $19/month |
 | **Enterprise** | All tools + `admin_*` | Unlimited | Custom |
 
 ### Tiering Strategies
@@ -53,41 +53,43 @@ Structure your plans by tool access to create clear value differentiation:
 
 **By Volume:**
 - All tiers get same tools
-- Differentiate by quota limits
+- Differentiate by included limits
 
-## Quota Management
+## Included usage
 
-Quotas are enforced through [meters](/meters/overview) — every MCP tool call automatically records a meter event against a `tool:{toolName}` meter. Plans reference these meters to set limits.
+Included allowances are enforced through [meters](/plans/glossary) — every MCP tool call automatically records a usage event against a `tool:{toolName}` meter. Plans reference these meters to set limits.
 
-### How Meter-Based Quotas Work
+### How meter-based included usage works
 
 1. Each MCP tool gets an auto-created meter (e.g. `tool:search_documents`)
-2. Every tool invocation records a meter event (fire-and-forget, non-blocking)
+2. Every tool invocation records a usage event (fire-and-forget, non-blocking)
 3. Usage-based and hybrid plans automatically track requests and define a `limit`
-4. On each request, SolvaPay queries the meter timeseries to check current usage against the plan's limit
+4. On each request, SolvaPay queries the meter timeseries to check current usage against the plan's included cap
 
-### Quota Settings
+### Included settings
 
-| Setting | Plan Field | Description |
+| Setting | Plan field | Description |
 |---------|-----------|-------------|
-| **Hard cap** | `limit` | Maximum units per billing period (`0` = unlimited) |
-| **Free units** | `freeUnits` | Units included before billing starts |
-| **Credits per unit** | `creditsPerUnit` | Credits per metered unit for usage-based billing |
-| **Overage policy** | `overagePolicy` | Whether to allow usage beyond the limit (hybrid plans) |
+| **Hard cap** | `limit` | Maximum requests per billing period (`0` = unlimited) |
+| **Included** | `freeUnits` | Requests included before overage. `0` is the unlimited sentinel (`LimitOption.cap === 0`) |
+| **Credits per request** | `creditsPerUnit` | Credits deducted per request for prepaid usage |
+| **Overage policy** | `overagePolicy` | Whether to allow usage beyond the included cap (hybrid plans) |
 
-### Overage Options
+See [Plans and billing glossary](/plans/glossary) for the credit peg, meter noun, and `freeUnits: 0` sentinel.
 
-1. **Hard limit** (`limit` with no overage policy) - Block requests when quota exhausted. The paywall response includes a checkout URL.
-2. **Soft limit** (hybrid plan with `overagePolicy.allowOverage: true`) - Allow continued use, charge overage at `overageRate` per unit up to `maxOverage`
+### Overage options
+
+1. **Hard limit** (`limit` with no overage policy) - Block requests when included usage is exhausted. The paywall response includes a checkout URL.
+2. **Soft limit** (hybrid plan with `overagePolicy.allowOverage: true`) - Allow continued use, charge overage at `overageRate` per request up to `maxOverage`
 3. **Unlimited** (`limit: 0`) - No cap on usage
 
-### Quota Recommendations
+### Included recommendations
 
 - **Free tier:** Hard limit to prevent abuse (e.g. `limit: 100`, `freeUnits: 100`)
-- **Paid tiers:** Usage-based with generous limits or hybrid with overage
+- **Paid tiers:** Usage-based with generous included usage or hybrid with overage
 - **Enterprise:** `limit: 0` (unlimited) or very high limits
 - **Unlimited free tier option:** Set free-plan `freeUnits: 0` when you intentionally want unlimited
-  free usage
+  free usage. That `0` is the unlimited sentinel, not "zero included".
 
 ## Tool Assignment Patterns
 
@@ -251,7 +253,7 @@ If authentication fails:
 If authenticated tool calls fail:
 1. Check user's purchase status
 2. Verify tool is assigned to user's plan
-3. Check if quota is exhausted
+3. Check if included usage is exhausted
 4. Review origin server logs for errors
 
 ## Next Steps
@@ -259,6 +261,6 @@ If authenticated tool calls fail:
 - [Managed MCP overview](/no-code-mcp/overview) - Review core concepts
 - [Quick start](/no-code-mcp/quick-start) - Set up your first product
 - [Authentication](/no-code-mcp/authentication) - Deep dive into OAuth
-- [Meters](/meters/overview) - Meter definitions and auto-created tool meters
+- [Plans and billing glossary](/plans/glossary) - Credits, meter noun, included vs wallet remaining
 - [Plans](/plans/overview) - Plan types and meter-based pricing
 - [Billing](/plans/billing) - Usage-based billing and end-of-period processing

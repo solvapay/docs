@@ -2449,6 +2449,18 @@
             "example": "requests",
             "type": "string"
           },
+          "needsTopUp": {
+            "description": "Access is blocked pending an auto-recharge top-up of the prepaid balance — `onExceed: top_up`.",
+            "type": "boolean"
+          },
+          "needsUpgrade": {
+            "description": "Access is blocked pending a plan switch to the limit's target pricing — `onExceed: auto_upgrade`.",
+            "type": "boolean"
+          },
+          "overage": {
+            "description": "Access is granted and usage beyond the included cap accrues an overage charge — `onExceed: charge`.",
+            "type": "boolean"
+          },
           "plans": {
             "description": "Active plans on the product available for activation or checkout",
             "items": {
@@ -2468,6 +2480,14 @@
             "description": "Remaining usage units before hitting the limit. `-1` means unlimited (no finite cap).",
             "example": 997,
             "type": "number"
+          },
+          "throttled": {
+            "description": "Access is granted but the caller should degrade/throttle service — the limit was exceeded with `onExceed: throttle`.",
+            "type": "boolean"
+          },
+          "upgraded": {
+            "description": "The customer was auto-upgraded to the target pricing to restore access — `onExceed: auto_upgrade` succeeded.",
+            "type": "boolean"
           },
           "withinLimits": {
             "description": "Whether the customer is within their usage limits",

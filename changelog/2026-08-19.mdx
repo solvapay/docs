@@ -1,0 +1,250 @@
+---
+title: "August 2026 release"
+description: "Composable plan options, Stripe Tax on live accounts, MCP on the official TypeScript SDK v2, MCP authorization conformance, and the AI plan builder."
+---
+
+## Composable plan options
+
+A plan is no longer one of four fixed shapes. It is an ordered `options[]` array, and the plan
+type you see in the SolvaPay Console is a derived label. The option kinds are `charge`,
+`billingCycle`, `limit`, `tier`, `trial`, `prepaid`, `entitlement`, `rollover`, `discount`, and
+the `autoAssigned` and `hidden` markers.
+
+- Every money role — plan price, per-unit rate, setup fee, per-seat rate — takes a per-currency
+  price list, with one currency marked as the plan default. Adding a currency prefills the price
+  at the current FX rate so you can round it to a clean figure.
+- `tier` supports graduated and volume bands. `prepaid` carries a minimum top-up and a
+  low-balance threshold, enforced at top-up time. `trial` can require a card and name a plan to
+  downgrade to. Setup fees are included in the checkout total shown to the customer.
+- The plan pricing builder shows a live tax preview, and tells you when Stripe is not connected
+  rather than showing a blank estimate.
+- Plans can be reordered — the order drives how your pricing surfaces render — and cloned.
+  Duplicate plan names within a product are rejected as you type.
+- Only free plans can be marked auto-assigned. Marking a plan with a per-unit charge as
+  auto-assigned is blocked in the builder, with an explanation.
+
+See [Plans overview](/plans/overview) for the option catalog and the common compositions.
+
+<Warning>
+  **Plan responses changed shape in `@solvapay/server` 2.1.0.** `SdkPlanResponse` and
+  `SdkPlanSnapshotDto` now carry `options[]` and a derived `type`. The flat pricing fields are
+  gone: `setupFee`, `trialDays`, `billingCycle`, `billingModel`, `creditsPerUnit`, `measures`,
+  `meterRef`, `limit`, `rolloverUnusedUnits`, `freeUnits`, `limits`, and `hidden`. `price` is now
+  optional and holds the derived headline amount.
+
+  Read the equivalent option off `plan.options` instead. If you annotate with
+  `components['schemas']['SdkPlanResponse']` you will get type errors on the removed fields — but
+  if you read them off a plain `listPlans()` result they are now `undefined` rather than a compile
+  error, so check any code that branches on `plan.billingCycle` or `plan.trialDays`.
+
+  `checkLimits`, paywall decisions, and purchase payloads are unaffected and keep the flat fields
+  they already returned.
+</Warning>
+
+## Credits and meter nouns
+
+Credits now mean one thing: the prepaid wallet, pegged at 100 credits to 1 USD cent. Usage prices
+read as money per meter noun (`$0.10 / request`) instead of `10 credits/request`.
+
+- The credit debit unit is reconciled with USD-pegged funding. This fixes a 100× error where a
+  100 SEK top-up appeared to buy roughly 1,040 requests instead of roughly 100, and where the
+  paywall over-reported how many requests the balance still covered by the same factor — which
+  mis-gated access and low-balance alerts.
+- The top-up screen explains the per-currency minimum instead of silently disabling the button.
+- On `payable()` options, paywall metadata, and `checkLimits`, prefer `meterName` over the
+  deprecated `usageType`. `usageType` is still accepted as an alias and is now typed as a plain
+  string, so a custom meter name type-checks on either field.
+
+See the [Plans glossary](/plans/glossary) for the vocabulary.
+
+## Tax
+
+Stripe Tax now applies on live accounts, not just newly connected ones.
+
+- Tax settings are written on live accounts instead of being skipped as already active, and
+  going live no longer requires you to declare a tax registration up front.
+- One Stop Shop registration is attempted when your account is eligible, and the actual outcome
+  is stored rather than assumed.
+- Buyer tax jurisdictions and tax IDs persist on the customer and carry through checkout, so the
+  same details apply on the next purchase. `@solvapay/core` validates tax IDs against the same
+  jurisdiction list the platform accepts.
+
+## Managed MCP naming
+
+`isManagedMcp` is the canonical product flag for the managed MCP path. `isMcpPay` remains
+accepted on input and emitted on output as a deprecated wire alias, so existing integrations keep
+working — migrate reads to `isManagedMcp`.
+
+See [Managed MCP overview](/no-code-mcp/overview).
+
+## MCP on the official TypeScript SDK v2
+
+`@solvapay/mcp` and `@solvapay/mcp-core` 0.3.0 move to the official MCP TypeScript SDK v2
+(`@modelcontextprotocol/server` and `@modelcontextprotocol/core` 2.0.0, replacing
+`@modelcontextprotocol/sdk`).
+
+- `createSolvaPayMcpFetchHandler` takes `factory: McpServerFactory` instead of `server`, so a
+  fresh server is built per request.
+- `responseMode: 'json' | 'sse' | 'auto'` replaces the removed `mode` option. 2025-era clients
+  are still served through the SDK's default stateless legacy leg, so existing hosts keep working.
+- `@modelcontextprotocol/ext-apps` has no v2 build, so `registerAppTool`, `registerAppResource`,
+  and `RESOURCE_MIME_TYPE` are now exported from `@solvapay/mcp`. Replace
+  `@modelcontextprotocol/ext-apps/server` imports. Client-side ext-apps usage inside iframe
+  bundles is unaffected.
+- The `zod` peer is `^4.2.0` and `engines.node` is `>=20` across the MCP packages and
+  `@solvapay/server`. Node 18 is end of life.
+
+See the [MCP guide](/sdks/typescript/guides/mcp) and the [MCP app guide](/sdks/typescript/guides/mcp-app).
+
+<Warning>
+  **`customer_ref` was broken on SDK v2 before 0.3.0.** SDK v2 moved the auth envelope from
+  `extra.authInfo` to `extra.http.authInfo`, so authenticated tool calls resolved to no customer:
+  intent tools returned an empty account panel for paying customers, and `registerPayable` tools
+  billed against `anonymous`. Upgrade to `@solvapay/mcp` and `@solvapay/mcp-core` 0.3.0.
+</Warning>
+
+## MCP authorization and custom domains
+
+Hosted OAuth now conforms to the 2025-11-25 MCP authorization spec. Access tokens are bound to a
+resource audience, refresh tokens rotate, client ID metadata documents are supported, and
+authorization responses carry the RFC 9207 `iss` parameter. This closes token-confusion and
+open-redirect gaps in the previous flow.
+
+- RFC 8707 resource indicators are canonicalized when stored and when compared. Clients that sent
+  the raw protected-resource-metadata resource on `/authorize` and a normalized form on `/token`
+  no longer get `invalid_grant`. A genuine resource mismatch now returns `invalid_target`, so
+  clients stop re-authorizing in a loop.
+- OAuth resource metadata advertises `https://{host}/mcp`, so managed MCP clients mint tokens the
+  proxy accepts.
+- MCP servers can bind a hostname you own. Domains are verified by TXT record, DNS checks are
+  zone-aware and show the specific failure, domains are purged when a provider is torn down, and
+  origin fetches are pinned to the resolved address to close a DNS-rebinding window.
+- Public clients get `none` advertised as a token endpoint auth method, token errors use RFC 6749
+  codes instead of a generic unauthorized response, and MCP consent recovers when an OAuth
+  identity link is orphaned.
+
+See [Managed MCP authentication](/no-code-mcp/authentication).
+
+<Warning>
+  **Access tokens issued before this release are rejected.** Tokens are now bound to a resource
+  audience, and pre-audience tokens have none. MCP clients re-run the authorization flow and
+  obtain a new token automatically; no configuration change is needed on your side.
+</Warning>
+
+## SDK setup diagnostics
+
+Misconfiguration now fails where you can see it.
+
+- `npx solvapay doctor` runs explicit network checks: secret key validity, product existence, and
+  product readiness.
+- `verifyProductConfiguration()` on `@solvapay/server` is an opt-in startup check, alongside
+  synchronous `productRef` shape validation, one-line MCP config logging, and enriched OAuth
+  dynamic client registration failure diagnostics.
+- `payable()` and the paywall read `SOLVAPAY_PRODUCT_REF` and throw when no product ref resolves.
+
+<Warning>
+  **`SOLVAPAY_PRODUCT` is replaced by `SOLVAPAY_PRODUCT_REF`, with no alias.** An unresolved
+  product ref now throws instead of falling back to a `default-product` placeholder that no
+  provider owns — the old fallback returned 404s rather than working. Rename the variable, or pass
+  `productRef` to `payable()` directly. The error names the fix and points at `solvapay doctor`.
+</Warning>
+
+See the [CLI reference](/sdks/typescript/setup/cli).
+
+## Console
+
+- **AI plan builder** — describe a plan in conversation and the builder authors it, inline on the
+  plan card, for new and existing plans, with a live checkout preview beside the chat.
+- **Plan discovery from a pricing page** — point the builder at a pricing page URL and it
+  reconstructs the equivalent SolvaPay plans for your review before creating them. It handles
+  per-seat pricing, monthly and annual toggles, free tiers, included usage, and contact-sales
+  tiers as hidden plans.
+- **Product view and edit** — a read-only product detail page with Overview, Plans, Integration,
+  Purchases, and Customers tabs, plus a dedicated edit page. Product rows show real purchase and
+  transaction counts, and row actions moved into a kebab menu.
+- **Per-provider release toggles** — features can be launched or disabled per provider, with an
+  operator-facing Feature Flags page. The AI plan builder and plan discovery are gated this way.
+- **Draft persistence** — the create-product wizard saves your progress and offers to restore it
+  if you navigate away or reload.
+- Plan created, updated, and deleted events now stream in real time, and the assign-plan picker
+  shows the billing interval again.
+
+## Fixes
+
+**Activation and purchase gating**
+
+- Paid default plans always require explicit activation. A customer can no longer start spending
+  on a plan they never chose just because they hold a credit balance. Explicit activation of a
+  pure usage plan is unchanged and still immediate.
+- A free zero-rate metered plan marked auto-assigned now enrolls at MCP sign-in, so clients stop
+  showing no active plan.
+- The MCP paywall says "activate" instead of "purchase required" when the customer already holds
+  credits.
+
+**Free plans and credits**
+
+- Hosted checkout shows genuinely free plans, stops labelling paid usage plans as free, and
+  activates pure usage plans immediately instead of demanding an upfront top-up.
+- Selecting a free usage-based plan at checkout no longer charges the buyer and drops them into a
+  top-up flow.
+
+**Onboarding and product creation**
+
+- Default meters survive a dev-tools reset and the go-live migration, so onboarding and metered
+  plan saves stop failing.
+- Onboarding blocks product creation until a plan exists, adds a Back button, and explains what
+  is wrong instead of bouncing you back a step.
+- Duplicate product and plan names are caught in the create wizard instead of silently dropping a
+  plan after the product is created.
+- Plan meter names match case-insensitively, and plan validation lists every specific error
+  inline instead of one generic failure.
+
+**Checkout and email**
+
+- An abandoned or timed-out checkout reports a terminal `expired` status, so MCP clients and the
+  hosted page stop polling forever.
+- The hosted customer account page no longer errors for customers with a paid purchase.
+- "View receipt" in purchase confirmation emails opens the customer's receipt instead of failing
+  on a missing session id.
+- The recorded payment-processor fee no longer includes SolvaPay's application fee, so provider
+  fee breakdowns are correct.
+- Duplicate Stripe webhook deliveries are an idempotent no-op instead of an error.
+
+**Hosted pages**
+
+- Hosted pages honour the full saved theme — accent, palette, light and dark, logo, icon, font —
+  and reflect live preview edits. The sign-in page renders the correct branding.
+- Hosted customer sessions no longer end on a single expired token. Token refresh was failing for
+  every hosted customer and the failure path discarded the stored token.
+- Receipt dates and usage numbers render in the customer's locale instead of the server's.
+- Screens refetch on reconnect, so a dropped socket no longer leaves stale data such as an
+  unchanged balance after a credit grant.
+
+**Console**
+
+- The Managed MCP product detail page no longer freezes and blocks sidebar navigation, and
+  opening a credit top-up row in the purchases drawer no longer crashes the console.
+- Disallowed characters in a plan name show the specific reason inline instead of a vague toast
+  on save.
+- The plan editor's palette no longer re-offers price roles the plan already has, which used to
+  silently add a stray second-currency row.
+- Copying a secret key works without revealing it on screen first.
+- Customer detail and edit pages identify the customer by reference, so a customer with no name
+  no longer renders a blank header.
+- Filter dropdowns can be cleared back to unfiltered.
+- Cloning a product no longer errors, and the operations console no longer redirects to the
+  provider console when a session expires.
+
+## Package versions
+
+| Package | Version |
+| --- | --- |
+| `@solvapay/server` | 2.1.0 |
+| `@solvapay/core` | 1.3.0 |
+| `@solvapay/react` | 1.7.0 |
+| `@solvapay/next` | 1.3.1 |
+| `@solvapay/mcp` | 0.3.0 |
+| `@solvapay/mcp-core` | 0.3.0 |
+| `@solvapay/init` | 0.4.0 |
+| `solvapay` | 1.3.0 |
+| `create-solvapay` | 0.6.0 |

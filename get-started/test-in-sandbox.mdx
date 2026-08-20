@@ -9,7 +9,7 @@ Before testing, make sure you have:
 
 - Created your first product
 - Configured pricing plans during product creation
-- Chosen your integration path (no-code MCP integration or SDK)
+- Chosen your integration path (Managed MCP or SDK)
 
 If you are on the SDK path, run [`npx solvapay init`](/sdks/typescript/setup/cli) first so your
 project is connected before endpoint testing.
@@ -25,15 +25,15 @@ In sandbox mode:
 
 You can see your current mode in the console header.
 
-You can switch between **Live** and **sandbox** at any time. Many providers activate live first, then switch back to sandbox for safe testing and regression checks.
+You can switch between **production** and **sandbox** at any time. Many providers activate production first, then switch back to sandbox for safe testing and regression checks.
 
 ## Testing your integration
 
-### For the no-code MCP integration
+### For Managed MCP
 
 1. **Add your proxy URL to an MCP client**
 
-   Copy the proxy URL from the no-code MCP integration section and add it to your MCP client (e.g., Cursor, Claude Desktop).
+   Copy the proxy URL from the Managed MCP section and add it to your MCP client (e.g., Cursor, Claude Desktop).
 
 2. **Complete the OAuth flow**
 
@@ -41,7 +41,7 @@ You can switch between **Live** and **sandbox** at any time. Many providers acti
 
 3. **Test tool access**
 
-   Call a protected tool and verify it succeeds. Check the dashboard to see the usage recorded.
+   Call a protected tool and verify it succeeds. Check the Console to see the usage recorded.
 
 4. **Test plan restrictions**
 
@@ -90,12 +90,12 @@ Use any future expiration date and any 3-digit CVC.
 
 Before or after going live, verify:
 
-- [ ] Users can authenticate (OAuth for the no-code MCP integration, your auth for SDK)
+- [ ] Users can authenticate (OAuth for Managed MCP, your auth for SDK)
 - [ ] Free plan users can access free tools/endpoints
 - [ ] Paid tools are blocked for free users
 - [ ] Checkout flow completes successfully
 - [ ] After payment, users gain access to paid features
-- [ ] Usage is tracked correctly in the dashboard
+- [ ] Usage is tracked correctly in the Console
 - [ ] Quota limits are enforced when exceeded
 
 ## Next steps

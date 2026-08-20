@@ -14,10 +14,20 @@
 - Use **product** for monetized offering, not "service"
 - Use **plan** for pricing tier, not "subscription plan" unless needed for clarity
 - Use **purchase** for completed checkout, and **checkout** for in-progress payment flow
-- Use **No-code MCP integration** for the hosted auth and monetization path for MCP servers (nav/section label); use **the no-code path** as body shorthand. Do not use the retired "MCP Pay" brand
+- Use **Managed MCP** for the managed auth and monetization path for MCP servers (nav/section label); use **Managed MCP** or **the managed path** as body shorthand. Do not use the retired "MCP Pay" or "Hosted MCP" names
 - Use **MCP Server** for SolvaPay's MCP integration docs (preserve exact casing)
 - Use **TypeScript SDK** for `@solvapay/*` package docs
 - Use **sandbox** and **production** (not "test mode" / "live mode")
+- Use **usage** as the umbrella noun (nav, analytics, "usage this month")
+- Use the **meter noun** for counted quantity ("1,000 requests included"). The seeded default meter is `requests`
+- Use **credits** only for the prepaid wallet. Peg: 100 credits = 1 USD cent
+- Use **included** for the per-cycle allowance (`LimitOption.cap`). Do not say "free units", "quota", or "allowance" in copy
+- Use **overage** for usage beyond included, charged per meter noun
+- Use **top up** / **top-up** for a one-off add of credits (`purpose: 'credit_topup'`)
+- Use **auto-recharge** for the setting that tops up the credit wallet automatically. Do not say "automatic top-up" on auto-recharge surfaces
+- Use **usage event** for one recorded data point. The HTTP path stays `POST /v1/sdk/meter-events`
+- Do not use generic **units**, **quota**, **consumption** as a noun, or **calls**/**messages** as stand-ins for the default meter. A meter whose `unit` is "calls" may say "calls". Wire identifiers (`units`, `CHARGE_PERS = 'unit'`) stay
+- Keep two remaining counts distinct: `LimitResponse.remaining` is leftover included allowance (`-1` = unlimited); `remainingUnits` is how many metered items the credit balance still covers
 
 ## Style preferences
 
@@ -37,7 +47,7 @@
 
 Document:
 - Public SolvaPay product flows: onboarding, products, plans, purchases, hosted pages, webhooks
-- No-code MCP integration setup and operations
+- Managed MCP setup and operations
 - MCP Server setup, tools, and usage patterns
 - TypeScript SDK integration and practical implementation guidance
 - End-user troubleshooting and error resolution steps

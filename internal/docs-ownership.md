@@ -10,7 +10,7 @@ This file defines canonical ownership boundaries for SolvaPay docs content.
 
 ## Naming boundaries
 
-- **No-code MCP integration**: hosted auth and monetization for MCP servers (the no-code path).
+- **Managed MCP**: managed auth and monetization for MCP servers (the managed path).
 - **Admin MCP Server**: provider account MCP operations.
 - **origin MCP server**: your own MCP endpoint that SolvaPay proxies or integrates with.
 

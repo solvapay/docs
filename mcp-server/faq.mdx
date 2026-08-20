@@ -7,11 +7,11 @@ description: "Frequently asked questions about the SolvaPay MCP Server."
 
 **How many tools are available?**
 
-27 tools across 8 domains: Customer, Product, Plan, Purchase, Payment, Revenue, Usage, and Transaction.
+31 tools across 7 domains: Customer, Product, Plan, Purchase, Payment, Usage, and Transaction.
 
 **What AI assistants are supported?**
 
-Any assistant that supports the Model Context Protocol with Streamable HTTP transport. This includes Cursor, Claude Desktop, Windsurf, and others. See [Installation](./installation) for setup instructions.
+Any assistant that supports the Model Context Protocol with Streamable HTTP transport. This includes Cursor, Claude Desktop, Windsurf, and others. See [Installation](/mcp-server/installation) for setup instructions.
 
 **Is my data isolated?**
 
@@ -23,7 +23,7 @@ Yes. Every tool call is scoped to the provider account associated with your cred
 
 The MCP server supports two authentication methods:
 
-- **OAuth login** — For clients that support OAuth (Claude.ai, Claude Desktop). You sign in with your SolvaPay dashboard credentials (email code, Google, or GitHub) and authorize the connection. No API key needed.
+- **OAuth login** — For clients that support OAuth (Claude.ai, Claude Desktop). You sign in with your SolvaPay Console credentials (email code, Google, or GitHub) and authorize the connection. No API key needed.
 - **API key** — For config-based clients (Cursor, VS Code). Pass your API key via the `X-API-Key` header or the `Authorization: Bearer` header.
 
 **Can only existing providers connect?**
@@ -32,11 +32,11 @@ Yes. The OAuth flow only allows sign-in — it does not create new accounts. You
 
 **Can I use both sandbox and production keys?**
 
-Yes. Configure separate MCP server entries in your client — one with a sandbox key for testing and another with a production key. See [Installation](./installation#using-multiple-environments) for details.
+Yes. Configure separate MCP server entries in your client — one with a sandbox key for testing and another with a production key. See [Installation](/mcp-server/installation#using-multiple-environments) for details.
 
 **What happens if my API key is compromised?**
 
-Revoke the key immediately in your SolvaPay dashboard under **Settings > API Keys**, then generate a new one and update your MCP configuration.
+Revoke the key immediately in your SolvaPay Console under **Settings > API Keys**, then generate a new one and update your MCP configuration.
 
 **What happens if my OAuth session expires?**
 

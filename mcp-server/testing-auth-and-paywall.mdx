@@ -3,14 +3,14 @@ title: "Test MCP server auth and paywall"
 description: "Validate OAuth authentication and paywall behavior in Claude or Cursor with one shared live-testing flow."
 ---
 
-Use this guide to validate your MCP Server in **Live** mode after setup. This flow is shared across
-the no-code MCP integration and SDK integration.
+Use this guide to validate your MCP Server in **production** after setup. This flow is shared across
+the managed path and SDK integration.
 
 ## Prerequisites
 
 Before testing, make sure you have:
 
-- An active product with the no-code MCP integration or SDK paywall configuration complete
+- An active product with Managed MCP or SDK paywall configuration complete
 - An MCP server URL ready to connect
 - Access to Claude or Cursor
 
@@ -19,7 +19,7 @@ Before testing, make sure you have:
 The chat test prompts and expected outcomes are the same for both integration paths. Only the
 connection method differs.
 
-### No-code MCP integration
+### Managed MCP
 
 In SolvaPay Console, open your product overview and click **Connect**.
 
@@ -64,10 +64,10 @@ If results are not as expected:
 - Confirm you connected the correct MCP server URL
 - Confirm your product is active and tool-to-plan mapping is configured
 - Re-run the OAuth flow and sign in with the expected account
-- Confirm you are testing in **Live** mode with live credentials
+- Confirm you are testing in **production** with production credentials
 
 ## Related guides
 
-- [Create a no-code MCP product](/no-code-mcp/create-no-code-mcp-product)
+- [Create a Managed MCP product](/no-code-mcp/create-no-code-mcp-product)
 - [MCP Server Integration Guide](/sdks/typescript/guides/mcp)
 - [Test in Sandbox](/get-started/test-in-sandbox)

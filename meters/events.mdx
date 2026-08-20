@@ -32,6 +32,7 @@ Record usage directly from your backend using the SDK API:
 # Record a single event
 POST /v1/sdk/meter-events
 {
+  "meterName": "requests",
   "customerRef": "cus_abc123",
   "value": 1,
   "properties": {
@@ -45,9 +46,9 @@ POST /v1/sdk/meter-events
 # Record events in bulk
 POST /v1/sdk/meter-events/bulk
 {
-  "records": [
-    { "customerRef": "cus_abc123", "value": 1 },
-    { "customerRef": "cus_def456", "value": 1 }
+  "events": [
+    { "meterName": "requests", "customerRef": "cus_abc123", "value": 1 },
+    { "meterName": "requests", "customerRef": "cus_def456", "value": 1 }
   ]
 }
 ```
@@ -93,11 +94,11 @@ await nats.publish('solvapay.meter.recordBulk', {
 
 ### Automatic MCP Tool Tracking
 
-Every MCP tool call through the SolvaPay proxy automatically records a usage record against the provider's `requests` meter. No SDK integration needed — the proxy records usage with the outcome as a property:
+Every MCP tool call through the SolvaPay proxy automatically records a usage record under a per-tool `tool:{toolName}` meter (e.g. `tool:get_customer`). No SDK integration needed — the proxy records usage with the outcome as a property:
 
 ```json
 {
-  "meterName": "requests",
+  "meterName": "tool:get_customer",
   "customerRef": "cus_abc123",
   "value": 1,
   "properties": {

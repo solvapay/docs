@@ -22,6 +22,8 @@ jobs:
         with:
           repository: solvapay/solvapay-sdk
           path: _sdk
+          sparse-checkout: docs
+          sparse-checkout-cone-mode: true
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -39,6 +41,11 @@ jobs:
 
       - name: Sync TypeScript SDK docs
         run: npx --yes tsx scripts/sync-typescript-sdk-docs.ts
+
+      # Drop the SDK tree before mint/PR so plan markdown and extra MDX
+      # cannot fail validation or get committed into the docs repo.
+      - name: Remove SDK checkout
+        run: rm -rf "$GITHUB_WORKSPACE/_sdk"
 
       - name: Install Mint CLI
         run: npm install -g mint@latest

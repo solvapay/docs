@@ -7,3 +7,6 @@ drafts/
 *.draft.mdx
 AGENTS.md
 migration/
+
+# Accidental SDK checkout next to docs (CI removes this before mint)
+_sdk/

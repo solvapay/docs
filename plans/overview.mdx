@@ -104,15 +104,6 @@ A feature flag or numeric benefit on the plan. The console label is **Benefit**.
 | `requireCard` | `boolean` | Collect a card before the trial starts |
 | `downgradeToPricingId` | `string` | Target plan when `onEnd` is `downgrade` |
 
-### `prepaid`
-
-Credit-wallet behavior for usage plans (minimum top-up, low-balance threshold).
-
-| Field | Type | Description |
-| --- | --- | --- |
-| `minTopUpMinor` | `number` | Minimum top-up, minor units |
-| `lowBalanceUnits` | `number` | Warn when wallet coverage falls to this many metered items |
-
 ### `discount`
 
 | Field | Type | Description |
@@ -186,13 +177,14 @@ A $0 flat charge plus `autoAssigned` is a free recurring fallback.
       "scope": "billing_period",
       "meter": "requests",
       "onExceed": "charge"
-    },
-    { "kind": "prepaid", "minTopUpMinor": 1000 }
+    }
   ]
 }
 ```
 
 `amountMinor: 2` is $0.02 per request. Do not send `creditsPerUnit` as a plan field.
+
+Minimum top-up is a provider setting (`minTopUpMinor` in SolvaPay Console settings), not a plan option. See [Auto-recharge](/sdks/typescript/guides/auto-recharge).
 
 ### Tiered — banded rates for one meter
 

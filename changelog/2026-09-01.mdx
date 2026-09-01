@@ -1,0 +1,21 @@
+---
+title: "September 2026"
+description: "The prepaid plan option is removed. Minimum top-up moves to provider settings and is enforced on every top-up path."
+---
+
+## Prepaid option removed
+
+`kind: "prepaid"` is no longer a plan option. Credit-wallet behavior is not per-plan: a wallet
+belongs to a customer and a provider, so a plan-level minimum or low-balance threshold could not
+govern it.
+
+- Incoming `kind: "prepaid"` is accepted and dropped. Responses never emit it.
+- `lowBalanceUnits` is gone. The low-balance webhook still fires from the credit debit path at the
+  existing threshold of 10 remaining units, after auto-recharge is attempted, and is deduped per
+  customer.
+- `minTopUpMinor` is now a **provider setting** in SolvaPay Console. It applies to hosted top-up,
+  payment-intent top-up, and auto-recharge. Amounts below the floor — the higher of Stripe's
+  per-currency minimum and the provider minimum — are **rejected**, not silently raised.
+
+See [Plans](/plans/overview), [Billing](/plans/billing), and
+[Auto-recharge](/sdks/typescript/guides/auto-recharge).

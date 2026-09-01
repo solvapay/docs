@@ -73,7 +73,8 @@ Included allowances are enforced through [meters](/plans/glossary) — every MCP
 | **Included** | `limit.cap` | Requests included per period. `0` is unlimited |
 | **On exceed** | `limit.onExceed` | `block` stops access; `charge` bills overage at the per-request rate |
 | **Usage rate** | `charge` with `per: "unit"` | Money per request (minor units). Not a credit count |
-| **Wallet** | `prepaid` | Minimum top-up and low-balance threshold for the credit wallet |
+
+Minimum top-up is a provider setting in SolvaPay Console, not a plan option. See [Auto-recharge](/sdks/typescript/guides/auto-recharge).
 
 See [Plans](/plans/overview) for compositions and [Plans and billing glossary](/plans/glossary) for the credit peg and `cap: 0` sentinel.
 

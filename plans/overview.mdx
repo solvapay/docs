@@ -59,14 +59,16 @@ Makes the plan recurring. Omit it for one-time or pay-as-you-go usage.
 
 ### `tier`
 
-Volume or graduated rates for a meter. The embedded `charge` is per-unit.
+Volume or graduated rates for a meter. The embedded `charge` is per-unit. One
+option per band — see [Tiered](#tiered-banded-rates-for-one-meter) for a worked
+example and for how the two modes differ.
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `from` | `number` | Inclusive start of the band |
-| `to` | `number \| null` | Inclusive end. `null` is the unbounded top band |
-| `mode` | `enum` | `graduated` or `volume` |
-| `charge` | `object` | Embedded per-unit charge (`amountMinor`, `currency`, `per: "unit"`, `meter`) |
+| `from` | `number` | Start of the band, inclusive. The first band starts at `0` |
+| `to` | `number \| null` | End of the band, exclusive — the next band starts here. `null` is the unbounded top band |
+| `mode` | `enum` | `graduated` or `volume`. Every band on a meter must use the same one |
+| `charge` | `object` | Embedded per-unit charge (`amountMinor`, `currency`, `per: "unit"`, `meter`). Its `meter` is what groups the band |
 
 ### `limit`
 
@@ -101,15 +103,6 @@ A feature flag or numeric benefit on the plan. The console label is **Benefit**.
 | `onEnd` | `enum` | `convert`, `cancel`, or `downgrade` |
 | `requireCard` | `boolean` | Collect a card before the trial starts |
 | `downgradeToPricingId` | `string` | Target plan when `onEnd` is `downgrade` |
-
-### `prepaid`
-
-Credit-wallet behavior for usage plans (minimum top-up, low-balance threshold).
-
-| Field | Type | Description |
-| --- | --- | --- |
-| `minTopUpMinor` | `number` | Minimum top-up, minor units |
-| `lowBalanceUnits` | `number` | Warn when wallet coverage falls to this many metered items |
 
 ### `discount`
 
@@ -184,13 +177,66 @@ A $0 flat charge plus `autoAssigned` is a free recurring fallback.
       "scope": "billing_period",
       "meter": "requests",
       "onExceed": "charge"
-    },
-    { "kind": "prepaid", "minTopUpMinor": 1000 }
+    }
   ]
 }
 ```
 
 `amountMinor: 2` is $0.02 per request. Do not send `creditsPerUnit` as a plan field.
+
+Minimum top-up is a provider setting (`minTopUpMinor` in SolvaPay Console settings), not a plan option. See [Auto-recharge](/sdks/typescript/guides/auto-recharge).
+
+### Tiered — banded rates for one meter
+
+A `tier` option is one band. Send one per band, contiguous and covering the whole
+range: each band's `from` is the previous band's `to`, the first starts at `0`,
+and exactly one band — the last — sets `to: null` for everything above it.
+
+```json
+{
+  "name": "Scale",
+  "currency": "USD",
+  "options": [
+    {
+      "kind": "tier",
+      "from": 0,
+      "to": 1000,
+      "mode": "graduated",
+      "charge": { "per": "unit", "amountMinor": 2, "currency": "USD", "meter": "requests" }
+    },
+    {
+      "kind": "tier",
+      "from": 1000,
+      "to": null,
+      "mode": "graduated",
+      "charge": { "per": "unit", "amountMinor": 1, "currency": "USD", "meter": "requests" }
+    }
+  ]
+}
+```
+
+Every band in a group shares one `mode`, and the two modes price the same usage
+differently. For 1,500 requests against the plan above:
+
+| `mode`      | What it charges                                     | Total  |
+| ----------- | --------------------------------------------------- | ------ |
+| `graduated` | Each band prices the requests that fall inside it: 1,000 × $0.02 + 500 × $0.01 | $25.00 |
+| `volume`    | The total picks one band and prices everything at that rate: 1,500 × $0.01     | $15.00 |
+
+Group bands by meter. A plan can tier two meters by sending two groups, each
+contiguous in its own `charge.meter`. Bands are grouped by that meter, never by
+their position in `options[]`.
+
+A meter is priced by bands **or** by a `charge` with `per: "unit"` — not both.
+Both are per-request prices on the same requests, so sending both is rejected.
+
+Bands and `limit` compose: the `cap` is the included count, and the bands price
+the overage above it. A plan with `"cap": 1000` and the bands above includes the
+first 1,000 requests and prices request 1,001 onward from the band it lands in.
+Set `onExceed: "charge"` so exceeding the included count bills rather than blocks.
+
+Tiered usage on a recurring plan bills at the end of each billing period. On a
+plan with no billing cycle it is charged in real time against the credit balance.
 
 ### Hybrid — recurring fee plus metered usage
 
@@ -219,7 +265,7 @@ A $0 flat charge plus `autoAssigned` is a free recurring fallback.
 }
 ```
 
-Tiers can replace the flat per-unit charge. The derived label is still `hybrid` when a billing cycle and a meter are both present.
+Bands replace the flat per-unit charge rather than joining it — a meter is priced one way or the other. The derived label is still `hybrid` when a billing cycle and a meter are both present.
 
 ### One-time — flat charge, no cycle
 

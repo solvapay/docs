@@ -36,7 +36,6 @@ Metered usage comes from usage events on a meter. The HTTP path stays `POST /v1/
 | `tier` | Graduated or volume rates instead of a single per-unit charge |
 | `limit` | Included cap. `cap: 0` is unlimited. A missing limit is pay-as-you-go |
 | `limit.onExceed` | `block` stops access; `charge` bills overage at the per-item rate |
-| `prepaid` | Credit-wallet top-up and low-balance behavior |
 | `rollover` | Unused included usage at period end (`forfeit`, `carry_forward`, …) |
 
 Overage is usage beyond the included cap, charged per meter noun. A plan with no limit bills every counted item.
@@ -50,6 +49,8 @@ Limit checks:
 5. Compare against `cap`. The leftover included count is `LimitResponse.remaining` (`-1` means unlimited)
 
 Wallet coverage (`remainingUnits`) is separate: how many metered items the credit balance still covers. Do not mix the two remainings.
+
+A provider-level **minimum top-up** (`minTopUpMinor` in SolvaPay Console settings) applies to every credit top-up and auto-recharge for that provider. Amounts below it are rejected. See [Auto-recharge](/sdks/typescript/guides/auto-recharge).
 
 ## Purchase states
 

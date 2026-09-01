@@ -116,8 +116,12 @@ DCR rejects any `redirect_uri` that is neither a known custom-protocol scheme no
 Default allowlist entries include:
 
 - Localhost (`http://localhost`, `http://127.0.0.1` with any port) for local development and MCP Inspector
+- `claude.ai` — Claude.ai hosted MCP clients
+- `chatgpt.com`, `chat.openai.com`, and `*.openai.com` — ChatGPT and OpenAI-hosted MCP clients
+- `www.cursor.com` — Cursor Cloud Agents and Automations (`https://www.cursor.com/agents/mcp/oauth/callback`). Cursor desktop uses `cursor://` or `http://localhost:8787/callback` instead
 - `*.mcpjam.com` — MCP Jam's hosted inspector subdomains
-- Custom protocol schemes: `cursor://`, `claude://`, `vscode://`, `cline://`, and the other MCP-client schemes above
+- `*.solvapay.com` — SolvaPay-hosted redirect endpoints
+- Custom protocol schemes: `cursor://`, `claude://`, `vscode://`, and the other MCP-client schemes above
 
 Two environment knobs on the backend control the allowlist at deploy time:
 

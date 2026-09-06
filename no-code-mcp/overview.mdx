@@ -87,7 +87,7 @@ When a customer calls `activate_plan` / `POST /v1/sdk/activate`, the response de
 - **Usage-based (metered, no billing cycle)** — `activated` immediately. A zero balance is not an activation gate. Empty-wallet access is enforced later as `topup_required` at usage time.
 - **Paid recurring, hybrid, or one-time** — `payment_required`. Complete checkout before the plan activates.
 
-The MCP App surface still exposes `topup` when a usage-time paywall returns `topup_required`.
+The MCP App surface routes customers to add credits via the `account` viewer with `view: "topup"` when a usage-time paywall returns `topup_required`.
 
 For API-first setup, the `POST /v1/sdk/products/mcp/bootstrap` endpoint lets you define:
 - product

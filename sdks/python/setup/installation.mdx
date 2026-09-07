@@ -1,0 +1,50 @@
+---
+title: "Installation"
+description: "Install the community Python SDK and configure your environment."
+---
+
+## Requirements
+
+- Python 3.10 or later
+- A SolvaPay account with a secret key — [get one here](https://app.solvapay.com)
+
+## Install
+
+```bash
+pip install git+https://github.com/dhruv-sanan/solvapay-python
+```
+
+Or with `uv` (recommended for agent projects):
+
+```bash
+uv add git+https://github.com/dhruv-sanan/solvapay-python
+```
+
+## Environment variables
+
+| Variable | Purpose |
+|---|---|
+| `SOLVAPAY_SECRET_KEY` | API secret key (required) |
+| `SOLVAPAY_API_BASE_URL` | Override API base URL (optional, defaults to `https://api.solvapay.com`) |
+| `SOLVAPAY_WEBHOOK_SECRET` | Webhook signing secret (required only for `verify_webhook`) |
+
+Set them in your shell or a `.env` file:
+
+```bash
+SOLVAPAY_SECRET_KEY=sk_live_...
+SOLVAPAY_WEBHOOK_SECRET=whsec_...
+```
+
+The `SolvaPay()` client reads `SOLVAPAY_SECRET_KEY` automatically — no constructor argument needed.
+
+## Verify installation
+
+```python
+from solvapay import SolvaPay
+sv = SolvaPay()
+print(sv)  # <SolvaPay base_url='https://api.solvapay.com'>
+```
+
+## Next steps
+
+- [Quick start](./quick-start) — protect your first function

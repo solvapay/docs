@@ -2444,6 +2444,10 @@
             "description": "ISO 4217 currency code for credit fields",
             "type": "string"
           },
+          "limit": {
+            "description": "The effective finite cap for this meter. Present only when the backend measured a finite cap.",
+            "type": "number"
+          },
           "meterName": {
             "description": "The meter name to use when tracking usage events",
             "example": "requests",
@@ -2488,6 +2492,10 @@
           "upgraded": {
             "description": "The customer was auto-upgraded to the target pricing to restore access — `onExceed: auto_upgrade` succeeded.",
             "type": "boolean"
+          },
+          "used": {
+            "description": "Consumed usage units this period. Present only when the backend measured a finite cap.",
+            "type": "number"
           },
           "withinLimits": {
             "description": "Whether the customer is within their usage limits",

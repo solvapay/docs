@@ -57,3 +57,8 @@ Do not document:
 - Undocumented/private APIs or endpoints not intended for customers
 - Experimental features unless explicitly marked as beta and approved
 - Security-sensitive implementation details (secrets, internal infra topology, internal tokens)
+
+## Commits and PRs
+
+Never add Cursor (or any agent/tool) as `Co-Authored-By`. No "Generated with …"
+trailer, `Made-with` trailer, or tool footer in commit messages or PR bodies.

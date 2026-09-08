@@ -1,0 +1,161 @@
+---
+title: "September 7, 2026 release"
+description: "The v3 MCP account widget, MCP gates that work on text-only hosts, a smaller MCP tool surface, a rebuilt hosted checkout and account, and auto-recharge activation fixes."
+---
+
+## MCP account widget
+
+`@solvapay/react` 2.2.0 ships a rebuilt account widget and puts MCP checkout, top-up, and account
+on the same layout as the hosted pages.
+
+- One layout across all three surfaces: primary content leads, seller and your-account trail, and
+  the identity rail stays visible at every width. `<McpApp>` reads the host `displayMode` and
+  advertises `inline` and `fullscreen`. Inline is a centered 36rem block. Fullscreen is a 1000px
+  column that falls back to the stacked widget under 1000px of host width.
+- The account view shows a status pill, a fact band, and a usage meter that warns at 80% of
+  included usage and turns critical at 100%. Each plan family gets its own panel, and every plan
+  row carries its own Activate or Switch action — in place when no payment is needed, through
+  checkout when it is.
+- Fullscreen adds plan consequence lines, credit activity and charges tables, and a merchant and
+  buyer footer. Auto-recharge has a dedicated view reached from the account panel.
+- The Stripe Payment Element is themed from your `--solvapay-*` tokens and uses the tabs layout.
+  The widget owns the billing country instead of the Payment Element, and mandate text sits below
+  the pay button.
+- A usage-based plan priced at $0 is no longer labelled Free, and one-time and recurring prices
+  render distinctly.
+- Outbound links route through the host's `ui/open-link` when the host declares `openLinks`, so a
+  link opens in the host rather than navigating the widget iframe.
+- The paywall no longer double-counts under concurrency. Concurrent `checkLimits` calls are
+  coalesced, and `trackUsage` sends an idempotency key derived from the request id, so a retry
+  records one usage event.
+
+See the [MCP guide](/sdks/typescript/guides/mcp) and the [MCP app guide](/sdks/typescript/guides/mcp-app).
+
+<Warning>
+  **Some MCP-only exports were removed in `@solvapay/react` 2.2.0.** `McpSellerDetailsCard`,
+  `McpCustomerDetailsCard`, `McpAccountView.hideDetailCards`, `McpLimitReached`, and
+  `CloseButton` are gone. If you use the turnkey `<McpApp>` you are unaffected. If you built a
+  custom shell that imported these, move the identity display to `McpPayingAs` inside the payment
+  form and let the host own window chrome.
+</Warning>
+
+## MCP on text-only hosts
+
+Paywall gates and intent tools no longer assume the host can render an iframe.
+
+- The default `mode` is now `auto`. A paywall gate names the included usage and gives a pasteable
+  https checkout URL, and narration emits plan refs, so a customer can recover without a UI panel.
+- Every response is complete on its own text. Data is included in `content[].text` by default, the
+  low-balance nudge and the manage URL are inline, and recovery steps name the tool to call.
+- Account narration branches on the same states the widget renders and reads total usage,
+  remaining usage, and period end, so what a text host says matches what a UI host shows.
+
+## A smaller MCP tool surface
+
+Near-duplicate transport tools were merged, from eight down to five.
+
+- `create_payment_intent` takes a `purpose`, `create_hosted_session` takes a `kind`, and
+  `set_renewal` takes `enabled`, replacing the separate per-case tools.
+- UI-only transport tools are marked private so ChatGPT does not list them for the model. They
+  were never intended for the model to call directly.
+- Checkout links are presented as named links instead of raw URLs.
+
+<Warning>
+  **Three MCP tool names changed in `@solvapay/mcp` 0.4.0.** If you call the transport tools
+  directly from a custom MCP client, replace the eight old names with the five merged names and
+  pass the discriminator argument (`purpose`, `kind`, or `enabled`). Integrations that go through
+  `@solvapay/react` or `<McpApp>` need no change.
+
+  The `@solvapay/mcp-core` peer range widened to accept `^0.4.0`. Installs pinned to `^0.3.0`
+  keep resolving to 0.3.x, so upgrading is an explicit opt-in rather than a forced peer conflict.
+</Warning>
+
+## Hosted checkout and account
+
+The hosted pages were rebuilt on one layout and one token set.
+
+- Subtotal, VAT, and total moved into the summary rail, so the form column ends at the CTA. The
+  listed price stays visible once tax is known.
+- The account page is one column with four tabs. **Purchases** merged into **Billing**, which is
+  now the single charge ledger — settled outcomes only, with status in the charge caption. Old
+  `?tab=purchases` links redirect there.
+- Tax details, card on file, and ledger export are populated on the hosted account instead of
+  rendering empty.
+- Optional address fields are no longer collected at checkout. Tax-relevant fields are unchanged.
+- Recurring prices read as amount and interval on one line, on plan cards and in the collapsed
+  mobile summary.
+- Receipt PDFs render currency correctly for every exponent, success page amounts are correct, and
+  the logo renders crisply.
+- Browsing products works again. The catalog call was failing and the browse tab was showing the
+  failure as an empty result; it now loads, and a genuine fetch failure is surfaced.
+
+## Auto-recharge activation
+
+Auto-recharge could not finish activating, for two independent reasons. Both are fixed.
+
+- The `setup_intent.succeeded` event was missing from the required webhook event list, so no
+  registered endpoint ever received it. The handler that flips auto-recharge from pending to
+  active existed but was never called, and the hosted page sat on "Finishing activation"
+  indefinitely.
+- Stripe Link was offered on the auto-recharge setup form, and a card set up through Link cannot
+  be charged off-session — so activation could never complete. Link is no longer offered on that
+  form. Other payment methods are unchanged.
+- A card captured for a one-time purchase was treated as a valid auto-recharge funding source, so
+  auto-recharge went active with nothing behind it and the first threshold breach failed at
+  Stripe. Card reusability is now recorded at payment time and checked before activation.
+- The setup form polls until activation is confirmed, resumes an interrupted 3D Secure return, and
+  shows auto-recharge as pending rather than displaying it as already on.
+- Threshold defaults and the trigger-time top-up amount are corrected, and the setting stays in
+  sync across account tabs.
+
+See [Auto-recharge](/sdks/typescript/guides/auto-recharge).
+
+<Warning>
+  **Re-register your Stripe webhook endpoint to receive `setup_intent.succeeded`.** Endpoints
+  registered before this release are not subscribed to it, and auto-recharge cannot activate
+  without it. Customers whose auto-recharge is stuck pending will activate normally once they
+  complete setup again.
+</Warning>
+
+## SDK contract additions
+
+All additive. Existing integrations see new optional fields and can ignore them.
+
+- `getCreditActivity` on `@solvapay/server` returns the account-wide credit ledger, backed by
+  `GET /v1/sdk/credits/activity`.
+- The merchant record carries city, region, and website.
+- `LimitResponse` carries measured `used` and `limit` when the backend measured a finite cap.
+  Previously the response dropped both and clients had to reconstruct the cap from a field the
+  backend resets to zero. Absent means unmeasured, not zero.
+- The payment-method contract exposes `reusable`, so you can tell a chargeable saved card from a
+  one-off card on file.
+- The MCP bootstrap payload seeds `limits`, so a client renders remaining included usage without a
+  second `checkLimits` call.
+- Attach and confirm accept `customerCountry`, `customerState`, and `customerPostalCode`.
+- Usage events record the tool name when the payable handler knows it.
+
+## Console
+
+- A saved plan is now described by a **Features** summary — the price headline, the plan type, and
+  a line for everything the headline did not already state: included usage, overage, trial, setup
+  fee, discounts, rollover, tiers, and additional currencies. The "start from a template" chooser
+  only appears while you are creating a plan that does not exist yet.
+
+## Package versions
+
+| Package | Version |
+| --- | --- |
+| `@solvapay/server` | 2.4.1 |
+| `@solvapay/core` | 1.7.0 |
+| `@solvapay/react` | 2.2.0 |
+| `@solvapay/next` | 1.3.7 |
+| `@solvapay/mcp` | 0.4.0 |
+| `@solvapay/mcp-core` | 0.4.0 |
+| `@solvapay/init` | 0.4.4 |
+| `create-solvapay` | 0.6.1 |
+
+<Warning>
+  **Deploying an MCP server to Cloudflare Workers requires `@solvapay/server` 2.4.1.** 2.4.0 was
+  missing an export from its edge bundle, which Workers resolve instead of the Node bundle, so
+  `wrangler deploy` failed at bundle time. Node targets are unaffected.
+</Warning>

@@ -21,13 +21,14 @@
 - Use **usage** as the umbrella noun (nav, analytics, "usage this month")
 - Use the **meter noun** for counted quantity ("1,000 requests included"). The seeded default meter is `requests`
 - Use **credits** only for the prepaid wallet. Peg: 100 credits = 1 USD cent
-- Use **included** for the per-cycle allowance (`LimitOption.cap`). Do not say "free units", "quota", or "allowance" in copy
+- Use **included** for the per-cycle plan cap (`LimitOption.cap`). Do not say "free units", "quota", or "allowance" for that count
+- Use **free allowance** for the code-declared cap on `registerFree` (`FreeLimit`). Keep it distinct from **included**
 - Use **overage** for usage beyond included, charged per meter noun
 - Use **top up** / **top-up** for a one-off add of credits (`purpose: 'credit_topup'`)
 - Use **auto-recharge** for the setting that tops up the credit wallet automatically. Do not say "automatic top-up" on auto-recharge surfaces
 - Use **usage event** for one recorded data point. The HTTP path stays `POST /v1/sdk/meter-events`
 - Do not use generic **units**, **quota**, **consumption** as a noun, or **calls**/**messages** as stand-ins for the default meter. A meter whose `unit` is "calls" may say "calls". Wire identifiers (`units`, `CHARGE_PERS = 'unit'`) stay
-- Keep two remaining counts distinct: `LimitResponse.remaining` is leftover included allowance (`-1` = unlimited); `remainingUnits` is how many metered items the credit balance still covers
+- Keep leftover counts distinct: `LimitResponse.remaining` is leftover included (`-1` = unlimited), except when the request named a `free-*` meter — then it is the free-allowance remainder. `remainingUnits` is how many metered items the credit balance still covers
 
 ## Style preferences
 

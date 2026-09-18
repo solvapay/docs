@@ -50,6 +50,7 @@
             "enum": [
               "activated",
               "already_active",
+              "already_purchased",
               "topup_required",
               "payment_required",
               "invalid"
@@ -531,9 +532,83 @@
           "taxIdType": {
             "description": "Tax ID type",
             "enum": [
+              "ae_trn",
+              "al_tin",
+              "am_tin",
+              "ao_tin",
+              "au_abn",
+              "aw_tin",
+              "az_tin",
+              "ba_tin",
+              "bb_tin",
+              "bd_bin",
+              "bf_ifu",
+              "bh_vat",
+              "bj_ifu",
+              "bs_tin",
+              "by_tin",
+              "ca_gst_hst",
+              "cd_nif",
+              "ch_vat",
+              "cl_tin",
+              "cm_niu",
+              "co_nit",
+              "cr_tin",
+              "cv_nif",
+              "ec_ruc",
+              "eg_tin",
+              "et_tin",
               "eu_vat",
               "gb_vat",
-              "us_ein"
+              "ge_vat",
+              "gn_nif",
+              "hk_br",
+              "id_npwp",
+              "in_gst",
+              "is_vat",
+              "jp_trn",
+              "ke_pin",
+              "kg_tin",
+              "kh_tin",
+              "kr_brn",
+              "kz_bin",
+              "la_tin",
+              "li_vat",
+              "lk_vat",
+              "ma_vat",
+              "md_vat",
+              "me_pib",
+              "mk_vat",
+              "mr_nif",
+              "mx_rfc",
+              "my_sst",
+              "ng_tin",
+              "no_vat",
+              "np_pan",
+              "nz_gst",
+              "om_vat",
+              "pe_ruc",
+              "ph_tin",
+              "rs_pib",
+              "ru_inn",
+              "sa_vat",
+              "sg_gst",
+              "sn_ninea",
+              "sr_fin",
+              "th_vat",
+              "tj_tin",
+              "tr_tin",
+              "tw_vat",
+              "tz_vat",
+              "ua_vat",
+              "ug_tin",
+              "us_ein",
+              "uy_ruc",
+              "uz_vat",
+              "vn_tin",
+              "za_vat",
+              "zm_tin",
+              "zw_tin"
             ],
             "type": "string"
           }
@@ -557,6 +632,35 @@
             "maxLength": 20,
             "minLength": 1,
             "type": "string"
+          },
+          "freeAllowance": {
+            "description": "SDK-only free-tool allowance. Authenticated by the provider secret key, so `cap` is the provider's own declaration, not customer input.",
+            "properties": {
+              "cap": {
+                "exclusiveMinimum": true,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "meter": {
+                "description": "Free meter name. Must match `/^free-[a-z0-9-]+$/`.",
+                "minLength": 1,
+                "pattern": "^free-[a-z0-9-]+$",
+                "type": "string"
+              },
+              "scope": {
+                "enum": [
+                  "rolling_window",
+                  "lifetime"
+                ],
+                "type": "string"
+              },
+              "windowDays": {
+                "exclusiveMinimum": false,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "type": "object"
           },
           "includeCheckoutSession": {
             "type": "boolean"
@@ -890,42 +994,12 @@
                               "downgrade"
                             ],
                             "type": "string"
-                          },
-                          "requireCard": {
-                            "type": "boolean"
                           }
                         },
                         "required": [
                           "kind",
                           "days",
                           "onEnd"
-                        ],
-                        "type": "object"
-                      },
-                      {
-                        "properties": {
-                          "kind": {
-                            "enum": [
-                              "prepaid"
-                            ],
-                            "type": "string"
-                          },
-                          "label": {
-                            "type": "string"
-                          },
-                          "lowBalanceUnits": {
-                            "exclusiveMinimum": false,
-                            "minimum": 0,
-                            "type": "integer"
-                          },
-                          "minTopUpMinor": {
-                            "exclusiveMinimum": false,
-                            "minimum": 0,
-                            "type": "integer"
-                          }
-                        },
-                        "required": [
-                          "kind"
                         ],
                         "type": "object"
                       },
@@ -1669,42 +1743,12 @@
                         "downgrade"
                       ],
                       "type": "string"
-                    },
-                    "requireCard": {
-                      "type": "boolean"
                     }
                   },
                   "required": [
                     "kind",
                     "days",
                     "onEnd"
-                  ],
-                  "type": "object"
-                },
-                {
-                  "properties": {
-                    "kind": {
-                      "enum": [
-                        "prepaid"
-                      ],
-                      "type": "string"
-                    },
-                    "label": {
-                      "type": "string"
-                    },
-                    "lowBalanceUnits": {
-                      "exclusiveMinimum": false,
-                      "minimum": 0,
-                      "type": "integer"
-                    },
-                    "minTopUpMinor": {
-                      "exclusiveMinimum": false,
-                      "minimum": 0,
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "kind"
                   ],
                   "type": "object"
                 },
@@ -2010,6 +2054,75 @@
         ],
         "type": "object"
       },
+      "CreditActivityEntryDto": {
+        "properties": {
+          "amount": {
+            "description": "Signed credit units on the USD peg (100 credits = 1 USD cent)",
+            "example": -200,
+            "type": "number"
+          },
+          "balance": {
+            "description": "Running credit balance after this event",
+            "example": 599800,
+            "type": "number"
+          },
+          "productName": {
+            "description": "Product display name when the event is product-scoped",
+            "type": "string"
+          },
+          "productRef": {
+            "description": "Product reference when the event is product-scoped",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Machine-readable reason when the ledger stored one",
+            "type": "string"
+          },
+          "timestamp": {
+            "description": "ISO-8601 timestamp",
+            "example": "2026-09-05T14:22:00.000Z",
+            "type": "string"
+          },
+          "type": {
+            "description": "Ledger event type",
+            "enum": [
+              "USAGE",
+              "TOPUP",
+              "GRANT",
+              "REFUND",
+              "ADJUSTMENT"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "amount",
+          "balance",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "CreditActivityResponseDto": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/CreditActivityEntryDto"
+            },
+            "type": "array"
+          },
+          "hasMore": {
+            "description": "True when more events exist beyond this page",
+            "example": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "entries",
+          "hasMore"
+        ],
+        "type": "object"
+      },
       "CreditDebitSkippedResponse": {
         "properties": {
           "debited": {
@@ -2025,7 +2138,8 @@
               "no_product_ref",
               "customer_not_found",
               "no_active_purchase",
-              "plan_not_credit_based"
+              "plan_not_credit_based",
+              "plan_billed_at_period_end"
             ],
             "example": "duplicate",
             "type": "string"
@@ -2053,8 +2167,14 @@
             ],
             "type": "number"
           },
+          "remainingUnits": {
+            "description": "How many metered items the remaining credit balance still covers",
+            "example": 99,
+            "type": "number"
+          },
           "unitsRemaining": {
-            "description": "Estimated remaining units after debit",
+            "deprecated": true,
+            "description": "Deprecated alias of remainingUnits. Prefer remainingUnits.",
             "example": 99,
             "type": "number"
           }
@@ -2062,6 +2182,7 @@
         "required": [
           "debited",
           "amount",
+          "remainingUnits",
           "unitsRemaining"
         ],
         "type": "object"
@@ -2093,7 +2214,8 @@
             "enum": [
               "parity",
               "db",
-              "fallback"
+              "fallback",
+              "funding"
             ],
             "example": "parity",
             "type": "string"
@@ -2174,7 +2296,7 @@
           "purchases": {
             "description": "Active purchases",
             "items": {
-              "$ref": "#/components/schemas/PurchaseInfo"
+              "$ref": "#/components/schemas/SdkPurchaseResponse"
             },
             "type": "array"
           },
@@ -2194,12 +2316,9 @@
       "DisableAutoRechargeResponse": {
         "properties": {
           "success": {
-            "description": "Always true on success",
-            "enum": [
-              true
-            ],
+            "description": "Whether auto-recharge was disabled",
             "example": true,
-            "type": "number"
+            "type": "boolean"
           }
         },
         "required": [
@@ -2313,21 +2432,45 @@
         ],
         "type": "object"
       },
+      "LimitAutoRechargeDto": {
+        "properties": {
+          "enabled": {
+            "description": "Whether auto-recharge is enabled for this provider",
+            "type": "boolean"
+          },
+          "status": {
+            "description": "Stored auto-recharge status when a config exists",
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "type": "object"
+      },
       "LimitBalanceDto": {
         "properties": {
           "creditBalance": {
             "description": "Credit balance in credits (100 credits = 1 minor currency unit)",
             "type": "number"
           },
+          "creditsPerMinorUnit": {
+            "description": "Credits per minor unit of `currency` (typically 100)",
+            "type": "number"
+          },
           "creditsPerUnit": {
-            "description": "Credits per usage unit",
+            "description": "Credits deducted per metered item (wallet coverage: remainingUnits = balance / creditsPerUnit)",
             "type": "number"
           },
           "currency": {
             "type": "string"
           },
+          "displayExchangeRate": {
+            "description": "USD → display-currency rate used with creditsPerMinorUnit",
+            "type": "number"
+          },
           "remainingUnits": {
-            "description": "Estimated whole units remaining from prepaid credit balance",
+            "description": "How many metered items the credit balance still covers (`balance / creditsPerUnit`)",
             "type": "number"
           }
         },
@@ -2344,15 +2487,20 @@
             "description": "Derived billing cycle",
             "type": "string"
           },
+          "checkoutUrl": {
+            "description": "Deep link that opens hosted checkout with this plan preselected. Present only when a checkout session was minted for this response.",
+            "type": "string"
+          },
           "creditsPerUnit": {
-            "description": "Per-unit charge in minor units (usage-based plans)",
+            "deprecated": true,
+            "description": "Deprecated alias of perUnitChargeMinor. Same minor-units value — not credits. Prefer perUnitChargeMinor.",
             "type": "number"
           },
           "currency": {
             "type": "string"
           },
           "freeUnits": {
-            "description": "Derived included units for the metered allowance",
+            "description": "Derived included allowance for the metered meter. `0` is the unlimited sentinel (`LimitOption.cap === 0`).",
             "type": "number"
           },
           "name": {
@@ -2365,6 +2513,10 @@
               "type": "object"
             },
             "type": "array"
+          },
+          "perUnitChargeMinor": {
+            "description": "Per-request charge in minor currency units (usage-based plans)",
+            "type": "number"
           },
           "price": {
             "description": "Headline price in smallest currency unit (e.g. cents)",
@@ -2410,6 +2562,14 @@
             "description": "True when the customer must activate a priced default plan before usage is allowed",
             "type": "boolean"
           },
+          "autoRecharge": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LimitAutoRechargeDto"
+              }
+            ],
+            "description": "Per-provider auto-recharge snapshot read off the customer document. Omitted when no config exists."
+          },
           "balance": {
             "allOf": [
               {
@@ -2437,7 +2597,7 @@
             "type": "number"
           },
           "creditsPerUnit": {
-            "description": "Credits per usage unit (for pre-paid usage-based plans)",
+            "description": "Credits deducted per metered item (for prepaid usage-based plans)",
             "type": "number"
           },
           "currency": {
@@ -2465,6 +2625,24 @@
             "description": "Access is granted and usage beyond the included cap accrues an overage charge — `onExceed: charge`.",
             "type": "boolean"
           },
+          "paywallReason": {
+            "description": "Authoritative paywall classification shared with Managed MCP. Present on denial responses only.",
+            "enum": [
+              "activation_required",
+              "topup_required",
+              "payment_required",
+              "limit_reached"
+            ],
+            "type": "string"
+          },
+          "planName": {
+            "description": "Display name of the active or default plan",
+            "type": "string"
+          },
+          "planRef": {
+            "description": "Active plan reference when the customer already holds a purchase",
+            "type": "string"
+          },
           "plans": {
             "description": "Active plans on the product available for activation or checkout",
             "items": {
@@ -2479,6 +2657,10 @@
               }
             ],
             "description": "Product the limit check applies to"
+          },
+          "purchaseRef": {
+            "description": "Active purchase reference when the customer already holds a purchase",
+            "type": "string"
           },
           "remaining": {
             "description": "Remaining usage units before hitting the limit. `-1` means unlimited (no finite cap).",
@@ -2515,6 +2697,9 @@
             "type": "string"
           },
           "authHeaderName": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9!#$%&'*+\\-.^_`|~]+$",
             "type": "string"
           },
           "description": {
@@ -2835,42 +3020,12 @@
                               "downgrade"
                             ],
                             "type": "string"
-                          },
-                          "requireCard": {
-                            "type": "boolean"
                           }
                         },
                         "required": [
                           "kind",
                           "days",
                           "onEnd"
-                        ],
-                        "type": "object"
-                      },
-                      {
-                        "properties": {
-                          "kind": {
-                            "enum": [
-                              "prepaid"
-                            ],
-                            "type": "string"
-                          },
-                          "label": {
-                            "type": "string"
-                          },
-                          "lowBalanceUnits": {
-                            "exclusiveMinimum": false,
-                            "minimum": 0,
-                            "type": "integer"
-                          },
-                          "minTopUpMinor": {
-                            "exclusiveMinimum": false,
-                            "minimum": 0,
-                            "type": "integer"
-                          }
-                        },
-                        "required": [
-                          "kind"
                         ],
                         "type": "object"
                       },
@@ -3139,9 +3294,18 @@
             "example": "2025-10-27T10:00:00Z",
             "type": "string"
           },
+          "createdAt": {
+            "description": "Created at",
+            "type": "string"
+          },
           "currency": {
             "description": "ISO 4217 currency code of the customer-facing charge",
             "example": "USD",
+            "type": "string"
+          },
+          "customerRef": {
+            "description": "Customer reference",
+            "example": "cus_3C4D5E6F",
             "type": "string"
           },
           "productRef": {
@@ -3157,9 +3321,11 @@
         },
         "required": [
           "reference",
+          "customerRef",
           "amount",
           "currency",
-          "completedAt"
+          "completedAt",
+          "createdAt"
         ],
         "type": "object"
       },
@@ -3374,7 +3540,7 @@
       "ProcessPaymentSucceededRecurring": {
         "properties": {
           "purchase": {
-            "$ref": "#/components/schemas/PurchaseInfo"
+            "$ref": "#/components/schemas/SdkPurchaseResponse"
           },
           "status": {
             "enum": [
@@ -3435,88 +3601,6 @@
             "type": "number"
           }
         },
-        "type": "object"
-      },
-      "PurchaseInfo": {
-        "properties": {
-          "amount": {
-            "description": "Amount in USD cents (normalised for aggregation)",
-            "example": 9900,
-            "type": "number"
-          },
-          "cancellationReason": {
-            "description": "Reason for cancellation",
-            "example": "Customer request",
-            "type": "string"
-          },
-          "cancelledAt": {
-            "description": "When purchase was cancelled",
-            "example": "2025-10-28T10:00:00Z",
-            "type": "string"
-          },
-          "currency": {
-            "description": "ISO 4217 currency code of the customer-facing charge",
-            "example": "GBP",
-            "type": "string"
-          },
-          "endDate": {
-            "description": "End date of purchase",
-            "example": "2025-11-27T10:00:00Z",
-            "type": "string"
-          },
-          "exchangeRate": {
-            "description": "Exchange rate from original currency to USD",
-            "example": 1.32,
-            "type": "number"
-          },
-          "originalAmount": {
-            "description": "Original amount in the payment currency (minor units)",
-            "example": 7500,
-            "type": "number"
-          },
-          "planRef": {
-            "description": "Plan reference from the plan snapshot, for reliable plan matching",
-            "example": "pln_abc123",
-            "type": "string"
-          },
-          "planSnapshot": {
-            "description": "Snapshot of the plan at time of purchase",
-            "type": "object"
-          },
-          "productName": {
-            "description": "Product name",
-            "example": "API Gateway Manager",
-            "type": "string"
-          },
-          "productRef": {
-            "description": "Product reference",
-            "example": "prd_abc123",
-            "type": "string"
-          },
-          "reference": {
-            "description": "Purchase reference",
-            "example": "pur_1A2B3C4D",
-            "type": "string"
-          },
-          "startDate": {
-            "description": "Start date",
-            "example": "2025-10-27T10:00:00Z",
-            "type": "string"
-          },
-          "status": {
-            "description": "Purchase status",
-            "example": "active",
-            "type": "string"
-          }
-        },
-        "required": [
-          "reference",
-          "productName",
-          "status",
-          "startDate",
-          "amount",
-          "currency"
-        ],
         "type": "object"
       },
       "PutAutoRechargeSdkDto": {
@@ -3681,6 +3765,11 @@
       },
       "SdkMerchantResponseDto": {
         "properties": {
+          "city": {
+            "description": "City from the legal entity address",
+            "example": "London",
+            "type": "string"
+          },
           "companyNumber": {
             "description": "Company registration number (EIN, Companies House No, Org No)",
             "example": "HRB12345",
@@ -3725,6 +3814,11 @@
             "example": "ACME INC",
             "type": "string"
           },
+          "stateOrCounty": {
+            "description": "State, county, or region from the legal entity address. Free text — values like \"Greater London\" are valid.",
+            "example": "Greater London",
+            "type": "string"
+          },
           "supportedTopupCurrencies": {
             "description": "Full set of currencies a customer may pay credit topups in, including the default currency. Omitted/single-entry means single-currency behavior.",
             "example": [
@@ -3757,6 +3851,11 @@
           "vatNumber": {
             "description": "VAT identification number (UK/EU)",
             "example": "DE123456789",
+            "type": "string"
+          },
+          "websiteUrl": {
+            "description": "Merchant public website. Distinct from supportUrl so the same URL is not emitted twice.",
+            "example": "https://acme.com",
             "type": "string"
           }
         },
@@ -4041,6 +4140,11 @@
             "nullable": true,
             "type": "object"
           },
+          "isMetered": {
+            "description": "Whether the frozen plan counts usage (prices per unit, or has a limit). Shipped clients read this to show an allowance.",
+            "example": true,
+            "type": "boolean"
+          },
           "name": {
             "description": "Plan name captured at purchase time",
             "example": "Pro Monthly",
@@ -4207,11 +4311,13 @@
             "type": "string"
           },
           "cancellationReason": {
-            "description": "Cancellation reason",
+            "description": "Reason for cancellation",
+            "example": "Customer request",
             "type": "string"
           },
           "cancelledAt": {
-            "description": "Cancelled at",
+            "description": "When purchase was cancelled",
+            "example": "2025-10-28T10:00:00Z",
             "type": "string"
           },
           "createdAt": {
@@ -4219,7 +4325,7 @@
             "type": "string"
           },
           "currency": {
-            "description": "Original payment currency code",
+            "description": "ISO 4217 currency code of the customer-facing charge",
             "example": "GBP",
             "type": "string"
           },
@@ -4234,16 +4340,17 @@
             "type": "string"
           },
           "endDate": {
-            "description": "End date",
+            "description": "End date of purchase",
+            "example": "2025-11-27T10:00:00Z",
             "type": "string"
           },
           "exchangeRate": {
             "description": "Exchange rate from original currency to USD",
-            "example": 1.3082,
+            "example": 1.32,
             "type": "number"
           },
           "isRecurring": {
-            "description": "Is recurring",
+            "description": "Whether the purchase is recurring",
             "example": true,
             "type": "boolean"
           },
@@ -4270,12 +4377,17 @@
             "type": "string"
           },
           "originalAmount": {
-            "description": "Original amount in the payment currency (cents/pence)",
-            "example": 10000,
+            "description": "Original amount in the payment currency (minor units)",
+            "example": 7500,
             "type": "number"
           },
           "paidAt": {
             "description": "Paid at timestamp",
+            "type": "string"
+          },
+          "planRef": {
+            "description": "Plan reference from the plan snapshot, for reliable plan matching",
+            "example": "pln_abc123",
             "type": "string"
           },
           "planSnapshot": {
@@ -4284,7 +4396,7 @@
                 "$ref": "#/components/schemas/SdkPlanSnapshotDto"
               }
             ],
-            "description": "Plan snapshot at time of purchase (null for credit topups)"
+            "description": "Snapshot of the plan at time of purchase"
           },
           "productName": {
             "description": "Product name",
@@ -4293,7 +4405,7 @@
           },
           "productRef": {
             "description": "Product reference",
-            "example": "prd_1A2B3C4D",
+            "example": "prd_abc123",
             "type": "string"
           },
           "reference": {
@@ -4308,6 +4420,7 @@
           },
           "startDate": {
             "description": "Start date",
+            "example": "2025-10-27T10:00:00Z",
             "type": "string"
           },
           "status": {
@@ -4328,9 +4441,9 @@
           "reference",
           "customerRef",
           "status",
+          "startDate",
           "amount",
           "currency",
-          "startDate",
           "isRecurring",
           "createdAt"
         ],
@@ -4344,6 +4457,10 @@
           },
           "inclusive": {
             "description": "Whether tax is included in the listed price",
+            "type": "boolean"
+          },
+          "notRegistered": {
+            "description": "True when Stripe reports taxability_reason not_collecting (no registration)",
             "type": "boolean"
           },
           "subtotal": {
@@ -4387,7 +4504,8 @@
               "reverse_charge",
               "standard",
               "none",
-              "not_collecting"
+              "not_collecting",
+              "not_supported"
             ],
             "type": "string"
           }
@@ -4756,42 +4874,12 @@
                         "downgrade"
                       ],
                       "type": "string"
-                    },
-                    "requireCard": {
-                      "type": "boolean"
                     }
                   },
                   "required": [
                     "kind",
                     "days",
                     "onEnd"
-                  ],
-                  "type": "object"
-                },
-                {
-                  "properties": {
-                    "kind": {
-                      "enum": [
-                        "prepaid"
-                      ],
-                      "type": "string"
-                    },
-                    "label": {
-                      "type": "string"
-                    },
-                    "lowBalanceUnits": {
-                      "exclusiveMinimum": false,
-                      "minimum": 0,
-                      "type": "integer"
-                    },
-                    "minTopUpMinor": {
-                      "exclusiveMinimum": false,
-                      "minimum": 0,
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "kind"
                   ],
                   "type": "object"
                 },
@@ -5018,7 +5106,7 @@
             "type": "number"
           },
           "overageUnits": {
-            "description": "Units exceeding the plan limit",
+            "description": "Units exceeding the plan included amount",
             "example": 0,
             "type": "number"
           },
@@ -5518,7 +5606,7 @@
   "paths": {
     "/v1/sdk/activate": {
       "post": {
-        "description": "Activates a specific plan on a product for a customer. Usage-based (PAYG) plans are topup-first: a zero-balance customer receives `topup_required` and only activates after a successful top-up, while free plans activate immediately and paid recurring / hybrid plans return `payment_required`.",
+        "description": "Activates a specific plan on a product for a customer. Usage-based plans (metered, no billing cycle) and free plans activate immediately. A zero credit balance is not an activation gate — empty-wallet access is enforced later as `topup_required` at usage time. Paid recurring, hybrid, or one-time plans return `payment_required`.",
         "operationId": "ActivateSdkController_activate",
         "parameters": [],
         "requestBody": {
@@ -5709,6 +5797,57 @@
         "summary": "Create a checkout session",
         "tags": [
           "Checkout Sessions"
+        ]
+      }
+    },
+    "/v1/sdk/credits/activity": {
+      "get": {
+        "description": "Every credit event on the customer account, newest first, including other products and top-ups. Credits are shared, so the balance only makes sense account-wide.",
+        "operationId": "CreditActivitySdkController_getActivity",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customerRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreditActivityResponseDto"
+                }
+              }
+            },
+            "description": "Account-wide credit ledger page."
+          },
+          "400": {
+            "description": "customerRef is required, or limit is invalid"
+          },
+          "404": {
+            "description": "Customer not found"
+          }
+        },
+        "security": [
+          {
+            "SecretKey": []
+          }
+        ],
+        "summary": "List account-wide credit activity for a customer",
+        "tags": [
+          "Credits"
         ]
       }
     },
@@ -6676,9 +6815,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "discriminator": {
-                    "propertyName": "status"
-                  },
                   "oneOf": [
                     {
                       "$ref": "#/components/schemas/ProcessPaymentSucceededRecurring"
@@ -6834,6 +6970,10 @@
                         "last4": {
                           "example": "4242",
                           "type": "string"
+                        },
+                        "reusable": {
+                          "example": true,
+                          "type": "boolean"
                         }
                       },
                       "required": [
@@ -6841,7 +6981,8 @@
                         "brand",
                         "last4",
                         "expMonth",
-                        "expYear"
+                        "expYear",
+                        "reusable"
                       ],
                       "type": "object"
                     },
@@ -7056,7 +7197,7 @@
     },
     "/v1/sdk/products/{productRef}": {
       "delete": {
-        "description": "Deletes a product permanently in sandbox. In live mode, soft-deletes (preserves data but hides from listings). If the product has purchases in live mode, deactivates instead.",
+        "description": "Soft-deletes a product (hides it from listings, restorable). If the product has any purchases, deactivates it instead so the catalog row stays resolvable. Same rule in sandbox and live.",
         "operationId": "ProductSdkController_deleteProduct",
         "parameters": [
           {
@@ -7077,9 +7218,8 @@
                 "schema": {
                   "properties": {
                     "action": {
-                      "description": "Outcome of the delete: hard delete in sandbox, soft-delete or deactivation in live depending on existing purchases",
+                      "description": "Outcome of the delete: deactivation when purchases exist, otherwise soft-delete. Same in sandbox and live.",
                       "enum": [
-                        "deleted",
                         "deactivated",
                         "soft_deleted"
                       ],

@@ -48,6 +48,8 @@ Limit checks:
 4. Sum usage events for that meter in the current period
 5. Compare against `cap`. The leftover included count is `LimitResponse.remaining` (`-1` means unlimited)
 
+When the request includes `freeAllowance` (a `free-*` meter), the check skips the purchase snapshot and counts usage against that cap instead. Denial sets `paywallReason: 'limit_reached'`. `remaining` / `used` / `limit` still report the free-meter remainder. See [Add a free allowance to MCP tools](/sdks/typescript/guides/free-allowance).
+
 Wallet coverage (`remainingUnits`) is separate: how many metered items the credit balance still covers. Do not mix the two remainings.
 
 A provider-level **minimum top-up** (`minTopUpMinor` in SolvaPay Console settings) applies to every credit top-up and auto-recharge for that provider. Amounts below it are rejected. See [Auto-recharge](/sdks/typescript/guides/auto-recharge).

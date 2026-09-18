@@ -49,7 +49,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 - A product and at least one plan in the SolvaPay Console
 - A TypeScript MCP server project
 
-Start from `createSolvaPayMcpServer` — the recommended factory that wires the transport, intent tools, paywall, and UI resource for you, so you register paid tools with `registerPayable` instead of hand-rolling an MCP server.
+Start from `createSolvaPayMcpServer` — the recommended factory that wires the transport, intent tools, paywall, and UI resource for you, so you register paid tools with `registerPayable` instead of hand-rolling an MCP server. For an otherwise-free tool with a per-customer cap, use `registerFree` — see [Add a free allowance to MCP tools](/sdks/typescript/guides/free-allowance).
 
 ## Steps
 

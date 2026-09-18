@@ -1,6 +1,6 @@
 ---
 title: "Plans and billing glossary"
-description: "What a credit is, how meters name usage, and the difference between included allowance and wallet coverage."
+description: "What a credit is, how meters name usage, and the difference between included remaining, a free allowance, and wallet coverage."
 ---
 
 SolvaPay splits **what gets counted** from **what gets spent**. The meter supplies the display noun. Credits are only the prepaid wallet.
@@ -37,14 +37,16 @@ Two leftover counts exist. Do not mix them.
 
 | Count | Wire field | Meaning |
 | --- | --- | --- |
-| Included remaining | `LimitResponse.remaining` | Leftover **included allowance** toward the plan cap. `-1` means unlimited |
+| Included remaining | `LimitResponse.remaining` | Leftover **included** toward the plan cap. `-1` means unlimited |
 | Wallet coverage | `remainingUnits` | How many metered items the **credit balance** still covers (`balance / creditsPerUnit`) |
 
-The stored included cap is `LimitOption.cap`. Copy says **included**, not "limit" or "quota".
+When a request names a `free-*` meter (`CheckLimitRequest.freeAllowance`), `remaining` is the **free-allowance** remainder, not included remaining. The field is reused; the meter name tells you which count it is.
+
+The stored included cap is `LimitOption.cap`. Copy says **included**, not "limit" or "quota". A **free allowance** is the code-declared cap on `registerFree` (`FreeLimit.cap`). Do not call a free allowance included.
 
 Recurring, usage-based, hybrid, and one-time are **derived labels** from `options[]`, not stored plan types. See [Plans](/plans/overview).
 
-`LimitOption.cap === 0` means unlimited. Commerce emits that sentinel on the wire as `freeUnits: 0`. A missing limit option is pay-as-you-go (no included allowance), not unlimited.
+`LimitOption.cap === 0` means unlimited. Commerce emits that sentinel on the wire as `freeUnits: 0`. A missing limit option is pay-as-you-go (no included amount), not unlimited.
 
 ## Overage
 
@@ -62,6 +64,18 @@ Overage is usage beyond the included allowance, charged per meter noun. A plan w
 
 A usage plan's empty wallet surfaces later as `topup_required` at usage time, not at activation.
 
+`paywallReason` on a limits denial names the recovery. `limit_reached` is also how a `registerFree` allowance reports exhaustion.
+
+| Reason | When |
+| --- | --- |
+| `activation_required` | No purchase yet — activate a plan |
+| `topup_required` | Usage-based plan, wallet empty — add credits |
+| `payment_required` | Paid plan needs checkout before access |
+| `limit_reached` | Included cap or a free allowance is exhausted |
+| `identity_required` | Unidentified caller on `registerFree` — 401, not a `LimitResponse.paywallReason`. There is no anonymous bucket |
+
+See [Add a free allowance to MCP tools](/sdks/typescript/guides/free-allowance).
+
 ## Credit minting
 
 Credits mint when the charge succeeds. The webhook is an idempotent backstop, not the primary booking path.
@@ -72,6 +86,7 @@ Credits mint when the charge succeeds. The webhook is an idempotent backstop, no
 | --- | --- |
 | Units (generic) | The meter noun (`requests`, or the meter's `unit`) |
 | Quota | Included |
+| Allowance (for a plan cap) | Included. **Free allowance** is reserved for `registerFree` |
 | Consumption (as a noun) | Usage |
 | Calls / messages (as a stand-in) | The meter noun, unless that meter’s `unit` really is "calls" |
 | Automatic top-up (on the setting) | Auto-recharge |
@@ -83,3 +98,4 @@ Wire identifiers (`units`, `CHARGE_PERS = 'unit'`, `customer.credit.auto_topup_f
 - [Plans](/plans/overview) — plan types and configuration
 - [Billing](/plans/billing) — cycles, renewals, and usage on a purchase
 - [Usage events](/sdks/typescript/guides/usage-events) — record usage from the TypeScript SDK
+- [Add a free allowance to MCP tools](/sdks/typescript/guides/free-allowance) — code-declared per-customer cap

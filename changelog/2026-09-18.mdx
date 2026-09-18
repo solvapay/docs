@@ -1,0 +1,24 @@
+---
+title: "September 18, 2026"
+description: "A code-declared free allowance for MCP tools, a free-capped scaffolder tier, and paywallReason coverage for limit_reached."
+---
+
+## Free allowance for MCP tools
+
+`@solvapay/mcp` adds `registerFree` for an otherwise-free MCP tool with a per-customer cap
+declared in code. Exhaustion uses the same paywall gate as a paid tool
+(`paywallReason: 'limit_reached'`). Tools that name the same `free-*` meter share one allowance.
+Unidentified callers fail with `401` / `identity_required` — there is no anonymous bucket.
+
+- The cap lives next to the tool. There is no Console control for it.
+- `remaining` / `used` / `limit` on the limits response are reused; the meter name tells you
+  whether the remainder is included or a free allowance.
+- Managed MCP public tools ("No plan") stay unlimited and untracked. A per-customer tracked cap
+  is the TypeScript SDK path.
+- `create-solvapay` accepts a `free-capped` operation tier that emits `ctx.registerFree`.
+  `describe.mjs` still suggests `free` / `paid` / `skip` — a cap is a pricing decision you upgrade
+  to.
+
+See [Add a free allowance to MCP tools](/sdks/typescript/guides/free-allowance),
+the [MCP guide](/sdks/typescript/guides/mcp), and
+[Plans and billing glossary](/plans/glossary).

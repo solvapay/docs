@@ -1,0 +1,222 @@
+---
+title: "Deploy SolvaPay MCP on Cloudflare Workers"
+description: "Run a paywalled MCP server on Cloudflare Workers using createSolvaPayMcpFetch — full OAuth, paywall, and widget wiring in ~60 lines."
+---
+
+Use this guide to deploy the SolvaPay MCP surface on Cloudflare Workers using the `examples/cloudflare-workers-mcp` starter.
+
+## Who this is for
+
+- Teams deploying an MCP server to Cloudflare Workers
+- Developers that need low-latency OAuth discovery and paywall enforcement at the edge
+- Anyone who wants a working starter to adapt rather than build from scratch
+
+## What you will achieve
+
+By the end, your MCP server runs on Workers with OAuth, paywall enforcement, and the widget UI wired through a single `createSolvaPayMcpFetch` call.
+
+## Prerequisites
+
+- Node.js 20+
+- pnpm (this repo uses pnpm workspaces)
+- A SolvaPay account with a secret key and a product ref (`prd_…`)
+- A Cloudflare account with [Wrangler](https://developers.cloudflare.com/workers/wrangler/) installed
+
+## Project structure
+
+```
+examples/cloudflare-workers-mcp/
+├── src/
+│   ├── worker.ts          # Fetch handler — Workers entrypoint
+│   ├── demo-tools.ts      # Optional paywalled demo tools (stock predictor)
+│   └── mcp-app.tsx        # React widget source
+├── wrangler.jsonc          # Wrangler config with placeholder vars
+├── .dev.vars.example       # Template for local dev secrets
+└── mcp-app.html            # Vite-bundled widget (gitignored until built)
+```
+
+## How the worker is wired
+
+`src/worker.ts` composes `createSolvaPay` and `createSolvaPayMcpFetch`, then exports a `fetch` handler:
+
+```typescript
+import { createSolvaPay } from '@solvapay/server'
+import { createSolvaPayMcpFetch } from '@solvapay/mcp/fetch'
+
+let cachedHandler: ((req: Request) => Promise<Response>) | undefined
+
+function getHandler(env: Env): (req: Request) => Promise<Response> {
+  if (cachedHandler) return cachedHandler
+
+  const apiBaseUrl = env.SOLVAPAY_API_BASE_URL ?? 'https://api.solvapay.com'
+  cachedHandler = createSolvaPayMcpFetch({
+    solvaPay: createSolvaPay({
+      apiKey: requireEnv(env, 'SOLVAPAY_SECRET_KEY'),
+      apiBaseUrl,
+    }),
+    productRef: requireEnv(env, 'SOLVAPAY_PRODUCT_REF'),
+    publicBaseUrl: requireEnv(env, 'MCP_PUBLIC_BASE_URL'),
+    resourceUri: 'ui://cloudflare-workers-mcp/mcp-app.html',
+    readHtml: async () => mcpAppHtml,
+    apiBaseUrl,
+    mode: 'json-stateless',
+    hideToolsByAudience: ['ui'],
+  })
+  return cachedHandler
+}
+
+export default {
+  async fetch(req: Request, env: Env): Promise<Response> {
+    if (req.method === 'OPTIONS') return browserCorsPreflight(req)
+    const response = await getHandler(env)(req)
+    return applyBrowserCors(req, response)
+  },
+} satisfies ExportedHandler<Env>
+```
+
+Key decisions:
+
+- **`requireEnv`** — helper defined in `src/worker.ts` that throws a descriptive error if a variable is missing, so the handler never caches in a broken state. A missing var surfaces a 500 on the first request; `cachedHandler` stays unset so the next request retries construction.
+- **`mode: 'json-stateless'`** — selects the stateless JSON transport preset. Workers isolates don't pin state across requests, so streaming or stateful session modes don't apply.
+- **`hideToolsByAudience: ['ui']`** — hides UI-audience tools from text-host MCP clients; the widget handles them.
+- **Handler caching** — `cachedHandler` is set once per isolate. `McpServer` construction, tool registrations, and internal caches all build once, not on every request. Secret or var rotations trigger a new worker version and a fresh isolate, so cache invalidation is automatic.
+- **CORS** — `applyBrowserCors` and `browserCorsPreflight` handle browser MCP clients (ChatGPT Custom Connectors, MCP Inspector web UI). Native-scheme clients (Cursor, Claude Desktop) are handled by the SDK itself.
+
+## Local development
+
+Steps 1–3 run from the **monorepo root**. Steps 4–5 run from inside the example directory.
+
+1. Install dependencies:
+
+   ```bash
+   pnpm install
+   ```
+
+2. Build the SDK packages:
+
+   ```bash
+   pnpm -w build:packages
+   ```
+
+3. Copy the dev secrets template and fill in your values:
+
+   ```bash
+   cp examples/cloudflare-workers-mcp/.dev.vars.example examples/cloudflare-workers-mcp/.dev.vars
+   ```
+
+4. Move into the example directory and build the Vite widget:
+
+   ```bash
+   cd examples/cloudflare-workers-mcp
+   pnpm build
+   ```
+
+5. Start the local dev server:
+
+   ```bash
+   pnpm exec wrangler dev
+   ```
+
+   `serve:local` in `examples/cloudflare-workers-mcp/package.json` is an alias for this command.
+
+## Configuration
+
+| Variable | Required | Default | Purpose |
+|---|---|---|---|
+| `SOLVAPAY_SECRET_KEY` | Yes | — | Merchant API key. SolvaPay dashboard → API Keys. Set as a secret — never commit. |
+| `SOLVAPAY_PRODUCT_REF` | Yes | — | Product (`prd_…`) the paywall gates on. SolvaPay dashboard → Products. |
+| `MCP_PUBLIC_BASE_URL` | Yes | — | Canonical public URL. OAuth `issuer` reflects this. Use `http://localhost:8787` for local dev. |
+| `SOLVAPAY_API_BASE_URL` | No | `https://api.solvapay.com` | Override to point at a staging backend. Omit for production. |
+| `DEMO_TOOLS` | No | omitted | Set to `"1"` to enable the paywalled demo stock-predictor tools. The starter's `wrangler.jsonc` sets this to `"1"` for demonstration only — remove the line before using this as a production template. |
+
+<Warning>
+  Never commit real values to `wrangler.jsonc`. The `vars` block is checked into
+  source control. Use `wrangler secret put` for `SOLVAPAY_SECRET_KEY` and any
+  other sensitive values. Wrangler secrets override matching `vars` at runtime.
+</Warning>
+
+## Deploy to production
+
+Set each secret before deploying:
+
+```bash
+echo "sk_live_your_key" | pnpm exec wrangler secret put SOLVAPAY_SECRET_KEY
+echo "prd_your_product_ref" | pnpm exec wrangler secret put SOLVAPAY_PRODUCT_REF
+echo "https://your-worker.example.com" | pnpm exec wrangler secret put MCP_PUBLIC_BASE_URL
+```
+
+To point at a staging backend, also set:
+
+```bash
+echo "https://api-dev.solvapay.com" | pnpm exec wrangler secret put SOLVAPAY_API_BASE_URL
+```
+
+Then deploy from the example directory:
+
+```bash
+pnpm run deploy
+```
+
+The `predeploy` script in `package.json` runs automatically before deploy: `pnpm -w build:packages && pnpm build`. This rebuilds all SDK packages and the Vite widget before Wrangler uploads the bundle.
+
+## Smoke test
+
+### Local
+
+```bash
+curl -si http://localhost:8787/.well-known/oauth-authorization-server | head -1
+# → HTTP/1.1 200 OK
+
+curl -si http://localhost:8787/.well-known/oauth-protected-resource | head -1
+# → HTTP/1.1 200 OK
+```
+
+Connect an MCP client (Cursor, Claude Desktop, or MCP Inspector) and call a paywalled tool without a purchase. The response should include a checkout URL, not a tool result. Complete a test purchase in sandbox and confirm the same call executes successfully. Confirm usage events appear in sandbox data.
+
+### Production
+
+Replace `localhost:8787` with your worker URL and repeat the curl checks above. Then repeat the paywall enforcement steps against the deployed worker.
+
+## Known SDK fix: lazy `setInterval`
+
+Cloudflare Workers forbids timers in the global scope. Any `setInterval` called at module top-level throws:
+
+> "Disallowed operation called within global scope."
+
+`createRequestDeduplicator` in `@solvapay/server` previously started its cleanup interval eagerly at construction time. Because `createSolvaPay` is instantiated at module scope (for handler caching), this caused a boot crash on Workers.
+
+The fix defers interval creation to the first `deduplicate()` call via `ensureCleanupInterval()` — which runs inside a request handler, never in the global scope. The change is backward-compatible with Node, Deno, and Supabase Edge.
+
+<Warning>
+  Rebuild `@solvapay/server` from patched source before deploying to Workers.
+  Run `pnpm -w build:packages` from the monorepo root. A stale pre-fix build
+  crashes at boot with the global scope error above.
+</Warning>
+
+## Performance
+
+Measured from a Stockholm client against deployed endpoints (15 samples each):
+
+| Endpoint | Supabase Edge p50 | Workers p50 | Speedup |
+|---|---|---|---|
+| `/.well-known/oauth-authorization-server` | 419 ms | 45 ms | ~9x |
+| `/.well-known/oauth-protected-resource` | 390 ms | 46 ms | ~8.5x |
+| `/oauth/token` | 459 ms | 111 ms | ~4x |
+
+Discovery endpoints are fastest on Workers because they bypass backend API calls. The token endpoint involves a round-trip to `api.solvapay.com` shared by both runtimes, so the speedup there is lower.
+
+## Adding demo tools
+
+The starter includes optional paywalled demo tools (`predict_price_chart`, `predict_direction`). Enable them by setting `DEMO_TOOLS=1` in `.dev.vars`. When enabled, `registerDemoTools` is passed as `additionalTools` to `createSolvaPayMcpFetch`.
+
+To use this starter as a template for your own server, remove the `DEMO_TOOLS` var and replace `registerDemoTools` with your own tool registration function.
+
+## Compatible clients
+
+Tested against Cursor, Claude Desktop, ChatGPT Custom Connectors, MCPJam, and MCP Inspector. Native-scheme clients connect directly; browser-based clients use the CORS layer described above.
+
+## Next related tasks
+
+- [Monetize an MCP server with SDK integration](/guides/monetize-mcp-server-with-sdk)
+- [Monetize an MCP server without code](/guides/monetize-mcp-server-no-code)
+- [Handle SolvaPay webhooks safely](/guides/handle-webhooks)

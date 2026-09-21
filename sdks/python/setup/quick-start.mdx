@@ -1,0 +1,64 @@
+---
+title: "Quick start"
+description: "Protect your first Python function with a SolvaPay paywall in 3 lines."
+---
+
+## 1) Install and set your key
+
+```bash
+pip install git+https://github.com/dhruv-sanan/solvapay-python
+export SOLVAPAY_SECRET_KEY=sk_sandbox_...
+export SOLVAPAY_PRODUCT_REF=prd_YOUR_PRODUCT
+```
+
+## 2) Gate a function
+
+```python
+from solvapay import SolvaPay, paywall
+from solvapay.paywall import PaywallRequired
+
+sv = SolvaPay()
+
+@paywall.require(product="prd_YOUR_PRODUCT", client=sv)
+def run_analysis(*, customer_ref: str, query: str) -> dict:
+    # only executes if customer is within limits
+    return {"result": f"Analysed: {query}"}
+```
+
+Call it:
+
+```python
+try:
+    result = run_analysis(customer_ref="cus_user_42", query="hello")
+    print(result)
+except PaywallRequired as exc:
+    print("Upgrade needed:", exc.checkout_url)
+```
+
+## 3) Ensure a customer exists first (idempotent)
+
+```python
+customer_ref = sv.ensure_customer("user_42", email="alice@example.com")
+result = run_analysis(customer_ref=customer_ref, query="hello")
+```
+
+`ensure_customer` is safe to call on every request — it creates the customer on first call and
+returns the same ref on subsequent calls.
+
+## How the paywall check works
+
+Before each call `@paywall.require` runs `check_limits` against SolvaPay. If `within_limits` is
+`False` it raises `PaywallRequired` carrying the hosted-checkout URL. Your code never executes
+unless the customer has an active purchase.
+
+```python
+# Manual check (without the decorator)
+limits = sv.check_limits(customer_ref="cus_user_42", product_ref="prd_YOUR_PRODUCT")
+if not limits.within_limits:
+    redirect_to(limits.checkout_url)
+```
+
+## Next steps
+
+- [FastMCP paywall guide](../guides/fastmcp-paywall) — gate MCP tools per-call
+- [Webhook handler](#) — verify SolvaPay events in FastAPI

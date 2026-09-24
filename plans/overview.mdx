@@ -79,11 +79,19 @@ Included cap for a meter. Copy says **included**. `cap: 0` means unlimited.
 | `cap` | `number` | Included count. `0` is unlimited |
 | `scope` | `enum` | `billing_period`, `lifetime`, or `rolling_window` |
 | `meter` | `string` | Meter this cap applies to |
-| `onExceed` | `enum` | `block`, `throttle`, `charge`, `notify`, `top_up`, or `auto_upgrade` |
+| `onExceed` | `enum` | `block`, `throttle`, `charge`, `top_up`, or `auto_upgrade` |
 | `windowDays` | `number` | Required when `scope` is `rolling_window` |
 | `onExceedPricingId` | `string` | Target plan when `onExceed` is `auto_upgrade` |
 
-A missing limit is pay-as-you-go (every counted item is billed). It is not unlimited.
+A limit needs a `billingCycle`. Pay-as-you-go (no cycle) cannot carry included usage. A missing limit means every counted item is billed. It is not unlimited.
+
+`onExceed` is what happens after the included count:
+
+- `block` stops access
+- `charge` bills overage on the saved card at the end of the billing period
+- `top_up` draws prepaid credits for usage past the cap, and refuses the next request when the balance cannot cover one unit
+- `throttle` keeps serving and tells the caller to slow down
+- `auto_upgrade` switches the customer to `onExceedPricingId`
 
 ### `entitlement`
 
@@ -100,9 +108,9 @@ A feature flag or numeric benefit on the plan. The console label is **Benefit**.
 | Field | Type | Description |
 | --- | --- | --- |
 | `days` | `number` | Trial length |
-| `onEnd` | `enum` | `convert`, `cancel`, or `downgrade` |
-| `requireCard` | `boolean` | Collect a card before the trial starts |
-| `downgradeToPricingId` | `string` | Target plan when `onEnd` is `downgrade` |
+| `onEnd` | `enum` | `convert` or `cancel` |
+
+`convert` moves the customer onto the plan’s paid terms. `cancel` ends access. A reverse trial is `cancel` plus an auto-assigned free plan on the product, so the customer stays on the free tier when the trial ends.
 
 ### `discount`
 
@@ -170,19 +178,12 @@ A $0 flat charge plus `autoAssigned` is a free recurring fallback.
       "amountMinor": 2,
       "currency": "USD",
       "meter": "requests"
-    },
-    {
-      "kind": "limit",
-      "cap": 1000,
-      "scope": "billing_period",
-      "meter": "requests",
-      "onExceed": "charge"
     }
   ]
 }
 ```
 
-`amountMinor: 2` is $0.02 per request. Do not send `creditsPerUnit` as a plan field.
+`amountMinor: 2` is $0.02 per request. This plan has no billing cycle and no included cap. Do not send `creditsPerUnit` as a plan field.
 
 Minimum top-up is a provider setting (`minTopUpMinor` in SolvaPay Console settings), not a plan option. See [Auto-recharge](/sdks/typescript/guides/auto-recharge).
 

@@ -34,11 +34,13 @@ Metered usage comes from usage events on a meter. The HTTP path stays `POST /v1/
 | --- | --- |
 | `charge` with `per: "unit"` | Money per counted item on `meter` |
 | `tier` | Graduated or volume rates instead of a single per-unit charge |
-| `limit` | Included cap. `cap: 0` is unlimited. A missing limit is pay-as-you-go |
-| `limit.onExceed` | `block` stops access; `charge` bills overage at the per-item rate |
+| `limit` | Included cap on a recurring plan. `cap: 0` is unlimited. Pay-as-you-go has no cap |
+| `limit.onExceed` | `block` stops access; `charge` bills overage on the saved card at period end; `top_up` draws prepaid credits past the cap |
 | `rollover` | Unused included usage at period end (`forfeit`, `carry_forward`, …) |
 
-Overage is usage beyond the included cap, charged per meter noun. A plan with no limit bills every counted item.
+Included usage needs a billing cycle. A pay-as-you-go plan cannot carry a limit.
+
+Overage is usage beyond the included cap. `charge` bills it per meter noun on the saved card when the period closes. `top_up` pays it from prepaid credits as each request is served, and denies the request when the balance cannot cover one unit. A plan with no limit bills every counted item.
 
 Limit checks:
 
@@ -65,7 +67,7 @@ A purchase moves through these states:
 | `active` (pending cancellation) | Active with `cancelledAt` set — access continues until period end |
 | `cancelled` | Cancel confirmed at period end |
 | `expired` | Purchase has ended |
-| `past_due` | Payment failed; purchase may be suspended |
+| `past_due` | A renewal, retry, trial conversion, or overage charge could not be collected. Access continues while SolvaPay retries |
 
 ## Reactivation
 
@@ -121,20 +123,21 @@ Each metered purchase can carry a `usage` subdocument for the current period. Th
 
 A daily job renews purchases whose `nextBillingDate` has passed and that still auto-renew:
 
-1. Charge the recurring flat `charge` (and any due usage) when `requiresPayment` is true
-2. Advance `nextBillingDate` by the `billingCycle` interval
+1. Charge the recurring flat `charge` (and any due overage) off-session on the card saved at checkout, when `requiresPayment` is true
+2. Advance `nextBillingDate` by the `billingCycle` interval only after that charge is collected
 
-`requiresPayment` is derived: any positive charge or tier amount.
+A decline, a card that needs authentication, a missing saved card, or a tax calculation failure leaves the purchase `past_due` and does not move `nextBillingDate`. Access continues while retries run. `requiresPayment` is derived: any positive charge or tier amount.
+
+Recurring checkout saves the card for later renewals, usage past the included allowance, and failed-payment retries.
 
 ## Trial end
 
-A `trial` option sets `days` and `onEnd` (`convert`, `cancel`, or `downgrade`). When the trial ends:
+A `trial` option sets `days` and `onEnd` (`convert` or `cancel`). When the trial ends:
 
-- `convert` — move to the paid plan terms
+- `convert` — charge the plan off-session and move to the paid terms. If that charge cannot be collected, the purchase becomes `past_due`
 - `cancel` — end access
-- `downgrade` — move to `downgradeToPricingId`
 
-If the plan requires payment and no payment method is on file, the purchase is suspended until checkout completes.
+A reverse trial is `cancel` plus an auto-assigned free plan on the product. The customer lands on that free plan when the trial ends. There is no downgrade target on the trial option.
 
 ## Usage reset and rollover
 

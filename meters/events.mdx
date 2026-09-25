@@ -164,15 +164,13 @@ Request → Find Purchase → Resolve Requests Meter
                     used < limit?  → Allow + Record Usage
 ```
 
-### End-of-Period Billing
+### Credit debit
 
-For post-paid and hybrid plans, a daily cron job:
+Usage is paid from prepaid credits as each event is recorded, not billed at period end:
 
-1. Finds purchases with expired billing periods
-2. Queries the Usage timeseries for total usage in the period
-3. Subtracts free units from the total
-4. Applies the plan's pricing (flat rate or tiered)
-5. Creates a payment intent for the calculated amount
+1. On pay-as-you-go, every counted item debits credits at the plan's rate (flat or tiered)
+2. On a recurring plan, usage within the included cap is free
+3. Past the cap (`onExceed: "top_up"`), or from the first item when the meter has no limit, each item debits credits
 
 See [Billing](/plans/billing) for the full billing flow.
 

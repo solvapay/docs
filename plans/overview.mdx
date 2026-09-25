@@ -79,19 +79,16 @@ Included cap for a meter. Copy says **included**. `cap: 0` means unlimited.
 | `cap` | `number` | Included count. `0` is unlimited |
 | `scope` | `enum` | `billing_period`, `lifetime`, or `rolling_window` |
 | `meter` | `string` | Meter this cap applies to |
-| `onExceed` | `enum` | `block`, `throttle`, `charge`, `top_up`, or `auto_upgrade` |
+| `onExceed` | `enum` | `block`, `charge`, or `top_up` |
 | `windowDays` | `number` | Required when `scope` is `rolling_window` |
-| `onExceedPricingId` | `string` | Target plan when `onExceed` is `auto_upgrade` |
 
 A limit needs a `billingCycle`. Pay-as-you-go (no cycle) cannot carry included usage. A missing limit means every counted item is billed. It is not unlimited.
 
 `onExceed` is what happens after the included count:
 
-- `block` stops access
+- `block` stops access. The denial offers the product's other plans, and checkout opens on the plan the customer picks
 - `charge` bills overage on the saved card at the end of the billing period
 - `top_up` draws prepaid credits for usage past the cap, and refuses the next request when the balance cannot cover one unit
-- `throttle` keeps serving and tells the caller to slow down
-- `auto_upgrade` switches the customer to `onExceedPricingId`
 
 ### `entitlement`
 

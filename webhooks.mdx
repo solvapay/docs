@@ -296,7 +296,7 @@ The complete purchase/subscription state machine:
 | `purchase.renewed` | A subscription successfully renewed (recurring charge). |
 | `purchase.renewal_reminder` | The upcoming-renewal reminder window was reached. |
 | `purchase.refunded` | A purchase's entitlement was revoked by a full refund. |
-| `purchase.plan_changed` | A subscription was upgraded or downgraded to a new plan. |
+| `purchase.plan_changed` | A subscription was upgraded or downgraded through checkout. A limit does not switch the plan. |
 
 ### Payment, Refund & Dispute Events
 
@@ -361,8 +361,9 @@ The complete purchase/subscription state machine:
 **Reactivation**: undoing a pending cancellation via `reactivateRenewal` emits
 `purchase.reactivated`.
 
-**Plan switching**: calling `activatePlan` with a different plan emits `purchase.expired`
+**Plan switching**: checkout that activates a different plan emits `purchase.expired`
 for the old purchase, `purchase.created` for the new one, and `purchase.plan_changed`.
+Hitting a usage cap does not emit `purchase.plan_changed`.
 </Info>
 
 ---

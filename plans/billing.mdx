@@ -35,7 +35,7 @@ Metered usage comes from usage events on a meter. The HTTP path stays `POST /v1/
 | `charge` with `per: "unit"` | Money per counted item on `meter` |
 | `tier` | Graduated or volume rates instead of a single per-unit charge |
 | `limit` | Included cap on a recurring plan. `cap: 0` is unlimited. Pay-as-you-go has no cap |
-| `limit.onExceed` | `block` stops access; `charge` bills overage on the saved card at period end; `top_up` draws prepaid credits past the cap |
+| `limit.onExceed` | `block` stops access and offers the product's other plans at checkout; `charge` bills overage on the saved card at period end; `top_up` draws prepaid credits past the cap |
 | `rollover` | Unused included usage at period end (`forfeit`, `carry_forward`, …) |
 
 Included usage needs a billing cycle. A pay-as-you-go plan cannot carry a limit.

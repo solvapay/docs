@@ -79,16 +79,17 @@ Included cap for a meter. Copy says **included**. `cap: 0` means unlimited.
 | `cap` | `number` | Included count. `0` is unlimited |
 | `scope` | `enum` | `billing_period`, `lifetime`, or `rolling_window` |
 | `meter` | `string` | Meter this cap applies to |
-| `onExceed` | `enum` | `block`, `charge`, or `top_up` |
+| `onExceed` | `enum` | `block` or `top_up` |
 | `windowDays` | `number` | Required when `scope` is `rolling_window` |
 
-A limit needs a `billingCycle`. Pay-as-you-go (no cycle) cannot carry included usage. A missing limit means every counted item is billed. It is not unlimited.
+A limit needs a `billingCycle`. Pay-as-you-go (no cycle) cannot carry included usage. A missing limit means every counted item is paid from prepaid credits. It is not unlimited.
 
 `onExceed` is what happens after the included count:
 
 - `block` stops access. The denial offers the product's other plans, and checkout opens on the plan the customer picks
-- `charge` bills overage on the saved card at the end of the billing period
 - `top_up` draws prepaid credits for usage past the cap, and refuses the next request when the balance cannot cover one unit
+
+Usage is never billed to the card. The API still accepts `onExceed: "charge"` and stores it as `top_up`.
 
 ### `entitlement`
 
@@ -119,19 +120,6 @@ A feature flag or numeric benefit on the plan. The console label is **Benefit**.
 | `duration` | `enum` | `once`, `repeating`, or `forever` |
 | `cycles` | `number` | Required when `duration` is `repeating` |
 | `appliesTo` | `enum` | `recurring`, `setup`, `usage`, or `all` |
-
-### `rollover`
-
-What happens to unused included usage at period end.
-
-| Field | Type | Description |
-| --- | --- | --- |
-| `meter` | `string` | Meter to roll |
-| `treatment` | `enum` | `forfeit`, `carry_forward`, `credit_units`, or `credit_money` |
-| `capUnits` | `number` | Optional carry-forward cap |
-| `maxCycles` | `number` | Optional max periods unused usage can carry |
-| `rateMinor` | `number` | Per-item value when `treatment` is `credit_money` |
-| `currency` | `string` | Required when `treatment` is `credit_money` |
 
 ### Markers
 
@@ -231,10 +219,11 @@ Both are per-request prices on the same requests, so sending both is rejected.
 Bands and `limit` compose: the `cap` is the included count, and the bands price
 the overage above it. A plan with `"cap": 1000` and the bands above includes the
 first 1,000 requests and prices request 1,001 onward from the band it lands in.
-Set `onExceed: "charge"` so exceeding the included count bills rather than blocks.
+Set `onExceed: "top_up"` so usage past the included count is paid from prepaid
+credits rather than blocked.
 
-Tiered usage on a recurring plan bills at the end of each billing period. On a
-plan with no billing cycle it is charged in real time against the credit balance.
+Tiered usage is paid from the credit balance as each request is served, on a
+recurring plan and on a plan with no billing cycle alike.
 
 ### Hybrid — recurring fee plus metered usage
 
@@ -257,7 +246,7 @@ plan with no billing cycle it is charged in real time against the credit balance
       "cap": 1000,
       "scope": "billing_period",
       "meter": "requests",
-      "onExceed": "charge"
+      "onExceed": "top_up"
     }
   ]
 }

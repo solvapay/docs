@@ -71,7 +71,7 @@ Included allowances are enforced through [meters](/plans/glossary) — every MCP
 | Setting | Option | Description |
 |---------|--------|-------------|
 | **Included** | `limit.cap` | Requests included per period. `0` is unlimited |
-| **On exceed** | `limit.onExceed` | `block` stops access; `charge` bills overage at the per-request rate |
+| **On exceed** | `limit.onExceed` | `block` stops access; `top_up` keeps serving and pays overage from prepaid credits at the per-request rate |
 | **Usage rate** | `charge` with `per: "unit"` | Money per request (minor units). Not a credit count |
 
 Minimum top-up is a provider setting in SolvaPay Console, not a plan option. See [Auto-recharge](/sdks/typescript/guides/auto-recharge).
@@ -81,14 +81,14 @@ See [Plans](/plans/overview) for compositions and [Plans and billing glossary](/
 ### Overage options
 
 1. **Hard cap** (`onExceed: "block"`) — stop requests when included usage is exhausted. The paywall includes a checkout URL.
-2. **Overage** (`onExceed: "charge"`) — keep serving and bill usage beyond the included cap at the per-request rate
+2. **Overage** (`onExceed: "top_up"`) — keep serving and pay usage beyond the included cap from prepaid credits at the per-request rate. The request is denied when the balance cannot cover one more
 3. **Unlimited** (`cap: 0`) — no included cap
-4. **Pay-as-you-go** — omit `limit`; every request is billed
+4. **Pay-as-you-go** — omit `limit`; every request is paid from prepaid credits
 
 ### Included recommendations
 
 - **Free tier:** Hard cap to prevent abuse (`limit.cap: 100`, `onExceed: "block"`)
-- **Paid tiers:** Usage-based with generous included usage, or hybrid with overage (`onExceed: "charge"`)
+- **Paid tiers:** Usage-based with generous included usage, or hybrid with overage (`onExceed: "top_up"`)
 - **Enterprise:** `limit.cap: 0` (unlimited) or a very high cap
 - **Unlimited free tier:** `limit.cap: 0` means unlimited, not "zero included". That is still a plan-derived included cap. A per-customer tracked cap on an otherwise-free *tool* is the TypeScript SDK `registerFree` path — see [Add a free allowance to MCP tools](/sdks/typescript/guides/free-allowance)
 

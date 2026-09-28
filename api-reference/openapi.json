@@ -891,7 +891,7 @@
                               "throttle",
                               "charge",
                               "notify",
-                              "top_up",
+                              "draw_credits",
                               "auto_upgrade"
                             ],
                             "type": "string"
@@ -1640,7 +1640,7 @@
                         "throttle",
                         "charge",
                         "notify",
-                        "top_up",
+                        "draw_credits",
                         "auto_upgrade"
                       ],
                       "type": "string"
@@ -2614,7 +2614,7 @@
             "type": "string"
           },
           "needsTopUp": {
-            "description": "Access is blocked pending an auto-recharge top-up of the prepaid balance — `onExceed: top_up`.",
+            "description": "Access is blocked until prepaid credits cover the next unit — past an included cap with `onExceed: draw_credits`, or from the first unit on a recurring meter with no limit.",
             "type": "boolean"
           },
           "needsUpgrade": {
@@ -2622,7 +2622,7 @@
             "type": "boolean"
           },
           "overage": {
-            "description": "Access is granted and usage beyond the included cap accrues an overage charge — `onExceed: charge`.",
+            "description": "Access is granted past the included cap and the usage is paid from prepaid credits — `onExceed: draw_credits`.",
             "type": "boolean"
           },
           "paywallReason": {
@@ -2917,7 +2917,7 @@
                               "throttle",
                               "charge",
                               "notify",
-                              "top_up",
+                              "draw_credits",
                               "auto_upgrade"
                             ],
                             "type": "string"
@@ -4771,7 +4771,7 @@
                         "throttle",
                         "charge",
                         "notify",
-                        "top_up",
+                        "draw_credits",
                         "auto_upgrade"
                       ],
                       "type": "string"

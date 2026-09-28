@@ -79,7 +79,7 @@ Included cap for a meter. Copy says **included**. `cap: 0` means unlimited.
 | `cap` | `number` | Included count. `0` is unlimited |
 | `scope` | `enum` | `billing_period`, `lifetime`, or `rolling_window` |
 | `meter` | `string` | Meter this cap applies to |
-| `onExceed` | `enum` | `block` or `top_up` |
+| `onExceed` | `enum` | `block` or `draw_credits` |
 | `windowDays` | `number` | Required when `scope` is `rolling_window` |
 
 A limit needs a `billingCycle`. Pay-as-you-go (no cycle) cannot carry included usage. A missing limit means every counted item is paid from prepaid credits. It is not unlimited.
@@ -87,9 +87,9 @@ A limit needs a `billingCycle`. Pay-as-you-go (no cycle) cannot carry included u
 `onExceed` is what happens after the included count:
 
 - `block` stops access. The denial offers the product's other plans, and checkout opens on the plan the customer picks
-- `top_up` draws prepaid credits for usage past the cap, and refuses the next request when the balance cannot cover one unit
+- `draw_credits` draws prepaid credits for usage past the cap, and refuses the next request when the balance cannot cover one unit
 
-Usage is never billed to the card. The API still accepts `onExceed: "charge"` and stores it as `top_up`.
+Usage is never billed to the card. The API still accepts `onExceed: "top_up"` and `"charge"` and stores both as `draw_credits`.
 
 ### `entitlement`
 
@@ -219,7 +219,7 @@ Both are per-request prices on the same requests, so sending both is rejected.
 Bands and `limit` compose: the `cap` is the included count, and the bands price
 the overage above it. A plan with `"cap": 1000` and the bands above includes the
 first 1,000 requests and prices request 1,001 onward from the band it lands in.
-Set `onExceed: "top_up"` so usage past the included count is paid from prepaid
+Set `onExceed: "draw_credits"` so usage past the included count is paid from prepaid
 credits rather than blocked.
 
 Tiered usage is paid from the credit balance as each request is served, on a
@@ -246,7 +246,7 @@ recurring plan and on a plan with no billing cycle alike.
       "cap": 1000,
       "scope": "billing_period",
       "meter": "requests",
-      "onExceed": "top_up"
+      "onExceed": "draw_credits"
     }
   ]
 }

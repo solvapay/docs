@@ -19,7 +19,7 @@ project is connected before endpoint testing.
 In sandbox mode:
 
 - No real charges are processed
-- Stripe test mode is used for all payment flows
+- Payments run in your payment processor's test mode
 - You can create test customers and purchases freely
 - All data is separate from production
 
@@ -67,24 +67,25 @@ You can switch between **production** and **sandbox** at any time. Many provider
 
 5. **Test the checkout flow**
 
-   Trigger a checkout and use Stripe test card numbers to complete the payment.
+   Trigger a checkout and use a [SolvaPay test card](/get-started/test-cards) to complete the payment.
 
 ## Live MCP client testing
 
 For live authentication and paywall validation in Claude or Cursor, use
 [Test MCP server auth and paywall](/mcp-server/testing-auth-and-paywall).
 
-## Stripe test cards
+## Test cards
 
-Use these card numbers for testing payments:
+Use SolvaPay test cards in sandbox, with any future expiry date and any security code:
 
 | Card number | Result |
 |-------------|--------|
-| `4242 4242 4242 4242` | Successful payment |
-| `4000 0000 0000 0002` | Card declined |
-| `4000 0000 0000 3220` | 3D Secure authentication |
+| `4111 5700 0000 0018` | Successful payment |
+| `4111 5700 0000 1016` | Card declined |
+| `4111 5700 0000 1024` | Declined for insufficient funds |
+| `4111 5700 0000 3012` | 3D Secure authentication |
 
-Use any future expiration date and any 3-digit CVC.
+See [Test cards](/get-started/test-cards) for every brand and scenario.
 
 ## Testing checklist
 

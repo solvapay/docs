@@ -45,6 +45,17 @@
             ]
           },
           {
+            "group": "MCP hosts",
+            "icon": "window-restore",
+            "pages": [
+              "mcp-hosts/overview",
+              "mcp-hosts/claude",
+              "mcp-hosts/claude-code",
+              "mcp-hosts/chatgpt",
+              "mcp-hosts/grok"
+            ]
+          },
+          {
             "group": "Managed MCP",
             "icon": "credit-card",
             "pages": [

@@ -1,0 +1,49 @@
+---
+title: "SolvaPay in ChatGPT"
+sidebarTitle: "ChatGPT"
+description: "How SolvaPay checkout, account pages and MCP UIs work when your MCP server runs in ChatGPT, including inline payment in the chat."
+keywords: ["ChatGPT", "ChatGPT apps", "ChatGPT developer mode", "MCP Apps", "inline checkout"]
+---
+
+ChatGPT renders MCP UIs inside the chat and allows the card form inside them. Customers can pay without leaving the conversation. Account pages open as SolvaPay-hosted pages in the system browser.
+
+## What works
+
+- Text and links: supported.
+- MCP UIs: rendered inline in the chat.
+- Payment form: inline in the chat.
+- Account pages: hosted page, in the system browser.
+
+## Checkout
+
+When a paid tool is blocked, the SolvaPay `account` tool can show checkout or top-up inline. The customer enters card details in the chat and returns to the conversation when the payment is confirmed. The response text also carries a hosted checkout link, so the customer can pay outside the chat if they prefer.
+
+## Account pages
+
+Plan, usage and billing history live on SolvaPay-hosted pages. ChatGPT opens them in the system browser.
+
+## MCP UIs
+
+ChatGPT supports MCP Apps, so the SolvaPay `account` tool renders its plan, checkout and top-up views inline. See the [MCP App integration guide](/sdks/typescript/guides/mcp-app) to build or customize them.
+
+## Connect your MCP server
+
+1. In ChatGPT, open **Settings** > **Security and login** and turn on **Developer mode**.
+2. Go to **Plugins** and select **+**.
+3. Enter a name and your MCP server URL, including the `/mcp` path, and create the connection.
+4. In a conversation, choose **Developer mode** from the **+** menu and select your app.
+
+Business and Enterprise workspaces need an admin to enable developer mode first. See OpenAI's [developer mode guide](https://developers.openai.com/api/docs/guides/developer-mode).
+
+## Demo videos
+
+| Use case | Recording |
+|---|---|
+| Inline payment form (top up) | [Watch](https://screen.studio/share/oGU00U9e) |
+
+## Known limitations
+
+- Developer mode is required for custom MCP servers until your app is published.
+- Hosted checkout links expire after 15 minutes. Ask the assistant for a new link if one has expired.
+
+Last tested: 2026-09-30

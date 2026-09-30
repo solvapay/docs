@@ -52,7 +52,7 @@
               "mcp-hosts/claude",
               "mcp-hosts/claude-code",
               "mcp-hosts/chatgpt",
-              "mcp-hosts/grok"
+              "mcp-hosts/grok-bot"
             ]
           },
           {
@@ -186,6 +186,10 @@
     {
       "source": "/mcp-pay/:slug",
       "destination": "/no-code-mcp/:slug"
+    },
+    {
+      "source": "/mcp-hosts/grok",
+      "destination": "/mcp-hosts/grok-bot"
     }
   ],
   "contextual": {

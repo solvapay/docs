@@ -102,21 +102,18 @@ This produces `purchase.expired` for the old purchase and `purchase.created` for
 
 ## Usage on the purchase
 
-Each metered purchase can carry a `usage` subdocument for the current period. The **source of truth is the usage timeseries**, not `usage.used`. Limit checks sum events from `periodStart` to now.
+An SDK purchase carries the billing period of the active usage window. It does not carry counts.
 
 ```json
 {
   "usage": {
-    "used": 0,
     "periodStart": "2026-01-01T00:00:00Z",
-    "periodEnd": "2026-02-01T00:00:00Z",
-    "resetDate": "2026-02-01T00:00:00Z",
-    "overageUnits": 0,
-    "overageCost": 0,
-    "carriedOverUnits": 0
+    "periodEnd": "2026-02-01T00:00:00Z"
   }
 }
 ```
+
+`used`, `remaining`, and `limit` come from `POST /v1/sdk/limits`. That check sums usage events from `periodStart` to now.
 
 ## Recurring renewal
 

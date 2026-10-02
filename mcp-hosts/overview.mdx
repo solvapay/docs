@@ -1,8 +1,8 @@
 ---
 title: "What each MCP host can render"
 sidebarTitle: "Overview"
-description: "Where SolvaPay checkout, account pages and MCP UIs appear in Claude, Claude Code, ChatGPT and Grok."
-keywords: ["MCP host", "MCP Apps", "Claude", "Claude Code", "ChatGPT", "Grok", "MCP checkout"]
+description: "Where SolvaPay checkout, account pages and MCP UIs appear in Claude, Claude Code, ChatGPT and Grok Bot."
+keywords: ["MCP host", "MCP Apps", "Claude", "Claude Code", "ChatGPT", "Grok Bot", "MCP checkout"]
 ---
 
 {/*
@@ -10,14 +10,17 @@ keywords: ["MCP host", "MCP Apps", "Claude", "Claude Code", "ChatGPT", "Grok", "
   1. That host's column in the matrix below.
   2. The host page in /mcp-hosts/<host>.mdx, including its "Last tested" line.
   3. The date in the Warning at the bottom of this page.
-  Demo video links live only on the host pages.
+  4. images/mcp-hosts/<host>-checkout.png, then the Frame under the summary
+     and img on this page's card. Add those only once the file exists.
+  5. The host page's Demo video section (YouTube embed and chapters).
+     Add it only once the video exists. Videos live only on host pages.
 */}
 
 Every host can show text and links returned by an MCP server. They differ in whether the server can draw its own interface inside the chat and where the checkout form appears. When a host cannot show the form inline, SolvaPay returns a link to a hosted page and the host opens it in a built-in browser or hands it to the system browser.
 
 ## Capability matrix
 
-| | [Claude](/mcp-hosts/claude) | [Claude Code (terminal)](/mcp-hosts/claude-code#terminal) | [Claude Code (desktop)](/mcp-hosts/claude-code#desktop-app) | [ChatGPT](/mcp-hosts/chatgpt) | [Grok](/mcp-hosts/grok) |
+| | [Claude](/mcp-hosts/claude) | [Claude Code (terminal)](/mcp-hosts/claude-code#terminal) | [Claude Code (desktop)](/mcp-hosts/claude-code#desktop-app) | [ChatGPT](/mcp-hosts/chatgpt) | [Grok Bot](/mcp-hosts/grok-bot) |
 |---|---|---|---|---|---|
 | **Text and links** <br /> Plain responses with clickable URLs | Supported | Supported | Supported | Supported | Supported |
 | **Render MCP UIs** <br /> Server-defined interface shown inside the chat | Renders inline | Text and links only | Text and links only | Renders inline | Text and links only |
@@ -36,7 +39,7 @@ The host decides what to show. Your MCP server sends the same response to every 
 2. The SolvaPay `account` tool also declares an MCP UI. Hosts that support MCP Apps, such as Claude and ChatGPT, render it inside the chat. Other hosts ignore it and show the text.
 3. When a paid tool is blocked, the response text states the limit and includes a link to hosted checkout.
 4. If a host renders the MCP UI but does not allow the card form inside it, the UI opens hosted checkout instead.
-5. The host opens the link. Claude and Claude Code desktop use their built-in browser. Claude Code in the terminal and Grok hand it to the system browser.
+5. The host opens the link. Claude and Claude Code desktop use their built-in browser. Claude Code in the terminal and Grok Bot hand it to the system browser.
 6. After payment, return to the chat. The next call to the paid tool runs.
 
 To build the MCP UI yourself, see the [MCP App integration guide](/sdks/typescript/guides/mcp-app). For the hosted pages themselves, see [Hosted pages](/no-code-mcp/hosted-pages).
@@ -53,7 +56,7 @@ To build the MCP UI yourself, see the [MCP App integration guide](/sdks/typescri
   <Card title="ChatGPT" icon="comments" href="/mcp-hosts/chatgpt">
     Renders MCP UIs and the payment form inline in the chat.
   </Card>
-  <Card title="Grok" icon="message-bot" href="/mcp-hosts/grok">
+  <Card title="Grok Bot" icon="message-bot" href="/mcp-hosts/grok-bot">
     Text and links only. Checkout opens in the system browser.
   </Card>
 </Columns>

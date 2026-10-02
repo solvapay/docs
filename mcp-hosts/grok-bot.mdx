@@ -1,0 +1,46 @@
+---
+title: "SolvaPay in Grok Bot"
+sidebarTitle: "Grok Bot"
+description: "How SolvaPay checkout and account pages work when your MCP server runs in Grok Bot, the xAI agent app."
+keywords: ["Grok Bot", "xAI", "custom MCP", "MCP checkout"]
+---
+
+[Grok Bot](https://x.ai/bot) shows text and links only. It does not render MCP UIs, so checkout and account pages open as SolvaPay-hosted pages in the system browser.
+
+## What works
+
+- Text and links: supported.
+- MCP UIs: text and links only.
+- Payment form: hosted page, in the system browser.
+- Account pages: hosted page, in the system browser.
+
+## Checkout
+
+When a paid tool is blocked, the response text states the limit and includes a link to hosted checkout. The customer opens the link in the system browser, pays, and returns to Grok Bot. The next call to the paid tool runs.
+
+## Account pages
+
+Ask the bot to manage the account. The `account` tool returns the current plan, usage and a link to the SolvaPay-hosted account page, which opens in the system browser.
+
+## MCP UIs
+
+Grok Bot ignores MCP UIs and uses only the markdown text of a response. Every SolvaPay response already contains a complete text answer with plain `https://` links, so nothing is lost.
+
+## Connect your MCP server
+
+Grok Bot has no connector form. Ask the bot to add the server in chat:
+
+```text
+Add this MCP server: https://your-mcp-server.example.com/mcp
+```
+
+The bot repeats the URL and asks you to confirm before it saves the connector. Tools are available from the next message.
+
+The server must be a public HTTPS URL using Streamable HTTP or SSE. Grok Bot runs on its own computer in the cloud, so it cannot reach `localhost`. This is separate from adding a connector at grok.com, which is Grok chat.
+
+## Known limitations
+
+- There is no inline checkout. Card entry always happens on the hosted page.
+- Hosted checkout links expire after 15 minutes. Ask the bot for a new link if one has expired.
+
+Last tested: 2026-09-30

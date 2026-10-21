@@ -2,6 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "almond",
   "name": "SolvaPay Documentation",
+  "description": "SolvaPay is the payment layer for selling APIs, MCP servers, and AI agents: paywalls, plans, credits, usage billing, and checkout. REST API base URL https://api.solvapay.com, authenticated with Authorization: Bearer <secret key>.",
   "colors": {
     "primary": "#3a3a3a",
     "light": "#4f4f4f",
@@ -22,6 +23,7 @@
             "icon": "rocket",
             "pages": [
               "index",
+              "api-reference/authentication",
               "get-started/choose-your-path",
               "get-started/create-account",
               "get-started/create-product",
@@ -176,6 +178,19 @@
       "destination": "/no-code-mcp/:slug"
     }
   ],
+  "markdown": {
+    "instructions": [
+      "SolvaPay quick facts:",
+      "- REST API base URL: https://api.solvapay.com. All public endpoints are under /v1/sdk/ (for example GET https://api.solvapay.com/v1/sdk/products). Sandbox and production share this URL.",
+      "- Auth: send a secret key as `Authorization: Bearer <secret key>` (the REST API also accepts `X-API-Key: <secret key>`).",
+      "- Secret key prefixes: `sk_sandbox_` (sandbox, test payments) and `sk_live_` (production). The prefix selects the environment.",
+      "- Get keys in SolvaPay Console (https://app.solvapay.com) > Developers > API Keys. Use a sandbox key while building.",
+      "- Admin MCP Server: https://mcp.solvapay.com/mcp (Streamable HTTP). Config-based clients must send `Authorization: Bearer <secret key>`; it ignores X-API-Key.",
+      "- Install the SolvaPay agent skills: `npx skills add https://solvapay.com` (skills CLI older than 1.5.7: `npx skills add solvapay/skills`).",
+      "- TypeScript SDK setup: `npx solvapay@latest init`. The SDK reads SOLVAPAY_SECRET_KEY and defaults to https://api.solvapay.com.",
+      "- Details: https://docs.solvapay.com/api-reference/authentication.md. OpenAPI spec: https://docs.solvapay.com/api-reference/openapi.json."
+    ]
+  },
   "contextual": {
     "options": [
       "copy",

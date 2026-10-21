@@ -8010,6 +8010,11 @@
       }
     }
   },
-  "servers": [],
+  "servers": [
+    {
+      "description": "SolvaPay API (sandbox and live; the secret key prefix selects the environment)",
+      "url": "https://api.solvapay.com"
+    }
+  ],
   "tags": []
 }

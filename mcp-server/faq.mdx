@@ -24,7 +24,7 @@ Yes. Every tool call is scoped to the provider account associated with your cred
 The MCP server supports two authentication methods:
 
 - **OAuth login** — For clients that support OAuth (Claude.ai, Claude Desktop). You sign in with your SolvaPay Console credentials (email code, Google, or GitHub) and authorize the connection. No API key needed.
-- **API key** — For config-based clients (Cursor, VS Code). Pass your API key via the `X-API-Key` header or the `Authorization: Bearer` header.
+- **API key** — For config-based clients (Cursor, VS Code). Pass your secret API key in the `Authorization: Bearer <secret key>` header. The MCP server doesn't read `X-API-Key`.
 
 **Can only existing providers connect?**
 
@@ -36,7 +36,7 @@ Yes. Configure separate MCP server entries in your client — one with a sandbox
 
 **What happens if my API key is compromised?**
 
-Revoke the key immediately in your SolvaPay Console under **Settings > API Keys**, then generate a new one and update your MCP configuration.
+Revoke the key immediately in your SolvaPay Console under **Developers > API Keys**, then generate a new one and update your MCP configuration.
 
 **What happens if my OAuth session expires?**
 

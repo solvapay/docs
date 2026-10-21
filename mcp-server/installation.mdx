@@ -11,25 +11,70 @@ Use the action button below to connect SolvaPay MCP with the correct endpoint.
 
 <McpConnectActions />
 
-OAuth-capable clients (Claude.ai, Claude Desktop) handle authentication automatically — just log in with your SolvaPay account. Config-based clients (Cursor, VS Code) require an API key from **SolvaPay Console > Settings > API Keys**.
+OAuth-capable clients (Claude.ai, Claude Desktop) handle authentication automatically — just log in with your SolvaPay account. Config-based clients (Cursor, VS Code) need a secret API key from **SolvaPay Console > Developers > API Keys**, sent as `Authorization: Bearer <secret key>`.
+
+| Property | Value |
+|---|---|
+| **Endpoint** | `https://mcp.solvapay.com/mcp` |
+| **Transport** | Streamable HTTP (stateless) |
+| **Auth header** | `Authorization: Bearer sk_sandbox_...` (or `sk_live_...` for production) |
+
+The MCP server only reads the `Authorization` header. An `X-API-Key` header is ignored and the request fails with `Authentication required`.
 
 ## Cursor IDE
 
-1. Open **Connect SolvaPay MCP** and select **Install in Cursor**.
-2. Enter your API key when prompted, or continue with `YOUR_API_KEY_HERE`.
-3. Confirm the install prompt in Cursor.
-4. If you installed with the placeholder key, update `X-API-Key` in Cursor MCP settings.
-5. Reload or toggle the SolvaPay MCP server in Cursor settings.
+Add SolvaPay to `~/.cursor/mcp.json` (all projects) or `.cursor/mcp.json` in your project root:
 
-After setup, you should see SolvaPay tools available in Cursor chat.
+```json ~/.cursor/mcp.json
+{
+  "mcpServers": {
+    "solvapay": {
+      "url": "https://mcp.solvapay.com/mcp",
+      "headers": {
+        "Authorization": "Bearer sk_sandbox_your_key_here"
+      }
+    }
+  }
+}
+```
+
+1. Replace `sk_sandbox_your_key_here` with your secret key.
+2. Save the file. If `mcp.json` already has an `mcpServers` object, add the `solvapay` entry to it.
+3. Open **Cursor Settings > MCP** and check that `solvapay` is enabled. Toggle it off and on if tools don't appear.
+
+You can also use **Connect SolvaPay MCP > Install in Cursor** above, which writes the same entry.
+
+After setup, SolvaPay tools are available in Cursor chat.
 
 ## VS Code
 
-1. Open **Connect SolvaPay MCP** and select **Copy VS Code config**.
-2. Paste into `.vscode/mcp.json` (workspace) or your user `mcp.json`.
-3. Replace `YOUR_API_KEY_HERE` with your SolvaPay API key.
-4. Run **MCP: List Servers** and start the `solvapay` server if needed.
-5. Reload VS Code if tools do not appear immediately.
+Add SolvaPay to `.vscode/mcp.json` in your workspace, or to your user `mcp.json` (**MCP: Open User Configuration**):
+
+```json .vscode/mcp.json
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "solvapay-secret-key",
+      "description": "SolvaPay secret key (sk_sandbox_... or sk_live_...)",
+      "password": true
+    }
+  ],
+  "servers": {
+    "solvapay": {
+      "type": "http",
+      "url": "https://mcp.solvapay.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${input:solvapay-secret-key}"
+      }
+    }
+  }
+}
+```
+
+1. Save the file.
+2. Run **MCP: List Servers** and start the `solvapay` server.
+3. Enter your secret key when VS Code prompts for it. VS Code stores it securely, so the key stays out of the file.
 
 After setup, SolvaPay tools are available in Copilot Chat.
 
@@ -51,16 +96,13 @@ OAuth is handled automatically — Claude securely stores the access token so yo
 
 ## Claude Desktop
 
-Use **Connect SolvaPay MCP** and select **Copy Claude Desktop config**.
+Add SolvaPay as a connector, the same way as in Claude.ai. Claude Desktop signs you in with OAuth, so you don't need an API key.
 
-Paste it into:
+1. Open **Settings > Connectors**.
+2. Click **Add custom connector** and enter `https://mcp.solvapay.com/mcp`.
+3. Sign in with your SolvaPay provider account and click **Authorize**.
 
-- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
-
-Then replace `YOUR_API_KEY_HERE` with your SolvaPay API key.
-
-Restart Claude Desktop after saving.
+Don't add SolvaPay to `claude_desktop_config.json`. That file is for local servers that Claude Desktop starts itself, not for remote servers like `https://mcp.solvapay.com/mcp`.
 
 ## Claude API (Messages API)
 
@@ -99,13 +141,28 @@ See the [plugin README](https://github.com/solvapay/solvapay-openclaw) for full 
 
 The SolvaPay MCP Server uses **Streamable HTTP**. Any MCP client that supports this transport can connect.
 
-Use **Connect SolvaPay MCP** and select **Copy MCP endpoint**, then configure your client with:
+Configure your client with:
 
 | Property | Value |
 |---|---|
 | **Endpoint** | `https://mcp.solvapay.com/mcp` |
 | **Transport** | Streamable HTTP (stateless) |
-| **Authentication** | OAuth 2.0 (browser-based clients) or `X-API-Key` header (config-based clients) |
+| **Authentication** | OAuth 2.0 (browser-based clients) or `Authorization: Bearer <secret key>` header (config-based clients) |
+
+Most config-based clients accept a JSON entry in this shape:
+
+```json
+{
+  "mcpServers": {
+    "solvapay": {
+      "url": "https://mcp.solvapay.com/mcp",
+      "headers": {
+        "Authorization": "Bearer sk_sandbox_your_key_here"
+      }
+    }
+  }
+}
+```
 
 ## Using Multiple Environments
 
@@ -133,11 +190,11 @@ If the connection is working, you'll see a response from the `list_customers` to
 
 **"Authentication required" error**
 
-For config-based clients (Cursor, VS Code): confirm the `X-API-Key` header is set in your MCP client configuration. For OAuth clients (Claude.ai): try removing and re-adding the connector to re-authenticate.
+For config-based clients (Cursor, VS Code): confirm your configuration sends `Authorization: Bearer <secret key>`. An `X-API-Key` header is ignored and gives this error. For OAuth clients (Claude.ai): try removing and re-adding the connector to re-authenticate.
 
 **"Invalid or expired secret key" error**
 
-The API key is being sent but is not valid. Verify it in **SolvaPay Console > Settings > API Keys**. Make sure you copied the full key.
+The API key is being sent but is not valid. Verify it in **SolvaPay Console > Developers > API Keys**. Make sure you copied the full key.
 
 **"Invalid or expired provider token" error**
 

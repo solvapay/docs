@@ -1,6 +1,6 @@
 ---
 title: "Use the SolvaPay agent skill"
-description: "Install the SolvaPay skill with one command in any compatible AI coding tool."
+description: "Install the SolvaPay agent skills with one command in any compatible AI coding tool."
 ---
 
 Use this guide when you want your AI coding agent to integrate SolvaPay with less prompting.
@@ -10,11 +10,19 @@ Use this guide when you want your AI coding agent to integrate SolvaPay with les
 Use this command first in any supported environment:
 
 ```bash
-npx skills add solvapay/skills
+npx skills add https://solvapay.com
 ```
 
-This is the fastest setup path and works across Cursor, Claude Code, Codex, Windsurf, and other
-tools that support Agent Skills.
+This installs the released SolvaPay skills listed at
+`https://solvapay.com/.well-known/agent-skills/index.json`. It works across Cursor, Claude Code,
+Codex, Windsurf, and other tools that support Agent Skills.
+
+If your `skills` CLI is older than 1.5.7, or your tool installs skills from GitHub, use the
+repository instead:
+
+```bash
+npx skills add solvapay/skills
+```
 
 ## Who this is for
 
@@ -30,8 +38,8 @@ monetization, website checkout, or provider onboarding.
 ## Prerequisites
 
 - An AI coding tool that supports Agent Skills
-- Access to the SolvaPay skills repository: `https://github.com/solvapay/skills`
-- Optional: a `npx` runtime if you use CLI-based install
+- Node.js with `npx` for the one-command install
+- For GitHub-based installs: the SolvaPay skills repository, `https://github.com/solvapay/skills`
 
 ## Platform-specific setup (secondary options)
 
@@ -76,12 +84,16 @@ Use the platform-specific instructions below only if you prefer a platform-nativ
   </Tab>
 </Tabs>
 
-## What the skill covers
+## What the skills cover
 
-- **SDK integration**: Add paywalls, usage billing, and webhooks in app code
-- **MCP server monetization**: Scaffold and monetize a paid MCP server with `npm create solvapay@latest -- --type mcp`
-- **Website checkout**: Add hosted checkout and customer portal flows for web apps
-- **Provider onboarding**: Set up account, product, plans, sandbox testing, and go-live
+| Skill | Use it for |
+|---|---|
+| `solvapay` | The starting point. Routes your agent to the right skill when the task involves SolvaPay. |
+| `create-mcp-app` | Scaffold or monetize an MCP server in code, including `npm create solvapay@latest -- --type mcp` |
+| `app-integration` | Add hosted checkout, the customer portal, paywalls, usage limits, webhooks, and billing UI to an app, API, or website |
+| `pay-with-solvapay` | For agents on the paying side: what to do when a call returns a SolvaPay paywall |
+
+Your agent needs a sandbox secret key to call SolvaPay. See [Authentication and base URL](/api-reference/authentication).
 
 ## Verify
 

@@ -5,6 +5,8 @@ description: "Choose between the CLI-first TypeScript SDK and Console-based Mana
 
 Use this page to choose your primary integration path before you build.
 
+Every path uses the same secret API key and base URL. See [Authentication and base URL](/api-reference/authentication).
+
 ## Decide in 10 seconds
 
 - Choose **TypeScript SDK** if you want to add monetization in your own code.
@@ -71,10 +73,10 @@ Both share the same plans, customers, and billing in your SolvaPay account.
 Start with one command for guided integration in any compatible AI coding tool:
 
 ```bash
-npx skills add solvapay/skills
+npx skills add https://solvapay.com
 ```
 
-Use platform-specific setup only if you prefer Cursor- or Claude-native flows.
+With a `skills` CLI older than 1.5.7, use `npx skills add solvapay/skills` instead.
 
 - [Use the SolvaPay agent skill](/guides/use-agent-skill)
 

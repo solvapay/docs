@@ -5,12 +5,9 @@ export const McpConnectActions = () => {
   const endpoint = 'https://mcp.solvapay.com/mcp'
   const serverName = 'solvapay'
 
-  const createCursorDeepLink = apiKey => {
+  const createCursorDeepLink = () => {
     const config = {
       url: endpoint,
-      headers: {
-        'X-API-Key': apiKey || 'YOUR_API_KEY_HERE',
-      },
     }
 
     const encodedConfig = btoa(JSON.stringify(config))
@@ -33,11 +30,7 @@ export const McpConnectActions = () => {
   }
 
   const openCursorInstall = () => {
-    const enteredKey = window.prompt(
-      'Enter your SolvaPay API key (from Settings > API Keys). Leave empty to add the placeholder and update it later.',
-    )
-    const deeplink = createCursorDeepLink(enteredKey?.trim())
-    window.location.href = deeplink
+    window.location.href = createCursorDeepLink()
   }
 
   const vscodeConfig = JSON.stringify(
@@ -46,9 +39,6 @@ export const McpConnectActions = () => {
         solvapay: {
           type: 'http',
           url: endpoint,
-          headers: {
-            'X-API-Key': 'YOUR_API_KEY_HERE',
-          },
         },
       },
     },
@@ -56,22 +46,7 @@ export const McpConnectActions = () => {
     2,
   )
 
-  const claudeDesktopConfig = JSON.stringify(
-    {
-      mcpServers: {
-        solvapay: {
-          url: endpoint,
-          headers: {
-            'X-API-Key': 'YOUR_API_KEY_HERE',
-          },
-        },
-      },
-    },
-    null,
-    2,
-  )
-
-  const addMcpCommand = `npx add-mcp ${endpoint} --header "X-API-Key: YOUR_API_KEY_HERE"`
+  const addMcpCommand = `npx add-mcp ${endpoint}`
 
   return (
     <div className="not-prose">
@@ -93,18 +68,18 @@ export const McpConnectActions = () => {
           >
             <span className="block text-sm font-semibold leading-tight">Install in Cursor</span>
             <span className="mt-1.5 block text-xs leading-snug text-zinc-600 dark:text-zinc-400">
-              One-click deeplink install with SolvaPay endpoint
+              One-click install, then sign in with your SolvaPay account
             </span>
           </button>
 
           <button
             type="button"
             className="mt-2 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-left text-zinc-900 transition-colors hover:bg-zinc-100 dark:border-white/15 dark:bg-white/[0.04] dark:text-zinc-100 dark:hover:bg-white/[0.08]"
-            onClick={() => copyText(endpoint, 'Claude.ai connector URL')}
+            onClick={() => copyText(endpoint, 'Claude connector URL')}
           >
-            <span className="block text-sm font-semibold leading-tight">Copy Claude.ai connector URL</span>
+            <span className="block text-sm font-semibold leading-tight">Copy Claude connector URL</span>
             <span className="mt-1.5 block text-xs leading-snug text-zinc-600 dark:text-zinc-400">
-              Paste into Claude.ai Settings &gt; Connectors — sign in with your SolvaPay account
+              Paste into Settings &gt; Connectors in Claude.ai or Claude Desktop — sign in with your SolvaPay account
             </span>
           </button>
 
@@ -117,20 +92,7 @@ export const McpConnectActions = () => {
           >
             <span className="block text-sm font-semibold leading-tight">Copy VS Code config</span>
             <span className="mt-1.5 block text-xs leading-snug text-zinc-600 dark:text-zinc-400">
-              Paste into `.vscode/mcp.json` or user `mcp.json`
-            </span>
-          </button>
-
-          <button
-            type="button"
-            className="mt-2 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-left text-zinc-900 transition-colors hover:bg-zinc-100 dark:border-white/15 dark:bg-white/[0.04] dark:text-zinc-100 dark:hover:bg-white/[0.08]"
-            onClick={() => copyText(claudeDesktopConfig, 'Claude Desktop config')}
-          >
-            <span className="block text-sm font-semibold leading-tight">
-              Copy Claude Desktop config
-            </span>
-            <span className="mt-1.5 block text-xs leading-snug text-zinc-600 dark:text-zinc-400">
-              Paste into `claude_desktop_config.json`
+              Paste into `.vscode/mcp.json` or user `mcp.json`, then sign in
             </span>
           </button>
 

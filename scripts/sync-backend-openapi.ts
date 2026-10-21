@@ -31,6 +31,16 @@ const DOC_INFO = {
   contact: {},
 }
 
+// Public base URL for the aggregated doc. Paths already carry the `/v1` global
+// prefix, so the server is the bare host. Sandbox and live share it; the secret
+// key prefix (`sk_sandbox_` / `sk_live_`) selects the environment.
+const DOC_SERVERS = [
+  {
+    url: 'https://api.solvapay.com',
+    description: 'SolvaPay API (sandbox and live; the secret key prefix selects the environment)',
+  },
+]
+
 const resolveSources = (): string[] => {
   const multi = process.env.BACKEND_OPENAPI_URLS?.trim()
   if (multi) {
@@ -513,7 +523,7 @@ const main = async (): Promise<void> => {
   const spec: Record<string, unknown> = {
     openapi: (fetched[0]?.doc.openapi as string) || '3.0.0',
     info: DOC_INFO,
-    servers: [],
+    servers: DOC_SERVERS,
     tags: [],
     paths: merged.paths,
     components: {

@@ -1,0 +1,62 @@
+---
+title: "Authentication and base URL"
+sidebarTitle: "Authentication and base URL"
+description: "REST API base URL, the Authorization header, secret key prefixes, and where to get your keys."
+---
+
+Every SolvaPay REST API request goes to one base URL and carries a secret API key.
+
+| | Value |
+|---|---|
+| **Base URL** | `https://api.solvapay.com` |
+| **Path prefix** | `/v1/sdk/` (for example `https://api.solvapay.com/v1/sdk/products`) |
+| **Auth header** | `Authorization: Bearer <secret key>` |
+| **Alternative header** | `X-API-Key: <secret key>` |
+| **Sandbox key prefix** | `sk_sandbox_` |
+| **Production key prefix** | `sk_live_` |
+| **Where to get keys** | [SolvaPay Console](https://app.solvapay.com) > **Developers** > **API Keys** |
+| **OpenAPI spec** | [`https://docs.solvapay.com/api-reference/openapi.json`](https://docs.solvapay.com/api-reference/openapi.json) |
+
+## Get a secret key
+
+1. Sign in to [SolvaPay Console](https://app.solvapay.com). If you don't have an account, [create one](/get-started/create-account).
+2. Click **Developers** in the sidebar.
+3. Under **API Keys** > **Sandbox keys**, click **Generate sandbox key** and copy the key.
+4. Store it as an environment variable, for example `SOLVAPAY_SECRET_KEY`.
+
+Secret keys are server-side credentials. Don't put them in browser code, mobile apps, or public repositories.
+
+## Sandbox and production
+
+Sandbox and production use the same base URL. The key prefix selects the environment:
+
+| Key prefix | Environment | Data |
+|---|---|---|
+| `sk_sandbox_` | Sandbox | Test data and test payments only |
+| `sk_live_` | Production | Real customers and real payments |
+
+Build and test with a sandbox key. Switch to a production key when you [go live](/get-started/go-live).
+
+## Make your first request
+
+List the products in your account:
+
+```bash
+curl https://api.solvapay.com/v1/sdk/products \
+  -H "Authorization: Bearer $SOLVAPAY_SECRET_KEY"
+```
+
+A `200` response with a JSON body means your key and base URL are correct. A new account can return an empty list.
+
+The [TypeScript SDK](/sdks/typescript/intro) uses the same base URL by default and reads the key from `SOLVAPAY_SECRET_KEY`.
+
+## Authentication errors
+
+| Response | Cause |
+|---|---|
+| `401` `Invalid authorization header. Use either Authorization: Bearer <key> or X-API-Key: <key>` | No key was sent, or the header is malformed. |
+| `401` `Invalid or expired secret key` | The key was sent but isn't valid. Check that you copied the whole key and that it hasn't been revoked. |
+
+## Admin MCP Server
+
+The [admin MCP Server](/mcp-server/installation) at `https://mcp.solvapay.com/mcp` signs you in with OAuth, so you don't need a key to connect it. It also accepts these secret keys as `Authorization: Bearer <secret key>`, which you need for sandbox data or for clients that can't open a browser.

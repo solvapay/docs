@@ -8,6 +8,14 @@
 - Run `mint dev` to preview locally
 - Run `mint broken-links` to check links
 
+## Generated and synced content
+
+Two parts of this repo are owned elsewhere. Never edit them by hand.
+
+- `sdks/typescript/**` is owned by the `solvapay-sdk` repo (`docs/`). Fix SDK content in `solvapay-sdk/docs`, then run `npx --yes tsx scripts/sync-typescript-sdk-docs.ts` here (`--dry-run` first; set `SDK_DOCS_SOURCE_DIR` for a custom checkout). The page list comes from `docs.json`.
+- `api-reference/openapi.json` is generated from the platform services' OpenAPI specs. Fix the spec in the `platform` repo, deploy, then run `npx --yes tsx scripts/sync-backend-openapi.ts` here. Doc-level metadata the script adds (`info`, `servers`) lives in that script. See `API_REFERENCE_OWNERSHIP.md`.
+- After either sync, run `mint validate` and `mint broken-links`, review the diff, and list what changed in the PR.
+
 ## Terminology
 
 - Use **SolvaPay Console** for the web app, not "admin panel" or "dashboard"

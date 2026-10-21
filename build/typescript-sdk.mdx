@@ -1,0 +1,123 @@
+---
+title: "Zero to working: TypeScript SDK"
+sidebarTitle: "Zero to working: TypeScript SDK"
+description: "Every step from a new account to a first paid API call with the TypeScript SDK and Express, in order, with the key, base URL, and auth header."
+---
+
+Follow these steps in order. You finish with an Express endpoint that refuses an unpaid customer with `402`, sends them to checkout, and serves them after they pay in sandbox.
+
+| | Value |
+|---|---|
+| **REST base URL** | `https://api.solvapay.com` (the SDK default) |
+| **Auth header** | `Authorization: Bearer $SOLVAPAY_SECRET_KEY` (the SDK sends it for you) |
+| **Key** | Sandbox secret key, `sk_sandbox_...`, in `SOLVAPAY_SECRET_KEY` |
+| **Packages** | `@solvapay/server`, installed by `npx solvapay@latest init` |
+
+## Prerequisites
+
+- A SolvaPay account. [Create one](/get-started/create-account) if you don't have one.
+- Node.js 20.6 or later (for `node --env-file`).
+- A project directory. An empty one works.
+
+## 1. Connect the project
+
+From your project root:
+
+```bash
+npx solvapay@latest init
+npm install express
+```
+
+`init` signs you in through the browser, writes `SOLVAPAY_SECRET_KEY` to `.env`, adds `.env` to `.gitignore`, and installs the SolvaPay server packages. See [CLI setup](/sdks/typescript/setup/cli) for details.
+
+Check that the key in `.env` starts with `sk_sandbox_`. If it doesn't, get a sandbox key from Console > **Developers** > **API Keys** and put it in `.env` yourself.
+
+## 2. Create a product and a paid plan
+
+Load the key into your shell, then create a product:
+
+```bash
+export $(grep '^SOLVAPAY_SECRET_KEY=' .env)
+
+curl -X POST https://api.solvapay.com/v1/sdk/products \
+  -H "Authorization: Bearer $SOLVAPAY_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "Task API" }'
+```
+
+Copy `reference` from the response, for example `prd_1A2B3C4D`. Then add a $20-per-month plan to it:
+
+```bash
+curl -X POST https://api.solvapay.com/v1/sdk/products/prd_1A2B3C4D/plans \
+  -H "Authorization: Bearer $SOLVAPAY_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Pro",
+    "currency": "USD",
+    "options": [
+      { "kind": "billingCycle", "interval": "month" },
+      { "kind": "charge", "per": "flat", "amountMinor": 2000, "currency": "USD" }
+    ]
+  }'
+```
+
+`amountMinor` is in cents. [Plans](/plans/overview) covers usage-based, credit, and hybrid plans. You can also [create the product in the Console](/get-started/create-product).
+
+## 3. Protect an endpoint
+
+Create `server.mjs` and replace `prd_1A2B3C4D` with your product reference:
+
+```javascript server.mjs
+import express from 'express'
+import { createSolvaPay } from '@solvapay/server'
+
+const app = express()
+app.use(express.json())
+
+// Reads SOLVAPAY_SECRET_KEY and calls https://api.solvapay.com
+const solvaPay = createSolvaPay()
+const payable = solvaPay.payable({ product: 'prd_1A2B3C4D' })
+
+app.post(
+  '/tasks',
+  payable.http(async req => {
+    return { success: true, task: { title: req.body.title } }
+  }),
+)
+
+app.listen(3000, () => console.log('Listening on http://localhost:3000'))
+```
+
+Start it:
+
+```bash
+node --env-file=.env server.mjs
+```
+
+## 4. Call it as an unpaid customer
+
+```bash
+curl -i -X POST http://localhost:3000/tasks \
+  -H "Content-Type: application/json" \
+  -H "x-customer-ref: user_123" \
+  -d '{"title":"My first task"}'
+```
+
+The SDK identifies the customer by the `x-customer-ref` header and creates them in SolvaPay on first use. They have no purchase, so the endpoint answers `402 Payment Required` with a JSON body that includes `checkoutUrl`.
+
+## 5. Pay in sandbox
+
+Open `checkoutUrl` in a browser and pay with the Stripe test card `4242 4242 4242 4242`, any future expiry date, and any CVC. Sandbox never charges a real card.
+
+## 6. Make the first paid call
+
+Run the same `curl` again. The customer now has a **Pro** purchase, so the endpoint returns `200` with the task. This is your first paid call.
+
+In the Console, the customer `user_123` and their purchase show up in sandbox.
+
+## Next steps
+
+- Identify customers from your own auth instead of a header: [Custom auth](/sdks/typescript/guides/custom-auth).
+- Framework guides: [Express](/sdks/typescript/guides/express), [Next.js](/sdks/typescript/guides/nextjs), [MCP](/sdks/typescript/guides/mcp).
+- Bill per request: [Usage events](/sdks/typescript/guides/usage-events).
+- [Go live](/get-started/go-live) when you're ready to take real payments with an `sk_live_` key.

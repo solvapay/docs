@@ -5,12 +5,9 @@ export const McpConnectActions = () => {
   const endpoint = 'https://mcp.solvapay.com/mcp'
   const serverName = 'solvapay'
 
-  const createCursorDeepLink = apiKey => {
+  const createCursorDeepLink = () => {
     const config = {
       url: endpoint,
-      headers: {
-        Authorization: `Bearer ${apiKey || 'YOUR_API_KEY_HERE'}`,
-      },
     }
 
     const encodedConfig = btoa(JSON.stringify(config))
@@ -33,30 +30,15 @@ export const McpConnectActions = () => {
   }
 
   const openCursorInstall = () => {
-    const enteredKey = window.prompt(
-      'Enter your SolvaPay secret key (from Developers > API Keys). Leave empty to add the placeholder and update it later.',
-    )
-    const deeplink = createCursorDeepLink(enteredKey?.trim())
-    window.location.href = deeplink
+    window.location.href = createCursorDeepLink()
   }
 
   const vscodeConfig = JSON.stringify(
     {
-      inputs: [
-        {
-          type: 'promptString',
-          id: 'solvapay-secret-key',
-          description: 'SolvaPay secret key (sk_sandbox_... or sk_live_...)',
-          password: true,
-        },
-      ],
       servers: {
         solvapay: {
           type: 'http',
           url: endpoint,
-          headers: {
-            Authorization: 'Bearer ${input:solvapay-secret-key}',
-          },
         },
       },
     },
@@ -64,7 +46,7 @@ export const McpConnectActions = () => {
     2,
   )
 
-  const addMcpCommand = `npx add-mcp ${endpoint} --header "Authorization: Bearer YOUR_API_KEY_HERE"`
+  const addMcpCommand = `npx add-mcp ${endpoint}`
 
   return (
     <div className="not-prose">
@@ -86,7 +68,7 @@ export const McpConnectActions = () => {
           >
             <span className="block text-sm font-semibold leading-tight">Install in Cursor</span>
             <span className="mt-1.5 block text-xs leading-snug text-zinc-600 dark:text-zinc-400">
-              One-click deeplink install with SolvaPay endpoint
+              One-click install, then sign in with your SolvaPay account
             </span>
           </button>
 
@@ -110,7 +92,7 @@ export const McpConnectActions = () => {
           >
             <span className="block text-sm font-semibold leading-tight">Copy VS Code config</span>
             <span className="mt-1.5 block text-xs leading-snug text-zinc-600 dark:text-zinc-400">
-              Paste into `.vscode/mcp.json` or user `mcp.json`
+              Paste into `.vscode/mcp.json` or user `mcp.json`, then sign in
             </span>
           </button>
 

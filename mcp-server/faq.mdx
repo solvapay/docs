@@ -23,8 +23,8 @@ Yes. Every tool call is scoped to the provider account associated with your cred
 
 The MCP server supports two authentication methods:
 
-- **OAuth login** — For clients that support OAuth (Claude.ai, Claude Desktop). You sign in with your SolvaPay Console credentials (email code, Google, or GitHub) and authorize the connection. No API key needed.
-- **API key** — For config-based clients (Cursor, VS Code). Pass your secret API key in the `Authorization: Bearer <secret key>` header. The MCP server doesn't read `X-API-Key`.
+- **OAuth login** — The default, for Claude.ai, Claude Desktop, Cursor, VS Code, and other clients that support remote MCP servers. You sign in with your SolvaPay Console credentials (email code, Google, or GitHub) and authorize the connection. No API key needed. OAuth sessions use your live account.
+- **API key** — For sandbox data, and for clients that can't open a browser (the Claude Messages API, scripts, CI). Pass your secret key in the `Authorization: Bearer <secret key>` header. The MCP server doesn't read `X-API-Key`.
 
 **Can only existing providers connect?**
 
@@ -32,7 +32,7 @@ Yes. The OAuth flow only allows sign-in — it does not create new accounts. You
 
 **Can I use both sandbox and production keys?**
 
-Yes. Configure separate MCP server entries in your client — one with a sandbox key for testing and another with a production key. See [Installation](/mcp-server/installation#using-multiple-environments) for details.
+Yes. OAuth connects to your live account. For sandbox, add a second MCP server entry that sends a sandbox key (`sk_sandbox_...`). See [Use an API key instead](/mcp-server/installation#use-an-api-key-instead).
 
 **What happens if my API key is compromised?**
 

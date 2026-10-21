@@ -59,4 +59,4 @@ The [TypeScript SDK](/sdks/typescript/intro) uses the same base URL by default a
 
 ## Admin MCP Server
 
-The [admin MCP Server](/mcp-server/installation) at `https://mcp.solvapay.com/mcp` accepts the same secret keys. Send the key as `Authorization: Bearer <secret key>`.
+The [admin MCP Server](/mcp-server/installation) at `https://mcp.solvapay.com/mcp` signs you in with OAuth, so you don't need a key to connect it. It also accepts these secret keys as `Authorization: Bearer <secret key>`, which you need for sandbox data or for clients that can't open a browser.

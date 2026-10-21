@@ -185,7 +185,7 @@
       "- Auth: send a secret key as `Authorization: Bearer <secret key>` (the REST API also accepts `X-API-Key: <secret key>`).",
       "- Secret key prefixes: `sk_sandbox_` (sandbox, test payments) and `sk_live_` (production). The prefix selects the environment.",
       "- Get keys in SolvaPay Console (https://app.solvapay.com) > Developers > API Keys. Use a sandbox key while building.",
-      "- Admin MCP Server: https://mcp.solvapay.com/mcp (Streamable HTTP). Config-based clients must send `Authorization: Bearer <secret key>`; it ignores X-API-Key.",
+      "- Admin MCP Server: https://mcp.solvapay.com/mcp (Streamable HTTP). Connect with OAuth: add the URL and sign in with the SolvaPay account; no API key needed. OAuth sessions use the live account; for sandbox data or headless clients, send `Authorization: Bearer <secret key>` (X-API-Key is ignored).",
       "- Install the SolvaPay agent skills: `npx skills add https://solvapay.com` (skills CLI older than 1.5.7: `npx skills add solvapay/skills`).",
       "- TypeScript SDK setup: `npx solvapay@latest init`. The SDK reads SOLVAPAY_SECRET_KEY and defaults to https://api.solvapay.com.",
       "- Details: https://docs.solvapay.com/api-reference/authentication.md. OpenAPI spec: https://docs.solvapay.com/api-reference/openapi.json."

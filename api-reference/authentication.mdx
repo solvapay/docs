@@ -35,7 +35,7 @@ Sandbox and production use the same base URL. The key prefix selects the environ
 | `sk_sandbox_` | Sandbox | Test data and test payments only |
 | `sk_live_` | Production | Real customers and real payments |
 
-Build and test with a sandbox key. Switch to a production key when you [go live](/get-started/go-live).
+A key only works while your account is in its environment. A new account starts in sandbox, so build and test with a sandbox key. When you [go live](/get-started/go-live) and switch the account to production in SolvaPay Console, replace the key with a production key. If you switch back to sandbox, switch back to the sandbox key too. A key for the other environment is rejected with `403` (see [Authentication errors](#authentication-errors)).
 
 ## Make your first request
 
@@ -56,7 +56,20 @@ The [TypeScript SDK](/sdks/typescript/intro) uses the same base URL by default a
 |---|---|
 | `401` `Invalid authorization header. Use either Authorization: Bearer <key> or X-API-Key: <key>` | No key was sent, or the header is malformed. |
 | `401` `Invalid or expired secret key` | The key was sent but isn't valid. Check that you copied the whole key and that it hasn't been revoked. |
+| `403` `key_env_mismatch` | The key is valid but belongs to the other environment. For example, a sandbox key after the account was switched to production. Use the key for the account's current environment, or switch the account back in SolvaPay Console. |
+
+A `403` body names both environments and the key to use:
+
+```json
+{
+  "code": "key_env_mismatch",
+  "message": "This is a sandbox secret key, but your SolvaPay account is in live mode. Use your live secret key (sk_live_...), or switch the account back to sandbox in the SolvaPay Console.",
+  "keyEnvironment": "sandbox",
+  "providerEnvironment": "live",
+  "statusCode": 403
+}
+```
 
 ## Admin MCP Server
 
-The [admin MCP Server](/mcp-server/installation) at `https://mcp.solvapay.com/mcp` signs you in with OAuth, so you don't need a key to connect it. It also accepts these secret keys as `Authorization: Bearer <secret key>`, which you need for sandbox data or for clients that can't open a browser.
+The [admin MCP Server](/mcp-server/installation) at `https://mcp.solvapay.com/mcp` signs you in with OAuth, so you don't need a key to connect it. OAuth sessions use the environment your account is in. The server also accepts these secret keys as `Authorization: Bearer <secret key>` for clients that can't open a browser. The same rule applies there: the key must match the account's current environment.

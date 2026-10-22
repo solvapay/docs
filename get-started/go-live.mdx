@@ -36,8 +36,11 @@ Once your checklist is complete:
 2. Find the **Sandbox/Production toggle**
 3. Click to switch to **Production**
 4. Confirm the switch
+5. If your integration uses a SolvaPay secret key, replace the `sk_sandbox_` key with an `sk_live_` key from **Developers > API Keys**
 
-That's it. Your integration is now processing real payments.
+A sandbox key stops working as soon as the account is in production, and the API rejects it with `403` `key_env_mismatch`. The [admin MCP Server](/mcp-server/installation) over OAuth needs no change: its next tool call uses production.
+
+Your integration is now processing real payments.
 
 ## What changes in production
 
@@ -45,6 +48,7 @@ That's it. Your integration is now processing real payments.
 |--------|---------|------------|
 | Payments | No real charges | Real charges processed |
 | Stripe credentials | Test keys | Live keys |
+| SolvaPay secret key | `sk_sandbox_` | `sk_live_` |
 | Customer data | Sandbox data | Production data |
 | Webhooks | Sandbox events | Real events |
 
@@ -61,6 +65,8 @@ You can switch back to sandbox mode at any time to:
 This is available after live activation, whether you activated by connecting an existing Stripe account or completing setup for a new Stripe account.
 
 Your sandbox and production data are kept separate. Switching modes doesn't affect existing customers or purchases in either environment.
+
+Switch your secret key back too. While the account is in sandbox, only `sk_sandbox_` keys work.
 
 ## After going live
 

@@ -19,7 +19,7 @@ Use the action button below to connect SolvaPay MCP with the correct endpoint.
 
 You don't need an API key. Add the endpoint to your client, and the client opens the SolvaPay sign-in page the first time it connects. Sign in with your SolvaPay provider account (email code, Google, or GitHub) and click **Authorize**. Only existing SolvaPay providers can connect; no new account is created during this flow.
 
-OAuth sessions work on your live account. To work with sandbox data, or from a client that can't open a browser, [use a sandbox API key](#use-an-api-key-instead) instead.
+The connection works on the environment your account is in: sandbox for a new account, production once you switch in SolvaPay Console. Switching takes effect on the next tool call, without reconnecting. From a client that can't open a browser, [use an API key](#use-an-api-key-instead) instead.
 
 ## Cursor IDE
 
@@ -129,17 +129,14 @@ The SolvaPay MCP Server uses **Streamable HTTP** and the standard MCP authorizat
 
 ## Use an API key instead
 
-Use a secret API key only when OAuth doesn't fit:
+Use a secret API key only when your client can't open a browser, such as the Claude Messages API, CI jobs, or scripts. Everywhere else, OAuth is simpler and follows your account's environment.
 
-- You want to work with **sandbox** data. OAuth sessions use your live account.
-- Your client can't open a browser, such as the Claude Messages API, CI jobs, or scripts.
-
-Get a key from **SolvaPay Console > Developers > API Keys** and send it in the `Authorization` header. The key prefix selects the environment: `sk_sandbox_` for sandbox, `sk_live_` for production.
+Get a key from **SolvaPay Console > Developers > API Keys** and send it in the `Authorization` header. Use the key for the environment your account is in: `sk_sandbox_` while it's in sandbox, `sk_live_` once you've switched to production. A key for the other environment is rejected, so after you switch in SolvaPay Console, replace the key in your configuration.
 
 ```json
 {
   "mcpServers": {
-    "solvapay-sandbox": {
+    "solvapay": {
       "url": "https://mcp.solvapay.com/mcp",
       "headers": {
         "Authorization": "Bearer sk_sandbox_your_key_here"
@@ -159,19 +156,29 @@ After connecting, ask your AI assistant something simple like:
 
 If the connection is working, you'll see a response from the `list_customers` tool. If your account is new, an empty list is expected.
 
+Each tool result starts with an `Environment: sandbox` or `Environment: live` line (`live` is production). To check the environment without listing anything, ask your assistant to call `get_environment`.
+
 ## Troubleshooting
 
 **"Authentication required" error**
 
-Your client connected without signing in. Remove the SolvaPay server or connector and add it again to restart the sign-in. If you use an API key, check that it's sent as `Authorization: Bearer <secret key>`; an `X-API-Key` header is ignored and gives this error.
+Your client connected without signing in. Reconnect SolvaPay in your client to restart the sign-in. If you use an API key, check that it's sent as `Authorization: Bearer <secret key>`; an `X-API-Key` header is ignored and gives this error.
 
-**"Invalid or expired secret key" error**
+**"Invalid or expired access token" error**
 
-Only applies when you use an API key. The key is being sent but is not valid. Verify it in **SolvaPay Console > Developers > API Keys**. Make sure you copied the full key.
+The server couldn't verify your credentials. With OAuth, your session has expired; sessions last up to 24 hours. Reconnect SolvaPay in your client to sign in again. With an API key, the key isn't valid: verify it in **SolvaPay Console > Developers > API Keys**, check that you copied the full key, and check that it hasn't been revoked.
+
+**"This is a sandbox secret key, but your SolvaPay account is in live mode" error**
+
+Only applies when you use an API key. The server returns `403` because the key belongs to the other environment. Your account was switched to production, but the configuration still sends a sandbox key. The full message names the key to use:
+
+> This is a sandbox secret key, but your SolvaPay account is in live mode. Use your live secret key (sk_live_...), or switch the account back to sandbox in the SolvaPay Console.
+
+Replace the key with one for the account's current environment, or switch the account back in SolvaPay Console. The same applies the other way round, to a production key while the account is in sandbox.
 
 **"Invalid or expired provider token" error**
 
-Your OAuth session has expired. Remove the connector and re-add it — you'll be prompted to sign in again.
+Your OAuth session has expired. Reconnect SolvaPay in your client, and you'll be prompted to sign in again.
 
 **Tools not appearing**
 

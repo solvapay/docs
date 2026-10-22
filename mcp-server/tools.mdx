@@ -1,6 +1,6 @@
 ---
 title: "Tools"
-description: "Complete reference for the 31 tools exposed by the SolvaPay MCP Server, organised across 7 domains."
+description: "Complete reference for the 33 tools exposed by the SolvaPay MCP Server, organised across 8 domains."
 ---
 
 The SolvaPay MCP Server gives AI agents — and any MCP-compatible client — full
@@ -12,16 +12,19 @@ Parameters marked **Required** must always be provided. Optional parameters can
 be omitted and will either use a sensible default or be ignored.
 </Tip>
 
+Every tool result except `get_environment`'s starts with an `Environment: sandbox` or `Environment: live` line (`live` is production), followed by the result as JSON. It names the environment the call ran against: your account's current environment.
+
 | Domain | Tools | Count |
 |---|---|--:|
 | [Customer Management](#customer-management) | `create_customer` · `get_customer` · `list_customers` · `update_customer` · `delete_customer` · `ensure_customer` | 6 |
-| [Product Management](#product-management) | `create_product` · `get_product` · `list_products` · `update_product` · `delete_product` | 5 |
+| [Product Management](#product-management) | `create_product` · `get_product` · `list_products` · `update_product` · `clone_product` · `delete_product` | 6 |
 | [Plan Management](#plan-management) | `create_plan` · `get_plan` · `list_plans` · `list_plans_for_product` · `update_plan` · `delete_plan` | 6 |
 | [Purchase Management](#purchase-management) | `list_purchases` · `get_purchase` · `get_purchases_by_customer` · `get_purchases_by_product` · `cancel_renewal` · `check_limits` | 6 |
 | [Payment & Checkout](#payment--checkout) | `create_checkout_session` · `create_customer_session` | 2 |
 | [Usage Tracking](#usage-tracking) | `record_usage` · `record_bulk_usage` | 2 |
 | [Transactions & Refunds](#transactions--refunds) | `list_transactions` · `get_transaction` · `get_transaction_stats` · `create_refund` | 4 |
-| | **Total** | **31** |
+| [Environment](#environment) | `get_environment` | 1 |
+| | **Total** | **33** |
 
 ---
 
@@ -95,6 +98,7 @@ Creates a customer if one doesn't exist for the given email. Returns the existin
 | `get_product` | Retrieve a product by reference |
 | `list_products` | List products with search and filters |
 | `update_product` | Update a product's details |
+| `clone_product` | Copy a product, including its plans, into a new product |
 | `delete_product` | Delete a product |
 
 ### create_product
@@ -126,6 +130,13 @@ Creates a customer if one doesn't exist for the given email. Returns the existin
 | `reference` | string | Yes | Product reference |
 | `name` | string | No | Updated name |
 | `description` | string | No | Updated description |
+
+### clone_product
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `reference` | string | Yes | Reference of the product to clone |
+| `name` | string | No | Name for the new product |
 
 ### delete_product
 
@@ -370,3 +381,17 @@ Each object in `events` accepts the same fields as `record_usage`.
 | `sourceTransactionRef` | string | Yes | Transaction reference to refund |
 | `amount` | number | No | Partial refund amount (omit for a full refund) |
 | `reason` | string | No | Refund reason |
+
+---
+
+## Environment
+
+| Tool | Description |
+|---|---|
+| `get_environment` | Get the environment (sandbox or live) this connection works on |
+
+### get_environment
+
+Takes no parameters. Returns `{ "environment": "sandbox" }` or `{ "environment": "live" }`.
+
+With OAuth, this is the environment your account is in, and it changes when you switch in SolvaPay Console. With an API key, it's the key's environment, which must match the account's.

@@ -20,7 +20,9 @@ The Model Context Protocol is an open standard that allows AI assistants (like C
 
 You sign in with OAuth in every client that supports remote MCP servers, including Claude.ai, Claude Desktop, Cursor, and VS Code. No API key required. The client opens the SolvaPay login page, and after you sign in and authorize, it receives a token automatically. See [Installation](/mcp-server/installation) for each client's setup.
 
-OAuth sessions work on your live account. To work with sandbox data, or from a client that can't open a browser, use a secret API key instead. See [Use an API key instead](/mcp-server/installation#use-an-api-key-instead).
+OAuth sessions work on the environment your account is in. A new account starts in sandbox, and when you switch between sandbox and production in SolvaPay Console, the next tool call uses the new environment. You don't need to reconnect. Each tool result starts with an `Environment: sandbox` or `Environment: live` line (`live` is production), so you can see which data a call used.
+
+Use a secret API key only from a client that can't open a browser. See [Use an API key instead](/mcp-server/installation#use-an-api-key-instead).
 
 ## What can you do?
 

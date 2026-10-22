@@ -162,11 +162,11 @@ Each tool result starts with an `Environment: sandbox` or `Environment: live` li
 
 **"Authentication required" error**
 
-Your client connected without signing in. Remove the SolvaPay server or connector and add it again to restart the sign-in. If you use an API key, check that it's sent as `Authorization: Bearer <secret key>`; an `X-API-Key` header is ignored and gives this error.
+Your client connected without signing in. Reconnect SolvaPay in your client to restart the sign-in. If you use an API key, check that it's sent as `Authorization: Bearer <secret key>`; an `X-API-Key` header is ignored and gives this error.
 
 **"Invalid or expired access token" error**
 
-The server couldn't verify your credentials. With OAuth, your session has expired; sessions last up to 24 hours. Remove the connector and add it again to sign in. With an API key, the key isn't valid: verify it in **SolvaPay Console > Developers > API Keys**, check that you copied the full key, and check that it hasn't been revoked.
+The server couldn't verify your credentials. With OAuth, your session has expired; sessions last up to 24 hours. Reconnect SolvaPay in your client to sign in again. With an API key, the key isn't valid: verify it in **SolvaPay Console > Developers > API Keys**, check that you copied the full key, and check that it hasn't been revoked.
 
 **"This is a sandbox secret key, but your SolvaPay account is in live mode" error**
 
@@ -178,7 +178,7 @@ Replace the key with one for the account's current environment, or switch the ac
 
 **"Invalid or expired provider token" error**
 
-Your OAuth session has expired. Remove the connector and re-add it — you'll be prompted to sign in again.
+Your OAuth session has expired. Reconnect SolvaPay in your client, and you'll be prompted to sign in again.
 
 **Tools not appearing**
 

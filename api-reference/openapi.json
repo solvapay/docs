@@ -5287,7 +5287,7 @@
       },
       "SecretKey": {
         "bearerFormat": "JWT",
-        "description": "Provider secret API key (sk_live_… / sk_test_…) supplied as a Bearer token.",
+        "description": "Provider secret API key (sk_sandbox_… / sk_live_…) supplied as a Bearer token.",
         "scheme": "bearer",
         "type": "http"
       }
@@ -8010,6 +8010,11 @@
       }
     }
   },
-  "servers": [],
+  "servers": [
+    {
+      "description": "SolvaPay API (sandbox and live; the secret key prefix selects the environment)",
+      "url": "https://api.solvapay.com"
+    }
+  ],
   "tags": []
 }

@@ -1,0 +1,87 @@
+---
+title: "Zero to working: agent skill"
+sidebarTitle: "Zero to working: agent skill"
+description: "Every step to have an AI coding agent integrate SolvaPay with the SolvaPay agent skills, in order, ending at a first paid call."
+---
+
+Follow these steps in order. Your coding agent (Claude Code, Cursor, Codex, or another tool that supports Agent Skills) does the integration. You give it a sandbox key and check the result with a first paid call.
+
+| | Value |
+|---|---|
+| **Install** | `npx skills add https://solvapay.com` |
+| **REST base URL** | `https://api.solvapay.com` |
+| **Auth header** | `Authorization: Bearer $SOLVAPAY_SECRET_KEY` |
+| **Key** | Sandbox secret key, `sk_sandbox_...`, from Console > **Developers** > **API Keys** |
+
+## Prerequisites
+
+- A SolvaPay account. [Create one](/get-started/create-account) if you don't have one.
+- An AI coding tool that supports Agent Skills.
+- Node.js with `npx`.
+
+## 1. Install the skills
+
+From your project root:
+
+```bash
+npx skills add https://solvapay.com
+```
+
+This installs the released SolvaPay skills: `solvapay` (the router), `create-mcp-app`, `app-integration`, and `pay-with-solvapay`. With a `skills` CLI older than 1.5.7, run `npx skills add solvapay/skills` instead. See [Use the SolvaPay agent skill](/guides/use-agent-skill) for tool-specific options.
+
+## 2. Give the project a sandbox key
+
+Either run the CLI, which signs you in and writes the key to `.env`:
+
+```bash
+npx solvapay@latest init
+```
+
+Or get a key from Console > **Developers** > **API Keys** > **Sandbox keys** and add it to `.env` yourself:
+
+```bash .env
+SOLVAPAY_SECRET_KEY=sk_sandbox_your_key_here
+```
+
+Don't paste the key into the chat. The agent reads it from `.env`.
+
+## 3. Ask the agent to integrate
+
+Describe what you're charging for. Name the product, the price, and what's free. For example:
+
+<Tabs>
+  <Tab title="API or app">
+    ```text
+    Use SolvaPay to charge for POST /tasks in this Express app. Create a product
+    "Task API" with a Pro plan at $20/month. Unpaid customers should get a 402 with
+    a checkout link. Use the sandbox key in .env (SOLVAPAY_SECRET_KEY).
+    ```
+  </Tab>
+  <Tab title="MCP server">
+    ```text
+    Use SolvaPay to monetize this MCP server. Keep list_docs free and put
+    deep_research on a Pro plan at $20/month. Use the sandbox key in .env
+    (SOLVAPAY_SECRET_KEY).
+    ```
+  </Tab>
+</Tabs>
+
+The `solvapay` skill routes the request: `app-integration` for an app, API, or website, and `create-mcp-app` for an MCP server. The agent creates the product and plan, adds the paywall, and tells you how to run it.
+
+## 4. Check the result with a first paid call
+
+Run the project the way the agent tells you, then:
+
+1. Call the protected endpoint or tool as a new customer. You get a paywall: a `402` with `checkoutUrl` for an API, or a checkout link in the tool result for an MCP server.
+2. Open the checkout link and pay with the Stripe test card `4242 4242 4242 4242`, any future expiry date, and any CVC.
+3. Call it again. It succeeds: this is your first paid call.
+
+The [TypeScript SDK](/build/typescript-sdk#4-call-it-as-an-unpaid-customer) and [Managed MCP](/build/managed-mcp#5-call-a-free-tool-and-a-paid-tool) pages show this check step by step.
+
+## If the agent gets stuck
+
+Point it at the facts it needs:
+
+- [Authentication and base URL](/api-reference/authentication): base URL, auth header, key prefixes.
+- [`llms.txt`](https://docs.solvapay.com/llms.txt): an index of every docs page as Markdown.
+- [Plans](/plans/overview): the `options[]` format for plans.

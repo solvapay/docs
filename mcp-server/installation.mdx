@@ -11,25 +11,56 @@ Use the action button below to connect SolvaPay MCP with the correct endpoint.
 
 <McpConnectActions />
 
-OAuth-capable clients (Claude.ai, Claude Desktop) handle authentication automatically — just log in with your SolvaPay account. Config-based clients (Cursor, VS Code) require an API key from **SolvaPay Console > Settings > API Keys**.
+| Property | Value |
+|---|---|
+| **Endpoint** | `https://mcp.solvapay.com/mcp` |
+| **Transport** | Streamable HTTP (stateless) |
+| **Authentication** | OAuth 2.0 — sign in with your SolvaPay account |
+
+You don't need an API key. Add the endpoint to your client, and the client opens the SolvaPay sign-in page the first time it connects. Sign in with your SolvaPay provider account (email code, Google, or GitHub) and click **Authorize**. Only existing SolvaPay providers can connect; no new account is created during this flow.
+
+The connection works on the environment your account is in: sandbox for a new account, production once you switch in SolvaPay Console. Switching takes effect on the next tool call, without reconnecting. From a client that can't open a browser, [use an API key](#use-an-api-key-instead) instead.
 
 ## Cursor IDE
 
-1. Open **Connect SolvaPay MCP** and select **Install in Cursor**.
-2. Enter your API key when prompted, or continue with `YOUR_API_KEY_HERE`.
-3. Confirm the install prompt in Cursor.
-4. If you installed with the placeholder key, update `X-API-Key` in Cursor MCP settings.
-5. Reload or toggle the SolvaPay MCP server in Cursor settings.
+Add SolvaPay to `~/.cursor/mcp.json` (all projects) or `.cursor/mcp.json` in your project root:
 
-After setup, you should see SolvaPay tools available in Cursor chat.
+```json ~/.cursor/mcp.json
+{
+  "mcpServers": {
+    "solvapay": {
+      "url": "https://mcp.solvapay.com/mcp"
+    }
+  }
+}
+```
+
+1. Save the file. If `mcp.json` already has an `mcpServers` object, add the `solvapay` entry to it.
+2. Open **Cursor Settings > MCP**. Cursor shows that `solvapay` needs sign-in; click to authenticate.
+3. Sign in with your SolvaPay account in the browser window and click **Authorize**.
+
+You can also use **Connect SolvaPay MCP > Install in Cursor** above, which writes the same entry.
+
+After setup, SolvaPay tools are available in Cursor chat.
 
 ## VS Code
 
-1. Open **Connect SolvaPay MCP** and select **Copy VS Code config**.
-2. Paste into `.vscode/mcp.json` (workspace) or your user `mcp.json`.
-3. Replace `YOUR_API_KEY_HERE` with your SolvaPay API key.
-4. Run **MCP: List Servers** and start the `solvapay` server if needed.
-5. Reload VS Code if tools do not appear immediately.
+Add SolvaPay to `.vscode/mcp.json` in your workspace, or to your user `mcp.json` (**MCP: Open User Configuration**):
+
+```json .vscode/mcp.json
+{
+  "servers": {
+    "solvapay": {
+      "type": "http",
+      "url": "https://mcp.solvapay.com/mcp"
+    }
+  }
+}
+```
+
+1. Save the file.
+2. Run **MCP: List Servers** and start the `solvapay` server.
+3. When VS Code asks to authenticate, sign in with your SolvaPay account in the browser and click **Authorize**.
 
 After setup, SolvaPay tools are available in Copilot Chat.
 
@@ -51,20 +82,17 @@ OAuth is handled automatically — Claude securely stores the access token so yo
 
 ## Claude Desktop
 
-Use **Connect SolvaPay MCP** and select **Copy Claude Desktop config**.
+Add SolvaPay as a connector, the same way as in Claude.ai. Claude Desktop signs you in with OAuth, so you don't need an API key.
 
-Paste it into:
+1. Open **Settings > Connectors**.
+2. Click **Add custom connector** and enter `https://mcp.solvapay.com/mcp`.
+3. Sign in with your SolvaPay provider account and click **Authorize**.
 
-- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
-
-Then replace `YOUR_API_KEY_HERE` with your SolvaPay API key.
-
-Restart Claude Desktop after saving.
+Don't add SolvaPay to `claude_desktop_config.json`. That file is for local servers that Claude Desktop starts itself, not for remote servers like `https://mcp.solvapay.com/mcp`.
 
 ## Claude API (Messages API)
 
-When using Claude's Messages API with the MCP connector beta, pass your SolvaPay API key or a provider JWT as the `authorization_token`:
+The Messages API can't open a browser, so it can't use the OAuth sign-in. Pass a SolvaPay secret key as the `authorization_token` instead (see [Use an API key instead](#use-an-api-key-instead)):
 
 ```json
 {
@@ -97,29 +125,28 @@ See the [plugin README](https://github.com/solvapay/solvapay-openclaw) for full 
 
 ## Other MCP Clients
 
-The SolvaPay MCP Server uses **Streamable HTTP**. Any MCP client that supports this transport can connect.
+The SolvaPay MCP Server uses **Streamable HTTP** and the standard MCP authorization flow (OAuth 2.0 with PKCE and dynamic client registration). Any MCP client that supports remote servers with OAuth can connect: add `https://mcp.solvapay.com/mcp` and sign in when prompted.
 
-Use **Connect SolvaPay MCP** and select **Copy MCP endpoint**, then configure your client with:
+## Use an API key instead
 
-| Property | Value |
-|---|---|
-| **Endpoint** | `https://mcp.solvapay.com/mcp` |
-| **Transport** | Streamable HTTP (stateless) |
-| **Authentication** | OAuth 2.0 (browser-based clients) or `X-API-Key` header (config-based clients) |
+Use a secret API key only when your client can't open a browser, such as the Claude Messages API, CI jobs, or scripts. Everywhere else, OAuth is simpler and follows your account's environment.
 
-## Using Multiple Environments
+Get a key from **SolvaPay Console > Developers > API Keys** and send it in the `Authorization` header. Use the key for the environment your account is in: `sk_sandbox_` while it's in sandbox, `sk_live_` once you've switched to production. A key for the other environment is rejected, so after you switch in SolvaPay Console, replace the key in your configuration.
 
-Create separate MCP server entries in your client:
+```json
+{
+  "mcpServers": {
+    "solvapay": {
+      "url": "https://mcp.solvapay.com/mcp",
+      "headers": {
+        "Authorization": "Bearer sk_sandbox_your_key_here"
+      }
+    }
+  }
+}
+```
 
-- `solvapay-sandbox` with your sandbox API key
-- `solvapay-production` with your production API key
-
-Both use the same endpoint — the environment is determined by your API key prefix:
-
-| Key Prefix | Environment | Data |
-|---|---|---|
-| `sk_sandbox_` | Sandbox | Test data only |
-| `sk_live_` | Production | Real data |
+The MCP server only reads `Authorization: Bearer`. An `X-API-Key` header is ignored. Keep keys out of shared or committed config files.
 
 ## Verifying the Connection
 
@@ -129,19 +156,29 @@ After connecting, ask your AI assistant something simple like:
 
 If the connection is working, you'll see a response from the `list_customers` tool. If your account is new, an empty list is expected.
 
+Each tool result starts with an `Environment: sandbox` or `Environment: live` line (`live` is production). To check the environment without listing anything, ask your assistant to call `get_environment`.
+
 ## Troubleshooting
 
 **"Authentication required" error**
 
-For config-based clients (Cursor, VS Code): confirm the `X-API-Key` header is set in your MCP client configuration. For OAuth clients (Claude.ai): try removing and re-adding the connector to re-authenticate.
+Your client connected without signing in. Reconnect SolvaPay in your client to restart the sign-in. If you use an API key, check that it's sent as `Authorization: Bearer <secret key>`; an `X-API-Key` header is ignored and gives this error.
 
-**"Invalid or expired secret key" error**
+**"Invalid or expired access token" error**
 
-The API key is being sent but is not valid. Verify it in **SolvaPay Console > Settings > API Keys**. Make sure you copied the full key.
+The server couldn't verify your credentials. With OAuth, your session has expired; sessions last up to 24 hours. Reconnect SolvaPay in your client to sign in again. With an API key, the key isn't valid: verify it in **SolvaPay Console > Developers > API Keys**, check that you copied the full key, and check that it hasn't been revoked.
+
+**"This is a sandbox secret key, but your SolvaPay account is in live mode" error**
+
+Only applies when you use an API key. The server returns `403` because the key belongs to the other environment. Your account was switched to production, but the configuration still sends a sandbox key. The full message names the key to use:
+
+> This is a sandbox secret key, but your SolvaPay account is in live mode. Use your live secret key (sk_live_...), or switch the account back to sandbox in the SolvaPay Console.
+
+Replace the key with one for the account's current environment, or switch the account back in SolvaPay Console. The same applies the other way round, to a production key while the account is in sandbox.
 
 **"Invalid or expired provider token" error**
 
-Your OAuth session has expired. Remove the connector and re-add it — you'll be prompted to sign in again.
+Your OAuth session has expired. Reconnect SolvaPay in your client, and you'll be prompted to sign in again.
 
 **Tools not appearing**
 

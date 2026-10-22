@@ -1,0 +1,111 @@
+---
+title: "Zero to working: Managed MCP"
+sidebarTitle: "Zero to working: Managed MCP"
+description: "Every step from a new account to a first paid tool call through Managed MCP, in order, with the key, base URL, and auth header."
+---
+
+Follow these steps in order. You finish with a customer paying for a tool on your MCP server in sandbox. You don't change your server's code.
+
+| | Value |
+|---|---|
+| **REST base URL** | `https://api.solvapay.com` |
+| **Auth header** | `Authorization: Bearer $SOLVAPAY_SECRET_KEY` |
+| **Key** | Sandbox secret key, `sk_sandbox_...`, from Console > **Developers** > **API Keys** |
+| **Endpoint used** | `POST /v1/sdk/products/mcp/bootstrap` |
+
+## Prerequisites
+
+- A SolvaPay account. [Create one](/get-started/create-account) if you don't have one.
+- Your MCP server reachable over HTTPS, for example `https://origin.example.com/mcp`. SolvaPay sits in front of it as a proxy.
+- An MCP client that supports OAuth, such as Claude.ai, Claude Desktop, or Cursor.
+
+## 1. Get a sandbox secret key
+
+In [SolvaPay Console](https://app.solvapay.com), click **Developers**. Under **API Keys** > **Sandbox keys**, click **Generate sandbox key** and copy it.
+
+```bash
+export SOLVAPAY_SECRET_KEY=sk_sandbox_your_key_here
+```
+
+## 2. Check the key and base URL
+
+```bash
+curl https://api.solvapay.com/v1/sdk/products \
+  -H "Authorization: Bearer $SOLVAPAY_SECRET_KEY"
+```
+
+A `200` with a JSON body means the key works. If you get a `401`, see [Authentication errors](/api-reference/authentication#authentication-errors).
+
+## 3. Create the product, plans, and tool mapping
+
+One call creates an MCP product, a free plan, a paid plan, and the tool-to-plan mapping. Replace `originUrl` and the tool names with your server's.
+
+```bash
+curl -X POST https://api.solvapay.com/v1/sdk/products/mcp/bootstrap \
+  -H "Authorization: Bearer $SOLVAPAY_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Docs Assistant",
+    "originUrl": "https://origin.example.com/mcp",
+    "plans": [
+      { "key": "free", "name": "Free", "currency": "USD", "options": [
+        { "kind": "billingCycle", "interval": "month" },
+        { "kind": "charge", "per": "flat", "amountMinor": 0, "currency": "USD" },
+        { "kind": "autoAssigned" }
+      ] },
+      { "key": "pro", "name": "Pro", "currency": "USD", "options": [
+        { "kind": "billingCycle", "interval": "month" },
+        { "kind": "charge", "per": "flat", "amountMinor": 2000, "currency": "USD" }
+      ] }
+    ],
+    "tools": [
+      { "name": "list_docs", "planKeys": ["free", "pro"] },
+      { "name": "deep_research", "planKeys": ["pro"] }
+    ]
+  }'
+```
+
+`amountMinor` is in cents, so `2000` is $20 per month. If you leave out `tools`, SolvaPay discovers your server's tools and maps them for you (`toolsAutoMapped: true` in the response).
+
+From the response, copy `mcpServer.mcpProxyUrl`, for example `https://docs-assistant.mcp.solvapay.com/mcp`. This is the URL your customers connect to.
+
+<Note>
+  Prefer the Console? [Create a Managed MCP product](/no-code-mcp/create-no-code-mcp-product) covers the same setup in the UI. Plan options are explained in [Plans](/plans/overview).
+</Note>
+
+## 4. Connect as a customer
+
+Add the proxy URL to an MCP client, the way a customer would. In Claude.ai or Claude Desktop, open **Settings > Connectors**, click **Add custom connector**, and paste the proxy URL. In Cursor, add it to `mcp.json` with only a `url`:
+
+```json ~/.cursor/mcp.json
+{
+  "mcpServers": {
+    "docs-assistant": {
+      "url": "https://docs-assistant.mcp.solvapay.com/mcp"
+    }
+  }
+}
+```
+
+The client opens a SolvaPay sign-in page. Sign in with a Google or GitHub account to act as a test customer.
+
+## 5. Call a free tool and a paid tool
+
+1. Ask the assistant to use `list_docs`. It's on the free plan, so it runs.
+2. Ask it to use `deep_research`. It's on the paid plan, so SolvaPay returns a paywall response with a checkout link instead of running the tool.
+
+## 6. Pay in sandbox
+
+Open the checkout link and pay with the Stripe test card `4242 4242 4242 4242`, any future expiry date, and any CVC. Sandbox never charges a real card. More test cards are in [Test in sandbox](/get-started/test-in-sandbox#stripe-test-cards).
+
+## 7. Make the first paid call
+
+Ask the assistant to use `deep_research` again. It now runs: this is your first paid tool call.
+
+In the Console, the customer, their **Pro** purchase, and the tool usage show up in sandbox.
+
+## Next steps
+
+- [Test MCP server auth and paywall](/mcp-server/testing-auth-and-paywall) covers the checks in more detail.
+- [Hosted pages](/no-code-mcp/hosted-pages) covers the sign-in, checkout, and account pages your customers see.
+- [Go live](/get-started/go-live) when you're ready to take real payments with an `sk_live_` key.

@@ -23,24 +23,28 @@ Yes. Every tool call is scoped to the provider account associated with your cred
 
 The MCP server supports two authentication methods:
 
-- **OAuth login** — For clients that support OAuth (Claude.ai, Claude Desktop). You sign in with your SolvaPay Console credentials (email code, Google, or GitHub) and authorize the connection. No API key needed.
-- **API key** — For config-based clients (Cursor, VS Code). Pass your API key via the `X-API-Key` header or the `Authorization: Bearer` header.
+- **OAuth login** — The default, for Claude.ai, Claude Desktop, Cursor, VS Code, and other clients that support remote MCP servers. You sign in with your SolvaPay Console credentials (email code, Google, or GitHub) and authorize the connection. No API key needed. OAuth sessions use the environment your account is in.
+- **API key** — For clients that can't open a browser (the Claude Messages API, scripts, CI). Pass your secret key in the `Authorization: Bearer <secret key>` header. The MCP server doesn't read `X-API-Key`.
 
 **Can only existing providers connect?**
 
 Yes. The OAuth flow only allows sign-in — it does not create new accounts. You must already have a SolvaPay provider account to connect.
 
+**Which environment does the MCP server use?**
+
+The one your account is in. A new account starts in sandbox. When you switch between sandbox and production in SolvaPay Console, the next tool call uses the new environment, with no need to reconnect. Each tool result starts with an `Environment: sandbox` or `Environment: live` line (`live` is production), and the `get_environment` tool returns it on its own.
+
 **Can I use both sandbox and production keys?**
 
-Yes. Configure separate MCP server entries in your client — one with a sandbox key for testing and another with a production key. See [Installation](/mcp-server/installation#using-multiple-environments) for details.
+Not at the same time. A key only works while your account is in its environment: `sk_sandbox_` in sandbox, `sk_live_` in production. A key for the other environment is rejected with a message that names the key to use. To move between environments, switch in SolvaPay Console, then update the key in your configuration. With OAuth you don't need to change anything. See [Use an API key instead](/mcp-server/installation#use-an-api-key-instead).
 
 **What happens if my API key is compromised?**
 
-Revoke the key immediately in your SolvaPay Console under **Settings > API Keys**, then generate a new one and update your MCP configuration.
+Revoke the key immediately in your SolvaPay Console under **Developers > API Keys**, then generate a new one and update your MCP configuration.
 
 **What happens if my OAuth session expires?**
 
-Remove the connector from your client and re-add it. You'll be redirected to the SolvaPay login page to sign in again.
+Sessions last up to 24 hours. Tool calls then fail with "Invalid or expired access token". Reconnect SolvaPay in your client. You'll be redirected to the SolvaPay login page to sign in again. You don't need to remove and re-add the connector.
 
 ## Technical
 

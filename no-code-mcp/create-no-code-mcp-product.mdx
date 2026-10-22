@@ -68,6 +68,8 @@ When users connect to the proxied MCP server URL:
 
 ## API quickstart (SDK bootstrap endpoint)
 
+These requests need a secret key in `SOLVAPAY_SECRET_KEY`. See [Authentication and base URL](/api-reference/authentication) for the base URL, header, and where to get a key.
+
 If you want the same setup flow through API, use the SDK bootstrap route:
 
 `POST /v1/sdk/products/mcp/bootstrap`
@@ -92,8 +94,16 @@ curl -X POST "https://api.solvapay.com/v1/sdk/products/mcp/bootstrap" \
     "name": "Docs Assistant",
     "originUrl": "https://origin.example.com/mcp",
     "plans": [
-      { "key": "free", "name": "Free", "price": 0, "freeUnits": 1000, "currency": "USD" },
-      { "key": "pro", "name": "Pro", "price": 2000, "currency": "USD", "billingCycle": "monthly" }
+      { "key": "free", "name": "Free", "currency": "USD", "options": [
+        { "kind": "billingCycle", "interval": "month" },
+        { "kind": "charge", "per": "flat", "amountMinor": 0, "currency": "USD" },
+        { "kind": "autoAssigned" },
+        { "kind": "limit", "cap": 1000, "scope": "billing_period", "meter": "requests", "onExceed": "block" }
+      ] },
+      { "key": "pro", "name": "Pro", "currency": "USD", "options": [
+        { "kind": "billingCycle", "interval": "month" },
+        { "kind": "charge", "per": "flat", "amountMinor": 2000, "currency": "USD" }
+      ] }
     ],
     "tools": [
       { "name": "list_docs", "planKeys": ["free", "pro"] },
@@ -114,12 +124,18 @@ curl -X POST "https://api.solvapay.com/v1/sdk/products/mcp/bootstrap" \
     "name": "Docs Assistant",
     "originUrl": "https://origin.example.com/mcp",
     "plans": [
-      { "key": "free", "name": "Free", "price": 0, "freeUnits": 0, "currency": "USD" }
+      { "key": "free", "name": "Free", "currency": "USD", "options": [
+        { "kind": "billingCycle", "interval": "month" },
+        { "kind": "charge", "per": "flat", "amountMinor": 0, "currency": "USD" },
+        { "kind": "autoAssigned" }
+      ] }
     ]
   }'
 ```
 
-`freeUnits: 0` on a free plan means unlimited free access for authenticated users.
+A free plan with no `limit` option gives authenticated users unlimited free access. Add a `limit` option (as in the first example) to cap free usage per billing period.
+
+Each plan takes an `options[]` array, the same as the [plan API](/plans/overview). Don't send the retired `price`, `freeUnits`, or `billingCycle` plan fields; the API rejects plans without `options`.
 
 Use this for the fastest onboarding. If you need fine-grained lifecycle control, use the granular
 product, plan, and MCP server endpoints.
@@ -149,9 +165,20 @@ curl -X PUT "https://api.solvapay.com/v1/sdk/products/prd_1A2B3C4D/mcp/plans" \
   -H "Content-Type: application/json" \
   -d '{
     "plans": [
-      { "key": "free", "name": "Free", "price": 0, "freeUnits": 100, "currency": "USD" },
-      { "key": "pro", "name": "Pro", "price": 2000, "currency": "USD", "billingCycle": "monthly" },
-      { "key": "team", "name": "Team", "price": 6000, "currency": "USD", "billingCycle": "monthly" }
+      { "key": "free", "name": "Free", "currency": "USD", "options": [
+        { "kind": "billingCycle", "interval": "month" },
+        { "kind": "charge", "per": "flat", "amountMinor": 0, "currency": "USD" },
+        { "kind": "autoAssigned" },
+        { "kind": "limit", "cap": 100, "scope": "billing_period", "meter": "requests", "onExceed": "block" }
+      ] },
+      { "key": "pro", "name": "Pro", "currency": "USD", "options": [
+        { "kind": "billingCycle", "interval": "month" },
+        { "kind": "charge", "per": "flat", "amountMinor": 2000, "currency": "USD" }
+      ] },
+      { "key": "team", "name": "Team", "currency": "USD", "options": [
+        { "kind": "billingCycle", "interval": "month" },
+        { "kind": "charge", "per": "flat", "amountMinor": 6000, "currency": "USD" }
+      ] }
     ],
     "toolMapping": [
       { "name": "list_docs", "planKeys": ["free", "pro", "team"] },
@@ -170,7 +197,11 @@ curl -X PUT "https://api.solvapay.com/v1/sdk/products/prd_1A2B3C4D/mcp/plans" \
   -H "Content-Type: application/json" \
   -d '{
     "plans": [
-      { "key": "free", "name": "Free", "price": 0, "freeUnits": 0, "currency": "USD" }
+      { "key": "free", "name": "Free", "currency": "USD", "options": [
+        { "kind": "billingCycle", "interval": "month" },
+        { "kind": "charge", "per": "flat", "amountMinor": 0, "currency": "USD" },
+        { "kind": "autoAssigned" }
+      ] }
     ]
   }'
 ```

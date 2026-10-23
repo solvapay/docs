@@ -16,7 +16,10 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
+          # Without check-latest, setup-node uses the runner's cached 24.x, which can lag the
+          # newest patch (24.21.0 instead of 24.22.1 on 2026-10-23).
+          check-latest: true
 
       - name: Install Mint CLI
         run: npm install -g mint@latest

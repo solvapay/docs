@@ -193,6 +193,140 @@ Deno.serve(
 )
 ```
 
+### External authorization server (Auth0, Clerk, Supabase, any OIDC issuer)
+
+By default the MCP's authorization server is SolvaPay. If your users already sign in through an OIDC issuer, `createSolvaPayMcpFetch` can advertise that issuer instead and verify its tokens on `/mcp`. The external `sub` is bridged to a SolvaPay customer for you, so `registerPayable` tools, usage, and the account UI work unchanged.
+
+This is a `@solvapay/mcp/fetch` feature. `createMcpOAuthBridge` (Express) stays SolvaPay-only until the Express parity follow-up ships.
+
+#### Generic recipe
+
+Two options together switch the handler into external mode: `verifyToken` verifies every bearer, and `authorizationServer` is what the handler advertises in the RFC 9728 protected-resource document. `createJwksBearerVerifier` from `@solvapay/auth` is the verifier for any issuer that publishes a JWKS.
+
+```typescript
+import { readFile } from 'node:fs/promises'
+import { createJwksBearerVerifier } from '@solvapay/auth'
+import { createSolvaPayMcpFetch } from '@solvapay/mcp/fetch'
+
+const publicBaseUrl = 'https://my-mcp.example.com'
+const issuer = 'https://auth.example.com/'
+
+export default createSolvaPayMcpFetch({
+  solvaPay,
+  productRef: process.env.SOLVAPAY_PRODUCT_REF,
+  resourceUri: 'ui://my-app/mcp-app.html',
+  readHtml: () => readFile('./mcp-app.html', 'utf8'),
+  publicBaseUrl,
+  apiBaseUrl: 'https://api.solvapay.com',
+  responseMode: 'json',
+  verifyToken: createJwksBearerVerifier({
+    issuer,
+    audience: `${publicBaseUrl}/mcp`,
+    userinfoEndpoint: `${issuer}userinfo`,
+  }),
+  authorizationServer: {
+    issuers: [issuer],
+    scopesSupported: ['openid', 'profile', 'email', 'offline_access'],
+  },
+})
+```
+
+What the handler does in this mode:
+
+- `/.well-known/oauth-protected-resource` lists `authorization_servers: issuers` and `scopes_supported: scopesSupported`. `resource` is `${publicBaseUrl}${mcpPath}` (SolvaPay mode keeps the bare origin). `/.well-known/oauth-authorization-server`, `/.well-known/openid-configuration`, and `/oauth/*` are not served; MCP clients fetch those from the issuer.
+- Every request to `/mcp` goes through `verifyToken`. A non-`cus_` subject is passed to `ensureCustomer(subject, subject, { email, name })`, and the resulting `cus_` ref lands in `extra.authInfo.extra.customer_ref`. `email` is forwarded only when the verifier reports `emailVerified: true`; an unverified email never links to an existing customer.
+
+**The three-way match.** The verifier's `issuer`, `authorizationServer.issuers[0]`, and the issuer the client discovers from the issuer's own metadata must be the same string byte-for-byte, trailing slash and path included. Auth0 issues `https://tenant/`; Supabase issues `https://ref.supabase.co/auth/v1`. The verifier never adds or strips a slash, so copy the `issuer` value from the issuer's `/.well-known/openid-configuration` verbatim.
+
+`verifyToken` takes the raw bearer and the `Request`, and returns a `VerifiedBearer` (`subject`, optional `email`, `emailVerified`, `name`, `scopes`, `expiresAt`, `resource`, `claims`) or `null`. You can write your own; the generic verifier is the recommended starting point because it handles JWKS caching, issuer and audience binding, and the profile lookup.
+
+`scopesSupported` must be non-empty. MCP clients request exactly these scopes, and the failures from an empty list are silent: no `offline_access` means no refresh token (hourly re-login on Auth0); no `email` means userinfo returns no `email_verified`, so every customer is created without an email.
+
+#### 401 or 500
+
+- `verifyToken` returns `null` (expired, bad signature, wrong issuer or audience, missing `sub`): the handler answers `401` with `WWW-Authenticate: Bearer resource_metadata="…", error="invalid_token"`. The client refreshes or re-authenticates.
+- `verifyToken` throws (JWKS unreachable, userinfo non-2xx, a configuration error from `audienceMismatchHint`): the handler answers a `500` JSON-RPC error with the message. Nothing is masked; a thrown error means something to fix on your side or the issuer's.
+- No bearer at all: `401` with the challenge and no `error` attribute, as in SolvaPay mode.
+
+#### Profile source
+
+The bridge needs `email` and `email_verified` to link an external identity to an existing SolvaPay customer. `createJwksBearerVerifier` reads them from exactly one of two places, and throws at construction if neither or both are set:
+
+- `claims: { email, emailVerified, name }`: names of access-token claims. Use this when the issuer can stamp the profile into the access token (Auth0 via an Action, Supabase via a custom access-token hook).
+- `userinfoEndpoint`: the issuer's OIDC userinfo URL. One `GET` per token, memoised until the token's `exp`. A `401` from userinfo throws, naming the scopes to add.
+
+#### Auth0 preset
+
+`createAuth0BearerVerifier` from `@solvapay/auth/auth0` wraps the generic verifier with Auth0's shape: issuer `https://{domain}/` (Auth0 always ends `iss` with a slash), JWKS at `https://{domain}/.well-known/jwks.json`, and the profile read from namespaced access-token claims.
+
+`domain` is the **token-issuing** hostname. With a custom domain configured, that is the custom domain:
+
+```typescript
+import { readFile } from 'node:fs/promises'
+import { createAuth0BearerVerifier } from '@solvapay/auth/auth0'
+import { createSolvaPayMcpFetch } from '@solvapay/mcp/fetch'
+
+const publicBaseUrl = 'https://my-mcp.example.com'
+const domain = 'auth.example.com'
+
+export default createSolvaPayMcpFetch({
+  solvaPay,
+  productRef: process.env.SOLVAPAY_PRODUCT_REF,
+  resourceUri: 'ui://my-app/mcp-app.html',
+  readHtml: () => readFile('./mcp-app.html', 'utf8'),
+  publicBaseUrl,
+  apiBaseUrl: 'https://api.solvapay.com',
+  responseMode: 'json',
+  verifyToken: createAuth0BearerVerifier({ domain, audience: `${publicBaseUrl}/mcp` }),
+  authorizationServer: {
+    issuers: [`https://${domain}/`],
+    scopesSupported: ['openid', 'profile', 'email', 'offline_access'],
+  },
+})
+```
+
+Without a custom domain, `domain` is the canonical tenant hostname (`tenant.eu.auth0.com`) and `issuers` is `https://tenant.eu.auth0.com/`. Auth0 stamps `iss` with whichever hostname the authorize request went through and serves the JWKS on both, so a token issued through the canonical domain is a `401` against a verifier configured with the custom domain. That is by design: pick one hostname and use it everywhere.
+
+Derive the verifier and `issuers` from a single `AUTH0_DOMAIN` variable so they cannot drift.
+
+**Post-login Action.** The preset reads `https://solvapay.com/email`, `https://solvapay.com/email_verified`, and `https://solvapay.com/name` from the access token. Add this Action to the Login flow (Actions → Flows → Login):
+
+```javascript
+exports.onExecutePostLogin = async (event, api) => {
+  const ns = 'https://solvapay.com/'
+  api.accessToken.setCustomClaim(`${ns}email`, event.user.email)
+  api.accessToken.setCustomClaim(`${ns}email_verified`, event.user.email_verified)
+  api.accessToken.setCustomClaim(`${ns}name`, event.user.name)
+}
+```
+
+Pass `claimNamespace` to the preset if you use a different prefix. A tenant without the Action can use the generic verifier with `userinfoEndpoint` set to `https://{domain}/userinfo` instead, at the cost of Auth0's per-user userinfo rate limit.
+
+`offline_access` in `scopesSupported` is what makes Auth0 issue a refresh token. Without it the client re-runs the login flow every time the access token expires (one hour by default).
+
+**Tenant checklist.** Everything below is in the Auth0 Dashboard.
+
+1. **Issuing domain.** Branding → Custom Domains. If a custom domain exists, use it for `domain`, `issuers`, and nothing else; otherwise use the canonical `tenant.region.auth0.com`.
+2. **Settings → Advanced.** Enable **Dynamic Client Registration**, **Resource Parameter Compatibility Profile**, and **Include Issuer in Authorization Responses**. Leave **Client ID Metadata Document Registration** off: if it is on and the client's metadata document is not imported, clients that support it stop using DCR and fail.
+3. **Tenant ACL.** Open DCR lets anyone create applications. Add a rule for the `dcr` scope that limits `/oidc/register` to the clients you expect. Cover both the custom domain and the canonical hostname; Auth0 keeps the registration endpoint reachable on the canonical host even with a custom domain in front.
+4. **API.** Applications → APIs → Create. Identifier exactly `${publicBaseUrl}${mcpPath}` (no trailing slash; this is the `resource` MCP clients derive from your server URL and the `audience` the verifier requires). Signing algorithm RS256. Enable **Allow Offline Access**.
+5. **API → Settings → Default Permissions for Third-Party Applications.** Authorise **User-Delegated Access**. Without it every dynamically registered client gets `access_denied` at authorize.
+6. **Connections.** Promote the login connections you want to offer to domain level. Third-party applications can only use domain-level connections.
+7. **Action.** The post-login Action above.
+8. **Local development.** A second API with identifier `http://localhost:8787/mcp` (or whatever your dev server binds) and its own default third-party grant, selected by the `audience` you pass locally.
+
+Dynamic registration of Claude Code's client metadata document is currently blocked on Auth0: the document omits `application_type: native`, Auth0 maps it to a regular web application, and loopback `http://` redirect URIs are only allowed for native applications. DCR works. If a dynamically registered Claude Code client fails at authorize on its ephemeral loopback port, pin the port on the client side (`claude mcp add --callback-port 5555 …` or `MCP_OAUTH_CALLBACK_PORT=5555`).
+
+#### Adding another provider
+
+The generic verifier is the recipe. Before writing a preset, answer these for the issuer:
+
+- **Issuer string.** Copy `issuer` from the provider's `/.well-known/openid-configuration` verbatim, path component included. MCP clients discover it at the RFC 8414 path-insertion URL (`https://host/.well-known/oauth-authorization-server/path`), so the path has to be part of the issuer, not stripped.
+- **JWKS path.** The default is `${issuer}/.well-known/jwks.json` joined with one slash. Override `jwksUri` if the provider publishes it elsewhere.
+- **Does the access token carry `email_verified`?** If yes, map it with `claims`. If not, use `userinfoEndpoint`, and make sure `scopesSupported` includes whatever scope the provider needs to return `email` from userinfo.
+- **Does the authorization server stamp the RFC 8707 `resource` into `aud`?** If it does natively, `audience` is the MCP URL and you are done. If it offers an issuance-time claims hook that can stamp a static audience, use that. If it does neither, the issuer cannot be used with this SDK until it does; do not relax the audience check.
+- **Is there a default audience that signals the hook is missing?** Pass `audienceMismatchHint`. It is called only when the signature, issuer, and expiry verified but `aud` did not, with the authentic payload. Return a message to turn that `401` into a `500` that names the fix, or `undefined` to keep the `401` (a token for something else replayed here).
+
 ### Advanced: custom customer-ref extraction
 
 If your server validates tokens itself, override `getCustomerRef` on a tool and decode claims with the bearer helpers from `@solvapay/mcp-core`. The validated token is available on `extra.authInfo.token`. These helpers only **decode** claims (`customerRef`, `customer_ref`, `sub`) — they do not verify signatures, so call them after token validation (for example against `/v1/customer/auth/userinfo`). Fail closed; never substitute a fallback identity such as `anonymous`.

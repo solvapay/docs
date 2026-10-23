@@ -499,6 +499,8 @@ function App({ children }: { children: React.ReactNode }) {
 
 Auth0 keeps the session in an httpOnly cookie. The client adapter reports whether a user is signed in; `proxy.ts` bridges the session into `x-user-id` for API routes.
 
+To put Auth0 in front of an MCP server instead of a web app, use `createAuth0BearerVerifier` with `createSolvaPayMcpFetch`. See [External authorization server](/sdks/typescript/guides/mcp#external-authorization-server-auth0-clerk-supabase-any-oidc-issuer) in the MCP guide.
+
 ### Example 3: Custom OAuth Adapter
 
 ```typescript

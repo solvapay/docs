@@ -1,0 +1,23 @@
+---
+title: "October 23, 2026"
+description: "The TypeScript SDK now requires Node.js 22 or later."
+---
+
+## Node.js 22 or later
+
+The TypeScript SDK packages now require Node.js 22 or later. Node 18 and 20 are end of life and
+don't get security fixes, including the October 21, 2026 Node.js security release.
+
+- `engines.node` is `>=22` in `@solvapay/server` 2.11.0, `@solvapay/mcp` 0.5.0,
+  `@solvapay/mcp-core` 0.5.0, `@solvapay/next` 1.4.0, `@solvapay/auth` 1.2.0, `@solvapay/init`
+  0.5.0, `solvapay` 1.4.0 and `create-solvapay` 0.8.0. These are minor releases with no API changes.
+- `@solvapay/react` 2.7.1 accepts `@solvapay/mcp-core` 0.5 as its optional peer.
+- The SDK is tested on Node 22, 24 and 26.
+- On Node 22, the bundled npm installs the MCP template from `npm create solvapay@latest -- --type mcp`.
+  You no longer need to upgrade npm first, as you did on Node 20.
+
+On an older Node, npm and pnpm warn about the engine mismatch, and Yarn 1 stops the install.
+Upgrade Node rather than ignoring the warning.
+
+See [Installation](/sdks/typescript/setup/installation) and the
+[TypeScript SDK quick start](/build/typescript-sdk).

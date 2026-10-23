@@ -91,6 +91,7 @@
             "group": "Changelog",
             "icon": "clock-rotate-left",
             "pages": [
+              "changelog/2026-10-23",
               "changelog/2026-09-18",
               "changelog/2026-09-07",
               "changelog/2026-09-01",

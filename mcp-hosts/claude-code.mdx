@@ -1,0 +1,50 @@
+---
+title: "SolvaPay in Claude Code"
+sidebarTitle: "Claude Code"
+description: "How SolvaPay checkout and account pages work when your MCP server runs in Claude Code, in the terminal and in the desktop app."
+keywords: ["Claude Code", "Claude Code MCP", "claude mcp add", "MCP checkout", "terminal"]
+---
+
+Claude Code shows text and links only. It does not render MCP UIs, so checkout and account pages always open as SolvaPay-hosted pages. In the terminal, the link opens in the system browser. In the desktop app, it opens in the app's built-in browser.
+
+## What works
+
+| | Terminal | Desktop app |
+|---|---|---|
+| Text and links | Supported | Supported |
+| MCP UIs | Text and links only | Text and links only |
+| Payment form | Hosted page, in the system browser | Hosted page, in the app's built-in browser |
+| Account pages | Hosted page, in the system browser | Hosted page, in the app's built-in browser |
+
+## Checkout
+
+When a paid tool is blocked, the response text states the limit and includes a link to hosted checkout. The customer opens the link, pays, and returns to Claude Code. The next call to the paid tool runs.
+
+## Account pages
+
+Ask the assistant to manage the account. The `account` tool returns the current plan, usage and a link to the SolvaPay-hosted account page.
+
+## MCP UIs
+
+Claude Code ignores MCP UIs. Every SolvaPay response already contains a complete text answer, so nothing is lost.
+
+## Terminal
+
+The terminal hands hosted links to your system browser. Add the server from your shell, not inside a `claude` session:
+
+```bash
+claude mcp add --transport http my-server https://your-mcp-server.example.com/mcp
+```
+
+Then start `claude` and run `/mcp` to authenticate. See Claude Code's [MCP quickstart](https://code.claude.com/docs/en/mcp-quickstart) for scopes and config files.
+
+## Desktop app
+
+The desktop app shows the same text responses and opens hosted links in its built-in browser. Add the server with the same Claude Code MCP setup as the terminal.
+
+## Known limitations
+
+- There is no inline checkout. Card entry always happens on the hosted page.
+- Hosted checkout links expire after 15 minutes. Ask the assistant for a new link if one has expired.
+
+Last tested: 2026-09-30

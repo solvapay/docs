@@ -1,0 +1,130 @@
+---
+title: "Agent sign-in for MCP hosts"
+sidebarTitle: "Agent sign-in (OAuth)"
+description: "How Claude, ChatGPT, Cursor and other MCP hosts sign their user in to SolvaPay and pay your MCP server per call, and what you add to your server for it."
+keywords: ["OAuth", "agent payments", "MCP", "Claude", "ChatGPT", "Cursor", "CIMD", "DCR", "PKCE"]
+---
+
+<Note>
+Preview. Agent sign-in runs in **sandbox** only, behind the `agent_payments` setting on your merchant. Ask SolvaPay to turn it on.
+</Note>
+
+When an MCP host such as Claude, ChatGPT or Cursor calls a paid tool on your server for the first time, your server answers with a sign-in challenge. The host sends its user to SolvaPay, where they sign in, set a monthly budget and approve with Face ID or Touch ID. The host then holds an agent token for your server, and every paid call is authorized and charged through SolvaPay. You never see a card and never run an OAuth server.
+
+## How a host signs in
+
+1. The host calls a paid tool with no token. Your server answers `401` with `WWW-Authenticate: Bearer error="invalid_token", …, resource_metadata="…"`.
+2. The host reads your server's protected resource metadata (RFC 9728), which names SolvaPay as the authorization server.
+3. The host reads SolvaPay's authorization server metadata and identifies itself: with a client ID metadata document (Claude Code, claude.ai) or by registering (Cursor, ChatGPT). Every client is public; PKCE with S256 is required.
+4. The user signs in to SolvaPay, reviews "App: Claude (claude.ai)" and your name, sets a budget and approves. A card is needed in production only.
+5. SolvaPay sends the browser back to the host with a code; the host exchanges it for an agent token valid for one hour and a refresh token valid for 90 days.
+6. The host calls your tool with the token. Your server verifies it locally against SolvaPay's keys and asks SolvaPay to authorize each paid call.
+
+Free tools and the tool list work before sign-in, so hosts can show your tools first.
+
+## Add it to your MCP server
+
+Your server uses `@solvapay/agents`. Turn sign-in on with `protectedResource`, set to the public URL of your MCP endpoint:
+
+```ts
+import {
+  createAgentCalls,
+  createAgentKeyVerifier,
+  createAgentLayer,
+  createAgentTokenVerifier,
+  createSolvaPayAgentClient,
+} from '@solvapay/agents'
+import { createAgentMcpRoute } from '@solvapay/agents/mcp'
+import { createRemoteJWKSet } from 'jose'
+
+const issuer = env.SOLVAPAY_AGENT_ISSUER // https://api.solvapay.com/v1/agent
+const mcpUrl = env.MCP_PUBLIC_URL // https://mcp.example.com/mcp
+const client = createSolvaPayAgentClient({ apiBaseUrl: env.SOLVAPAY_API_BASE_URL, secretKey: env.SOLVAPAY_SECRET_KEY })
+
+const route = createAgentMcpRoute({
+  issuer,
+  agentLayer: createAgentLayer({
+    verifyAgentToken: createAgentTokenVerifier({
+      issuer,
+      providerRef: env.SOLVAPAY_PROVIDER_REF,
+      resource: mcpUrl,
+      keys: createRemoteJWKSet(new URL(`${issuer}/jwks.json`)),
+    }),
+    verifyAgentKey: createAgentKeyVerifier({ client }),
+  }),
+  calls: createAgentCalls({ client, maxWaitSeconds: 55, log }),
+  log,
+  mcpPath: '/mcp',
+  serverName: 'my-server',
+  protectedResource: { resource: mcpUrl },
+  freeTools: server => registerFreeTools(server),
+  tools: (server, paid) => registerPaidTools(paid),
+})
+
+export default { fetch: (req: Request) => route(req).then(r => r ?? new Response('Not found', { status: 404 })) }
+```
+
+With `protectedResource` set, the route:
+
+- serves your metadata at `/.well-known/oauth-protected-resource/mcp` and `/mcp/.well-known/oauth-protected-resource`;
+- lists every tool to a host that has not signed in, and runs only the free ones;
+- answers a paid call with no token, or an expired one, with the sign-in challenge;
+- accepts a token whose audience is your MCP URL.
+
+Set `lazyAuth: false` to challenge every tool call, free ones included. Agents that connect with `npx solvapay connect` keep working on the same path with their agent key.
+
+For an HTTP API, pass the same `protectedResource` to `createAgentHttpGate` and mount `protectedResourceHandler` at `/.well-known/oauth-protected-resource/<path>`.
+
+## Tell SolvaPay where your server is
+
+SolvaPay finds your merchant from the URL a host names, so your catalog listing must carry your MCP URL. Save your listing in the SolvaPay Console (or `PUT /v1/ui/catalog-listing`) with `mcpUrl` set to the same URL as `protectedResource.resource`. One URL belongs to one merchant.
+
+## Endpoints
+
+| What | URL |
+| --- | --- |
+| Issuer | `https://api.solvapay.com/v1/agent` |
+| Authorization server metadata | `https://api.solvapay.com/.well-known/oauth-authorization-server/v1/agent`, also `/.well-known/openid-configuration/v1/agent` and `/v1/agent/.well-known/openid-configuration` |
+| Authorize | `https://api.solvapay.com/v1/agent/oauth/authorize` |
+| Token | `https://api.solvapay.com/v1/agent/oauth/token` (form fields only) |
+| Registration | `https://api.solvapay.com/v1/agent/oauth/register` (RFC 7591, public clients) |
+| Revocation | `https://api.solvapay.com/v1/agent/oauth/revoke` (RFC 7009) |
+| Keys | `https://api.solvapay.com/v1/agent/jwks.json` |
+
+The dev and staging environments use `api-dev.solvapay.com` and `api-staging.solvapay.com` with the same paths.
+
+## The token
+
+The access token is a SolvaPay agent token, ES256, verified against the keys above:
+
+| Claim | Value |
+| --- | --- |
+| `iss` | `https://api.solvapay.com/v1/agent` |
+| `aud` | your MCP URL |
+| `sub` | the agent, `agt_…` |
+| `principal` | the user at your merchant, `ppl_…`: use it as your customer ID |
+| `scope` | `usage` |
+| `cid` | the host's client ID |
+| `env` | `sandbox`, or `live` for your production mode; `sandbox` during the preview |
+| `px` | present when the user lets SolvaPay's classifier read the end of the prompt |
+
+## What the user controls
+
+The user sees each app under **Connected apps** in their SolvaPay account and each agent with "Claude via claude.ai". They can pause, resume or revoke an agent, or disconnect an app. A revoke stops the host's next paid call and its next refresh.
+
+## Listing in Claude's directory
+
+Hosts connect to any MCP URL as a custom connector. To list in Claude's connector directory, submit your server with:
+
+- your MCP URL, served over HTTPS with the challenge above;
+- every tool with `title` and `annotations` (`@solvapay/agents` fills `readOnlyHint: false` and `destructiveHint: false` on paid tools when you leave them out);
+- no client ID or secret: Claude identifies itself with its own client ID metadata document.
+
+## Errors hosts may show
+
+| Error | Meaning |
+| --- | --- |
+| `invalid_target` on authorize | No merchant lists this MCP URL, or its `agent_payments` setting is off |
+| `invalid_client` | The host's client ID is unknown, or its metadata document could not be read |
+| `invalid_request` page, no redirect | The host's redirect URI was not registered for its client |
+| `invalid_grant` on refresh | The user revoked the agent, or the refresh token was reused or expired |

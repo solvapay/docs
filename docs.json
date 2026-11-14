@@ -159,6 +159,7 @@
               "sdks/python/guides/mcp",
               "sdks/python/guides/api-client",
               "sdks/python/guides/webhooks",
+              "sdks/python/guides/react-web-checkout",
               "sdks/python/guides/agents",
               "sdks/python/guides/examples"
             ]
@@ -173,6 +174,7 @@
               "sdks/go/guides/mcp",
               "sdks/go/guides/api-client",
               "sdks/go/guides/webhooks",
+              "sdks/go/guides/react-web-checkout",
               "sdks/go/guides/agents",
               "sdks/go/guides/examples"
             ]

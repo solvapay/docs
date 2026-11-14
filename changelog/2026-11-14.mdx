@@ -1,0 +1,40 @@
+---
+title: "November 14, 2026"
+description: "Python and Go SDKs, and agent payments in preview for TypeScript, Python and Go."
+---
+
+## Python and Go SDKs
+
+SolvaPay now has SDKs for Python and Go, next to the TypeScript SDK. Each covers the server side:
+
+- Make a function paid: each call is checked against the customer's plan and billed when it succeeds.
+- Paid and free MCP tools, with SolvaPay sign-in, the built-in `account` and `activate_plan` tools,
+  and the checkout widget on MCP Apps hosts.
+- Webhook verification.
+- The full SolvaPay API, generated from the same spec as the TypeScript types.
+
+```bash
+pip install solvapay                               # Python 3.10+
+go get github.com/solvapay/solvapay-sdk/go@latest  # Go 1.26+
+```
+
+The paywall, its messages, the `account` tool's answers and webhook verification behave the same
+in all three SDKs. A shared conformance suite checks the Python and Go SDKs against the TypeScript
+SDK on every change. Each SDK has its own version line, starting at 0.1.0 (Go tags are
+`go/vX.Y.Z`), so the numbers don't line up across languages.
+
+Python and Go have no frontend packages: the React components and the `npx solvapay init` CLI stay
+TypeScript-only. Set `SOLVAPAY_SECRET_KEY` and `SOLVAPAY_PRODUCT_REF` yourself.
+
+See the [Python SDK](/sdks/python/intro) and the [Go SDK](/sdks/go/intro).
+
+## Agent payments (preview)
+
+SolvaPay agents can pay for your API or MCP tools per call. Each paid call is authorized with
+SolvaPay before it runs and completed at its actual cost. The TypeScript (`@solvapay/agents`),
+Python (`solvapay[agents]`) and Go (`github.com/solvapay/solvapay-sdk/go/agents`) SDKs support
+it.
+
+Agent payments are in preview and have to be turned on for your account. See agent payments for
+[TypeScript](/sdks/typescript/guides/agents), [Python](/sdks/python/guides/agents) and
+[Go](/sdks/go/guides/agents).

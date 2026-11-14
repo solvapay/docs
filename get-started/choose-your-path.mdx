@@ -1,6 +1,6 @@
 ---
 title: "Choose your path"
-description: "Choose between the CLI-first TypeScript SDK and Console-based Managed MCP."
+description: "Choose between the SolvaPay SDKs (TypeScript, Python, Go) and Console-based Managed MCP."
 ---
 
 Use this page to choose your primary integration path before you build.
@@ -9,40 +9,68 @@ Every path uses the same secret API key and base URL. See [Authentication and ba
 
 Each path has a step-by-step page from a new account to a first paid call:
 [Managed MCP](/build/managed-mcp), [TypeScript SDK](/build/typescript-sdk), and
-[agent skill](/build/agent-skill).
+[agent skill](/build/agent-skill). The Python and Go SDKs start from their quick starts:
+[Python](/sdks/python/setup/quick-start) and [Go](/sdks/go/setup/quick-start).
 
 ## Decide in 10 seconds
 
-- Choose **TypeScript SDK** if you want to add monetization in your own code.
+- Choose an **SDK** (TypeScript, Python, or Go) if you want to add monetization in your own code.
 - Choose **Managed MCP** if you want SolvaPay to host auth, checkout, and paywall enforcement for your MCP server. No code required.
 
 ## Quick comparison
 
-| Feature | TypeScript SDK | Managed MCP |
+| Feature | SDK (TypeScript, Python, Go) | Managed MCP |
 |---|---|---|
 | Code changes required | Yes | None |
-| Fastest setup | `npx solvapay@latest init` | Console setup |
+| Fastest setup | `npx solvapay@latest init` (TypeScript), `pip install solvapay`, `go get github.com/solvapay/solvapay-sdk/go` | Console setup |
 | Authentication | Custom or OAuth | OAuth (Google/GitHub) |
 | Supported platforms | Any API, MCP, or web app | MCP servers only |
 | Hosting | Your infrastructure | Managed by SolvaPay |
 | Customization | Full programmatic control | Configuration-based |
 
-## Path A: TypeScript SDK (recommended for developers)
+## Path A: SDK (recommended for developers)
 
-For SDK integration, start with one command from your project root:
+Pick the SDK for your server's language. All three check the same plans, bill the
+same way, and show the same paywall messages: a shared conformance suite checks
+the Python and Go SDKs against the TypeScript one on every change.
 
-```bash
-npx solvapay@latest init
-```
+<Tabs>
+  <Tab title="TypeScript">
+    Start with one command from your project root:
 
-This is the fastest way to authenticate, set your secret key, and install core SDK packages.
-Use the SDK setup docs for full command behavior and framework-specific next steps.
+    ```bash
+    npx solvapay@latest init
+    ```
 
-### Get started
+    It signs you in, writes your secret key to `.env`, and installs the SDK packages.
 
-- [CLI setup](/sdks/typescript/setup/cli)
-- [SDK quick start](/sdks/typescript/setup/quick-start)
-- [TypeScript SDK introduction](/sdks/typescript/intro)
+    - [CLI setup](/sdks/typescript/setup/cli)
+    - [SDK quick start](/sdks/typescript/setup/quick-start)
+    - [TypeScript SDK introduction](/sdks/typescript/intro)
+  </Tab>
+  <Tab title="Python">
+    ```bash
+    pip install solvapay
+    ```
+
+    Copy a sandbox secret key from Console > **Developers** > **API Keys** into `SOLVAPAY_SECRET_KEY`.
+
+    - [Installation](/sdks/python/setup/installation)
+    - [Quick start](/sdks/python/setup/quick-start)
+    - [Python SDK introduction](/sdks/python/intro)
+  </Tab>
+  <Tab title="Go">
+    ```bash
+    go get github.com/solvapay/solvapay-sdk/go
+    ```
+
+    Copy a sandbox secret key from Console > **Developers** > **API Keys** into `SOLVAPAY_SECRET_KEY`.
+
+    - [Installation](/sdks/go/setup/installation)
+    - [Quick start](/sdks/go/setup/quick-start)
+    - [Go SDK introduction](/sdks/go/intro)
+  </Tab>
+</Tabs>
 
 After CLI setup, create or confirm your product and plans in the Console:
 

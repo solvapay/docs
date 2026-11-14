@@ -1,9 +1,9 @@
-name: Sync TypeScript SDK docs
+name: Sync SDK docs
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [sync-typescript-sdk-docs]
+    types: [sync-sdk-docs]
   schedule:
     - cron: '0 5 * * 1'
 
@@ -22,7 +22,10 @@ jobs:
         with:
           repository: solvapay/solvapay-sdk
           path: _sdk
-          sparse-checkout: docs
+          sparse-checkout: |
+            docs
+            python/docs
+            go/docs
           sparse-checkout-cone-mode: true
 
       - name: Setup Node
@@ -33,17 +36,10 @@ jobs:
           # newest patch (24.21.0 instead of 24.22.1 on 2026-10-23).
           check-latest: true
 
-      - name: Detect SDK docs source
-        run: |
-          if [ -d "$GITHUB_WORKSPACE/_sdk/docs" ]; then
-            echo "SDK_DOCS_SOURCE_DIR=$GITHUB_WORKSPACE/_sdk/docs" >> "$GITHUB_ENV"
-          else
-            echo "Missing SDK docs source directory: $GITHUB_WORKSPACE/_sdk/docs" >&2
-            exit 1
-          fi
-
-      - name: Sync TypeScript SDK docs
-        run: npx --yes tsx scripts/sync-typescript-sdk-docs.ts
+      - name: Sync SDK docs
+        run: npx --yes tsx scripts/sync-sdk-docs.ts
+        env:
+          SDK_REPO_DIR: ${{ github.workspace }}/_sdk
 
       # Drop the SDK tree before mint/PR so plan markdown and extra MDX
       # cannot fail validation or get committed into the docs repo.
@@ -62,12 +58,12 @@ jobs:
       - name: Create sync PR
         uses: peter-evans/create-pull-request@v6
         with:
-          branch: chore/sync-typescript-sdk-docs
-          title: "chore(docs): sync TypeScript SDK docs"
+          branch: chore/sync-sdk-docs
+          title: "chore(docs): sync SDK docs"
           body: |
-            Automated sync of `sdks/typescript/**` from upstream SDK docs source.
+            Automated sync of `sdks/typescript/**`, `sdks/python/**` and `sdks/go/**` from the solvapay-sdk repo.
 
-            - Ran `npx --yes tsx scripts/sync-typescript-sdk-docs.ts`
+            - Ran `npx --yes tsx scripts/sync-sdk-docs.ts`
             - Ran `mint validate`
             - Ran `mint broken-links`
-          commit-message: "chore(docs): sync TypeScript SDK docs"
+          commit-message: "chore(docs): sync SDK docs"

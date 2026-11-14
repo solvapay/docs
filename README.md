@@ -37,28 +37,21 @@ mint dev
 
 View your local preview at `http://localhost:3000`.
 
-## Syncing TypeScript SDK docs
+## Syncing SDK docs
 
-The `sdks/typescript/**` content is upstream-owned and synced from the SDK repository.
-Do not manually edit files under `sdks/typescript/**`.
+`sdks/typescript/**`, `sdks/python/**` and `sdks/go/**` are owned by the
+[solvapay-sdk](https://github.com/solvapay/solvapay-sdk) repo, next to the code
+they describe: `docs/` (TypeScript), `python/docs/` and `go/docs/`. Don't edit
+them here. The pages copied are the ones `docs.json` lists under each
+`sdks/<language>/`.
 
-Run sync from the docs root:
-
-```bash
-npx --yes tsx scripts/sync-typescript-sdk-docs.ts
-```
-
-If your SDK docs source is in a custom location, set:
+Run the sync from the docs root, with the SDK repo checked out next to this one
+(or set `SDK_REPO_DIR` to its root):
 
 ```bash
-SDK_DOCS_SOURCE_DIR="/absolute/path/to/solvapay-sdk/docs" npx --yes tsx scripts/sync-typescript-sdk-docs.ts
-```
-
-Helpful flags:
-
-```bash
-# Preview changes without writing files
-npx --yes tsx scripts/sync-typescript-sdk-docs.ts --dry-run
+npx --yes tsx scripts/sync-sdk-docs.ts --dry-run
+npx --yes tsx scripts/sync-sdk-docs.ts
+npx --yes tsx scripts/sync-sdk-docs.ts --lang python   # one language
 ```
 
 After syncing, run docs checks:

@@ -90,7 +90,7 @@ See [Plans](/plans/overview) for compositions and [Plans and billing glossary](/
 - **Free tier:** Hard cap to prevent abuse (`limit.cap: 100`, `onExceed: "block"`)
 - **Paid tiers:** Usage-based with generous included usage, or hybrid with overage (`onExceed: "draw_credits"`)
 - **Enterprise:** `limit.cap: 0` (unlimited) or a very high cap
-- **Unlimited free tier:** `limit.cap: 0` means unlimited, not "zero included". That is still a plan-derived included cap. A per-customer tracked cap on an otherwise-free *tool* is the TypeScript SDK `registerFree` path — see [Add a free allowance to MCP tools](/sdks/typescript/guides/free-allowance)
+- **Unlimited free tier:** `limit.cap: 0` means unlimited, not "zero included". That is still a plan-derived included cap. A per-customer tracked cap on an otherwise-free *tool* is the SDK free tool path (`registerFree` in TypeScript, `register_free` in Python, `RegisterFree` in Go) — see [Add a free allowance to MCP tools](/sdks/typescript/guides/free-allowance)
 
 ## Tool Assignment Patterns
 
@@ -120,7 +120,7 @@ Examples of good candidates for "No plan":
 - `list_capabilities` - Shows available features
 - `ping` - Health check
 
-A Managed MCP "No plan" tool is public, untracked, and unlimited. It is not a per-customer free allowance. If you need a tracked cap that converts to a paid plan when exhausted, use the TypeScript SDK `registerFree` path — [Add a free allowance to MCP tools](/sdks/typescript/guides/free-allowance). There is no Console setting for that cap.
+A Managed MCP "No plan" tool is public, untracked, and unlimited. It is not a per-customer free allowance. If you need a tracked cap that converts to a paid plan when exhausted, use the SDK free tool path (`registerFree`, `register_free`, `RegisterFree`) — [Add a free allowance to MCP tools](/sdks/typescript/guides/free-allowance). There is no Console setting for that cap.
 
 ## User Flow Optimization
 

@@ -136,6 +136,85 @@ router.post(
 export default router
 ```
 
+```python Python (Starlette)
+# webhooks.py
+import os
+
+from solvapay import SolvaPayError, verify_webhook
+from starlette.applications import Starlette
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+from starlette.routing import Route
+
+WEBHOOK_SECRET = os.environ["SOLVAPAY_WEBHOOK_SECRET"]
+
+
+async def solvapay_webhook(request: Request) -> JSONResponse:
+    try:
+        event = verify_webhook(
+            body=await request.body(),  # the raw bytes, before any JSON parsing
+            signature=request.headers.get("sv-signature"),
+            secret=WEBHOOK_SECRET,
+        )
+    except SolvaPayError as error:
+        return JSONResponse({"error": error.code}, status_code=401)
+
+    if event["type"] == "payment.succeeded":
+        ...  # fulfil the order
+    elif event["type"] == "purchase.cancelled":
+        ...  # revoke access
+    return JSONResponse({"received": True})
+
+
+app = Starlette(routes=[Route("/api/webhooks/solvapay", solvapay_webhook, methods=["POST"])])
+```
+
+```go Go (net/http)
+// main.go
+package main
+
+import (
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"time"
+
+	solvapay "github.com/solvapay/solvapay-sdk/go"
+)
+
+func main() {
+	secret := os.Getenv("SOLVAPAY_WEBHOOK_SECRET")
+	if secret == "" {
+		log.Fatal("SOLVAPAY_WEBHOOK_SECRET is not set")
+	}
+	http.HandleFunc("POST /api/webhooks/solvapay", webhookHandler(secret))
+	log.Fatal(http.ListenAndServe(":3000", nil))
+}
+
+func webhookHandler(secret string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body) // the raw bytes, before any JSON parsing
+		if err != nil {
+			http.Error(w, "unreadable body", http.StatusBadRequest)
+			return
+		}
+		event, err := solvapay.VerifyWebhook(body, r.Header.Get("SV-Signature"), secret, time.Time{})
+		if err != nil {
+			http.Error(w, solvapay.ErrorCode(err), http.StatusUnauthorized)
+			return
+		}
+		switch event.(map[string]any)["type"] {
+		case "payment.succeeded":
+			// fulfil the order
+		case "purchase.cancelled":
+			// revoke access
+		}
+		w.Write([]byte(`{"received":true}`))
+	}
+}
+```
+
 </CodeGroup>
 
 <Warning>
@@ -212,6 +291,11 @@ const event: WebhookEvent = verifyWebhook({
 ```
 
 `verifyWebhook` throws a `SolvaPayError` if the signature is invalid or older than 5 minutes.
+
+The Python and Go SDKs verify the same way:
+[`verify_webhook`](/sdks/python/guides/webhooks) raises `SolvaPayError`, and
+[`VerifyWebhook`](/sdks/go/guides/webhooks) returns an error. Both return the parsed event and
+use the same error codes (`webhook_signature_missing`, `webhook_signature_invalid`, and so on).
 
 ### Edge Runtimes
 

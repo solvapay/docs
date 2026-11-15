@@ -1,6 +1,6 @@
 ---
 title: "Monetize an MCP server with SDK integration"
-description: "Use the SolvaPay TypeScript SDK to monetize an MCP server with full control over auth, paywall behavior, and tool access."
+description: "Use a SolvaPay SDK (TypeScript, Python, or Go) to monetize an MCP server with full control over auth, paywall behavior, and tool access."
 ---
 
 Use this guide when you want to monetize an MCP server and keep implementation control in your own codebase.
@@ -22,42 +22,143 @@ By the end, your MCP server uses the SolvaPay SDK to enforce purchases and manag
 
 ## What the change looks like
 
-You wrap your existing tool handlers with `payable.mcp()`. Your business logic
-stays untouched — SolvaPay intercepts the call, checks for a valid purchase,
-and either runs your function or returns a checkout URL to the agent.
+You build the server with SolvaPay's MCP server factory and register each paid tool with it.
+Your tool logic stays the same. Before each call, SolvaPay checks the customer's plan: the call
+either runs and is billed, or returns the paywall with a checkout link. The factory also adds
+the `account` and `activate_plan` tools and the checkout widget.
 
-```typescript
-// Before — unprotected tool
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { arguments: args } = request.params
-  return await createTask(args)
-})
+<CodeGroup>
 
-// After — protected with SolvaPay
-const solvaPay = createSolvaPay({ apiKey: process.env.SOLVAPAY_SECRET_KEY })
-const payable = solvaPay.payable({ product: 'prd_YOUR_PRODUCT_ID' })
+```typescript TypeScript
+import { z } from 'zod'
+import { createSolvaPayMcpServer } from '@solvapay/mcp'
 
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { arguments: args } = request.params
-  return await payable.mcp(createTask)(args)
+const server = createSolvaPayMcpServer({
+  solvaPay,
+  productRef: process.env.SOLVAPAY_PRODUCT_REF,
+  resourceUri: 'ui://my-app/mcp-app.html',
+  htmlPath: path.join(import.meta.dirname, 'mcp-app.html'),
+  publicBaseUrl: 'https://my-mcp.example.com',
+  additionalTools: ({ registerPayable }) => {
+    registerPayable('search_knowledge', {
+      description: 'Search the knowledge base.',
+      schema: { query: z.string().min(1) },
+      annotations: { readOnlyHint: true, idempotentHint: true },
+      handler: async ({ query }, ctx) => ctx.respond({ query, results: [] }),
+    })
+  },
 })
 ```
+
+```python Python
+import os
+
+from solvapay import create_solvapay
+from solvapay.mcp import ResponseContext, create_solvapay_mcp_server
+from solvapay.mcp.response import ResponseResult
+
+mcp = create_solvapay_mcp_server(
+    solvapay=create_solvapay(),
+    public_base_url=os.environ["PUBLIC_BASE_URL"],  # where MCP clients reach this server
+    name="research",
+)
+
+
+async def quote(symbol: str, ctx: ResponseContext) -> ResponseResult:
+    """Latest price for a symbol."""
+    return ctx.respond({"symbol": symbol, "price": 101.5})
+
+
+mcp.register_payable("quote", handler=quote, description="Latest price for a symbol.")
+
+app = mcp.http_app()  # the MCP endpoint is /mcp
+```
+
+```go Go
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"log"
+	"net/http"
+	"os"
+
+	solvapay "github.com/solvapay/solvapay-sdk/go"
+)
+
+func main() {
+	client, err := solvapay.NewClient(solvapay.Config{}) // SOLVAPAY_SECRET_KEY
+	if err != nil {
+		log.Fatal(err)
+	}
+	server, err := solvapay.NewMCPServer(solvapay.MCPServerOptions{
+		Client:        client, // the product comes from SOLVAPAY_PRODUCT_REF
+		PublicBaseURL: os.Getenv("PUBLIC_BASE_URL"),
+		Name:          "research",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = server.RegisterPayable("get_quote", solvapay.PaidTool{
+		Title:       "Get quote",
+		Description: "Latest price for a ticker symbol.",
+		InputSchema: map[string]any{
+			"type":       "object",
+			"properties": map[string]any{"symbol": map[string]any{"type": "string"}},
+			"required":   []any{"symbol"},
+		},
+		Handler: func(ctx context.Context, args json.RawMessage, rc *solvapay.ResponseContext) (*solvapay.ToolResponse, error) {
+			var in struct {
+				Symbol string `json:"symbol"`
+			}
+			if err := json.Unmarshal(args, &in); err != nil {
+				return nil, err
+			}
+			return rc.Respond(map[string]any{"symbol": in.Symbol, "price": 101.5}, solvapay.RespondOptions{}), nil
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Fatal(http.ListenAndServe(":3031", server.Handler())) // MCP endpoint: /mcp
+}
+```
+
+</CodeGroup>
 
 ## Prerequisites
 
 - A SolvaPay account
 - A product and at least one plan in the SolvaPay Console
-- A TypeScript MCP server project
+- An MCP server project in TypeScript, Python, or Go
 
-Start from `createSolvaPayMcpServer` — the recommended factory that wires the transport, intent tools, paywall, and UI resource for you, so you register paid tools with `registerPayable` instead of hand-rolling an MCP server. For an otherwise-free tool with a per-customer cap, use `registerFree` — see [Add a free allowance to MCP tools](/sdks/typescript/guides/free-allowance).
+For an otherwise-free tool with a per-customer cap, register it as a free tool (`registerFree`,
+`register_free`, `RegisterFree`). See [Add a free allowance to MCP tools](/sdks/typescript/guides/free-allowance).
 
 ## Steps
 
-1. Complete [SDK quick start](/sdks/typescript/setup/quick-start) to set up the base paywall flow.
-2. Follow the [MCP integration guide](/sdks/typescript/guides/mcp) for the full implementation.
-3. Configure identity with [custom auth](/sdks/typescript/guides/custom-auth) if your server uses external auth.
-4. Add usage billing with [usage events](/sdks/typescript/guides/usage-events) where needed.
-5. Render a custom checkout or account UI inside the host iframe with the [MCP App integration guide](/sdks/typescript/guides/mcp-app).
+<Tabs>
+  <Tab title="TypeScript">
+    1. Complete [SDK quick start](/sdks/typescript/setup/quick-start) to set up the base paywall flow.
+    2. Follow the [MCP integration guide](/sdks/typescript/guides/mcp) for the full implementation.
+    3. Configure identity with [custom auth](/sdks/typescript/guides/custom-auth) if your server uses external auth.
+    4. Add usage billing with [usage events](/sdks/typescript/guides/usage-events) where needed.
+    5. Render a custom checkout or account UI inside the host iframe with the [MCP App integration guide](/sdks/typescript/guides/mcp-app).
+  </Tab>
+  <Tab title="Python">
+    1. Follow [installation](/sdks/python/setup/installation).
+    2. Follow the [MCP guide](/sdks/python/guides/mcp) for the full implementation.
+    3. See the [stock research example](/sdks/python/guides/examples) for a complete server.
+  </Tab>
+  <Tab title="Go">
+    1. Follow [installation](/sdks/go/setup/installation).
+    2. Follow the [MCP guide](/sdks/go/guides/mcp) for the full implementation.
+    3. See the [stock research example](/sdks/go/guides/examples) for a complete server.
+  </Tab>
+</Tabs>
 
 ## Verify
 

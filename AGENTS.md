@@ -12,7 +12,7 @@
 
 Two parts of this repo are owned elsewhere. Never edit them by hand.
 
-- `sdks/typescript/**` is owned by the `solvapay-sdk` repo (`docs/`). Fix SDK content in `solvapay-sdk/docs`, then run `npx --yes tsx scripts/sync-typescript-sdk-docs.ts` here (`--dry-run` first; set `SDK_DOCS_SOURCE_DIR` for a custom checkout). The page list comes from `docs.json`.
+- `sdks/typescript/**`, `sdks/python/**` and `sdks/go/**` are owned by the `solvapay-sdk` repo (`docs/`, `python/docs/`, `go/docs/`). Fix SDK content there, then run `npx --yes tsx scripts/sync-sdk-docs.ts` here (`--dry-run` first; set `SDK_REPO_DIR` for a checkout that isn't `../solvapay-sdk`). The page list comes from `docs.json`.
 - `api-reference/openapi.json` is generated from the platform services' OpenAPI specs. Fix the spec in the `platform` repo, deploy, then run `npx --yes tsx scripts/sync-backend-openapi.ts` here. Doc-level metadata the script adds (`info`, `servers`) lives in that script. See `API_REFERENCE_OWNERSHIP.md`.
   - There's no public spec endpoint (`https://api.solvapay.com/v1/openapi.json` returns 404), so a sync needs the services running. Start platform locally (`npm run dev` in the platform repo; it needs `gcloud auth login` and `gcloud auth application-default login` first). Then fetch only the five services that own `/v1/sdk/*` routes:
 
@@ -35,7 +35,8 @@ Two parts of this repo are owned elsewhere. Never edit them by hand.
 - Use **purchase** for completed checkout, and **checkout** for in-progress payment flow
 - Use **Managed MCP** for the managed auth and monetization path for MCP servers (nav/section label); use **Managed MCP** or **the managed path** as body shorthand. Do not use the retired "MCP Pay" or "Hosted MCP" names
 - Use **MCP Server** for SolvaPay's MCP integration docs (preserve exact casing)
-- Use **TypeScript SDK** for `@solvapay/*` package docs
+- Use **TypeScript SDK** for `@solvapay/*` package docs, **Python SDK** for the `solvapay` package on PyPI, and **Go SDK** for the `github.com/solvapay/solvapay-sdk/go` module
+- Use **agent payments** for paid calls made by SolvaPay agents; mark agent payments pages as preview
 - Use **sandbox** and **production** (not "test mode" / "live mode")
 - Use **usage** as the umbrella noun (nav, analytics, "usage this month")
 - Use the **meter noun** for counted quantity ("1,000 requests included"). The seeded default meter is `requests`
@@ -69,7 +70,8 @@ Document:
 - Public SolvaPay product flows: onboarding, products, plans, purchases, hosted pages, webhooks
 - Managed MCP setup and operations
 - MCP Server setup, tools, and usage patterns
-- TypeScript SDK integration and practical implementation guidance
+- TypeScript, Python and Go SDK integration and practical implementation guidance
+- Agent payments, marked preview
 - End-user troubleshooting and error resolution steps
 
 Do not document:

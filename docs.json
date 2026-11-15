@@ -49,6 +49,17 @@
             ]
           },
           {
+            "group": "MCP hosts",
+            "icon": "window-restore",
+            "pages": [
+              "mcp-hosts/overview",
+              "mcp-hosts/claude",
+              "mcp-hosts/claude-code",
+              "mcp-hosts/chatgpt",
+              "mcp-hosts/grok-bot"
+            ]
+          },
+          {
             "group": "Managed MCP",
             "icon": "credit-card",
             "pages": [
@@ -91,6 +102,7 @@
             "group": "Changelog",
             "icon": "clock-rotate-left",
             "pages": [
+              "changelog/2026-11-14",
               "changelog/2026-10-23",
               "changelog/2026-09-18",
               "changelog/2026-09-07",
@@ -133,7 +145,38 @@
               "sdks/typescript/guides/auto-recharge",
               "sdks/typescript/guides/business-checkout",
               "sdks/typescript/guides/webhooks",
+              "sdks/typescript/guides/agents",
               "sdks/typescript/guides/examples"
+            ]
+          },
+          {
+            "group": "Python SDK",
+            "icon": "python",
+            "pages": [
+              "sdks/python/intro",
+              "sdks/python/setup/installation",
+              "sdks/python/setup/quick-start",
+              "sdks/python/guides/mcp",
+              "sdks/python/guides/api-client",
+              "sdks/python/guides/webhooks",
+              "sdks/python/guides/react-web-checkout",
+              "sdks/python/guides/agents",
+              "sdks/python/guides/examples"
+            ]
+          },
+          {
+            "group": "Go SDK",
+            "icon": "golang",
+            "pages": [
+              "sdks/go/intro",
+              "sdks/go/setup/installation",
+              "sdks/go/setup/quick-start",
+              "sdks/go/guides/mcp",
+              "sdks/go/guides/api-client",
+              "sdks/go/guides/webhooks",
+              "sdks/go/guides/react-web-checkout",
+              "sdks/go/guides/agents",
+              "sdks/go/guides/examples"
             ]
           }
         ]
@@ -180,6 +223,10 @@
     {
       "source": "/mcp-pay/:slug",
       "destination": "/no-code-mcp/:slug"
+    },
+    {
+      "source": "/mcp-hosts/grok",
+      "destination": "/mcp-hosts/grok-bot"
     }
   ],
   "markdown": {

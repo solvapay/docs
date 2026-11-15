@@ -1,0 +1,17 @@
+---
+title: "November 15, 2026"
+description: "Agent payments preview support on the platform, and checks that keep merchant accounts able to take payments."
+---
+
+## Agent payments (preview)
+
+The platform side of [agent payments](/sdks/typescript/guides/agents) is now in production, as a preview. SolvaPay turns it on per merchant account; until then, your server's agent calls are refused with `feature_not_enabled`. Live agent payments aren't open yet: agents pay in sandbox with test money, and nothing real is charged.
+
+## Merchant accounts
+
+- **Your website has to be one Stripe accepts.** Sign-up and **Settings** > **Business** now refuse test, example and local addresses such as `testcompany.com`, `example.com` or `localhost`, and say why. Stripe refuses those sites, and an account with one can't take payments.
+
+## Customer sign-in
+
+- **`GET /v1/customer/auth/userinfo` answers a token it doesn't accept with `401 invalid_token`.** It used to answer `400`. The SDKs' MCP servers depend on this to send the host back to sign-in.
+- **Switching between sandbox and live no longer signs your customers out.** A customer's MCP token is refused while you're in the other environment, and works again when you switch back.

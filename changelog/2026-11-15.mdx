@@ -1,0 +1,23 @@
+---
+title: "November 15, 2026"
+description: "Agent payments on the platform: the SolvaPay account for agents' owners, agent sign-in for MCP hosts, and checks that keep merchant accounts able to take payments."
+---
+
+## Agent payments on the platform
+
+The platform side of [agent payments](/sdks/typescript/guides/agents) is now in production.
+
+- **A SolvaPay account for agents' owners.** At [account.solvapay.com](https://account.solvapay.com), the person behind an agent signs in with an email code, saves a card, sets a budget and approves the agent with a passkey. The account is made the first time they sign in. Agents ask before they go over a limit, and the owner answers from the account.
+- **Connect an agent from the CLI.** `npx solvapay connect <merchant> --client <claude|hermes>` asks the owner to approve, then saves the agent's key. `npx solvapay launch <claude|hermes> <merchant>` starts Claude Code or Hermes already paying a merchant.
+- **Agent sign-in for MCP hosts.** An MCP server that takes agent payments can send hosts such as Claude to SolvaPay to sign the agent in, instead of handing them an agent key.
+
+Live agent payments aren't open yet: agents pay in sandbox with test money, and nothing real is charged. Agent payments are a preview for merchants, and SolvaPay turns them on per merchant account. Until then, your server's agent calls are refused with `feature_not_enabled`.
+
+## Merchant accounts
+
+- **Your website has to be one Stripe accepts.** Sign-up and **Settings** > **Business** now refuse test, example and local addresses such as `testcompany.com`, `example.com` or `localhost`, and say why. Stripe refuses those sites, and an account with one can't take payments.
+
+## Customer sign-in
+
+- **`GET /v1/customer/auth/userinfo` answers a token it doesn't accept with `401 invalid_token`.** It used to answer `400`. The SDKs' MCP servers depend on this to send the host back to sign-in.
+- **Switching between sandbox and live no longer signs your customers out.** A customer's MCP token is refused while you're in the other environment, and works again when you switch back.

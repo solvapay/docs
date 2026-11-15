@@ -1,17 +1,11 @@
 ---
 title: "November 15, 2026"
-description: "Agent payments on the platform: the SolvaPay account for agents' owners, agent sign-in for MCP hosts, and checks that keep merchant accounts able to take payments."
+description: "Agent payments preview support on the platform, and checks that keep merchant accounts able to take payments."
 ---
 
-## Agent payments on the platform
+## Agent payments (preview)
 
-The platform side of [agent payments](/sdks/typescript/guides/agents) is now in production.
-
-- **A SolvaPay account for agents' owners.** At [account.solvapay.com](https://account.solvapay.com), the person behind an agent signs in with an email code, saves a card, sets a budget and approves the agent with a passkey. The account is made the first time they sign in. Agents ask before they go over a limit, and the owner answers from the account.
-- **Connect an agent from the CLI.** `npx solvapay connect <merchant> --client <claude|hermes>` asks the owner to approve, then saves the agent's key. `npx solvapay launch <claude|hermes> <merchant>` starts Claude Code or Hermes already paying a merchant.
-- **Agent sign-in for MCP hosts.** An MCP server that takes agent payments can send hosts such as Claude to SolvaPay to sign the agent in, instead of handing them an agent key.
-
-Live agent payments aren't open yet: agents pay in sandbox with test money, and nothing real is charged. Agent payments are a preview for merchants, and SolvaPay turns them on per merchant account. Until then, your server's agent calls are refused with `feature_not_enabled`.
+The platform side of [agent payments](/sdks/typescript/guides/agents) is now in production, as a preview. SolvaPay turns it on per merchant account; until then, your server's agent calls are refused with `feature_not_enabled`. Live agent payments aren't open yet: agents pay in sandbox with test money, and nothing real is charged.
 
 ## Merchant accounts
 

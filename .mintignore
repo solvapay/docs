@@ -10,3 +10,8 @@ migration/
 
 # Accidental SDK checkout next to docs (CI removes this before mint)
 _sdk/
+
+# Internal notes: kept in the repo, not published on docs.solvapay.com
+internal/
+usage-analytics-refactoring-plan.md
+API_REFERENCE_OWNERSHIP.md

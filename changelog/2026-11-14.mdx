@@ -1,6 +1,6 @@
 ---
 title: "November 14, 2026"
-description: "Python and Go SDKs, and agent payments in preview for TypeScript, Python and Go."
+description: "Python and Go SDKs and CLI support, and agent payments in preview for TypeScript, Python and Go."
 ---
 
 ## Python and Go SDKs
@@ -23,8 +23,27 @@ in all three SDKs. A shared conformance suite checks the Python and Go SDKs agai
 SDK on every change. Each SDK has its own version line, starting at 0.1.0 (Go tags are
 `go/vX.Y.Z`), so the numbers don't line up across languages.
 
-Python and Go have no frontend packages: the React components and the `npx solvapay init` CLI stay
-TypeScript-only. Set `SOLVAPAY_SECRET_KEY` and `SOLVAPAY_PRODUCT_REF` yourself.
+Python and Go have no frontend packages, but the React checkout components work with a Python or Go
+backend: see React web checkout for [Python](/sdks/python/guides/react-web-checkout) and
+[Go](/sdks/go/guides/react-web-checkout).
+
+## The CLI for Python and Go
+
+The SolvaPay CLI now sets up Python and Go projects too. It runs on Node.js 22 or later:
+
+- `npx solvapay init` detects the language from `go.mod`, `uv.lock`, `poetry.lock`,
+  `pyproject.toml`, `requirements.txt` or `package.json`. It signs you in, writes
+  `SOLVAPAY_SECRET_KEY` and `SOLVAPAY_PRODUCT_REF` to `.env`, and adds the SDK pinned exactly with
+  `uv add`, `poetry add` or `go get`. For plain pip it prints the install command. When the folder
+  has files for two languages, or none, pass `--language ts|python|go`.
+- `npm create solvapay@latest my-server -- --type mcp --language python` (or `go`) scaffolds a paid
+  MCP server with one paid tool, one free tool, tests and a Dockerfile.
+- `npx solvapay doctor` checks that the SDK is the newest release in every language the project
+  uses, and prints the upgrade command.
+- `npx solvapay verify <server url>` checks a running MCP server in any language.
+
+In a folder with no project files, `init --yes` no longer creates a `package.json` on its own. Pass
+`--language ts` for that. See [CLI setup](/sdks/typescript/setup/cli).
 
 See the [Python SDK](/sdks/python/intro) and the [Go SDK](/sdks/go/intro).
 

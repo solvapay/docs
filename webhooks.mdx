@@ -590,6 +590,7 @@ are introduced, so you never miss a future event.
       "reference": "purchase_abc123",
       "status": "active",
       "customer": "cust_ref_001",
+      "customerExternalRef": "MC-DEV-104382",
       "plan": "plan_ref_001",
       "product": "prod_ref_001",
       "amount": 2999,
@@ -614,6 +615,7 @@ are introduced, so you never miss a future event.
       "reference": "purchase_abc123",
       "status": "active",
       "customer": "cust_ref_001",
+      "customerExternalRef": "MC-DEV-104382",
       "plan": "plan_ref_001",
       "product": "prod_ref_001",
       "amount": 2999,
@@ -638,6 +640,7 @@ are introduced, so you never miss a future event.
       "reference": "purchase_abc123",
       "status": "cancelled",
       "customer": "cust_ref_001",
+      "customerExternalRef": "MC-DEV-104382",
       "plan": "plan_ref_001",
       "product": "prod_ref_001",
       "amount": 2999,
@@ -662,6 +665,7 @@ are introduced, so you never miss a future event.
       "reference": "purchase_abc123",
       "status": "expired",
       "customer": "cust_ref_001",
+      "customerExternalRef": "MC-DEV-104382",
       "plan": "plan_ref_001",
       "product": "prod_ref_001",
       "amount": 2999,
@@ -686,6 +690,7 @@ are introduced, so you never miss a future event.
       "reference": "purchase_abc123",
       "status": "suspended",
       "customer": "cust_ref_001",
+      "customerExternalRef": "MC-DEV-104382",
       "plan": "plan_ref_001",
       "product": "prod_ref_001",
       "amount": 2999,
@@ -720,6 +725,7 @@ To learn more about SDK customer syncing, see
       "email": "jane@example.com",
       "telephone": "+1234567890",
       "status": "active",
+      "externalRef": "MC-DEV-104382",
       "created": 1740000000,
       "product": {
         "reference": "prod_ref_001"
@@ -743,6 +749,7 @@ To learn more about SDK customer syncing, see
       "email": "jane.smith@example.com",
       "telephone": "+1234567890",
       "status": "active",
+      "externalRef": null,
       "created": 1740000000
     },
     "previous_attributes": null
@@ -752,8 +759,8 @@ To learn more about SDK customer syncing, see
 
 ### customer.deleted
 
-The `customer.deleted` payload contains only the customer `id` and a `created` timestamp.
-Other fields are not included since the record has been removed.
+The `customer.deleted` payload contains the customer `id`, `reference`, `externalRef` and a
+`created` timestamp. Other fields are not included since the record has been removed.
 
 ```json
 {
@@ -761,12 +768,29 @@ Other fields are not included since the record has been removed.
   "data": {
     "object": {
       "id": "cust_abc123",
+      "reference": "customer_abc123",
+      "externalRef": "MC-DEV-104382",
       "created": 1740000000
     },
     "previous_attributes": null
   }
 }
 ```
+
+### Matching events to your own records
+
+Customer and purchase events carry your own ID for the customer, so you can match an event to
+your own record without a lookup or an email match.
+
+- `customer.created`, `customer.updated` and `customer.deleted` include `externalRef`.
+- Every `purchase.*` event includes `customerExternalRef`: the `externalRef` of the purchase's
+  customer when the event is sent. The `customer` field still holds the SolvaPay customer reference.
+
+You set `externalRef` when you create or update a customer (`POST /v1/sdk/customers`,
+`PATCH /v1/sdk/customers/{reference}`). Both fields are `null` when you have not set one.
+
+Because `externalRef` appears in webhook payloads, use a stable, opaque ID such as your user ID,
+not an email address.
 
 ### Customer sync with the TypeScript SDK
 
@@ -845,6 +869,7 @@ extra context:
       "reference": "purchase_abc123",
       "status": "past_due",
       "customer": "cust_ref_001",
+      "customerExternalRef": "MC-DEV-104382",
       "plan": "plan_ref_001",
       "product": "prod_ref_001",
       "retryCount": 1,
@@ -866,6 +891,7 @@ extra context:
       "reference": "purchase_def456",
       "status": "active",
       "customer": "cust_ref_001",
+      "customerExternalRef": "MC-DEV-104382",
       "plan": "plan_pro_001",
       "product": "prod_ref_001",
       "created": 1740000000

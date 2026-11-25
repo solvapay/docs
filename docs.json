@@ -60,6 +60,13 @@
             ]
           },
           {
+            "group": "Agent payments",
+            "icon": "key",
+            "pages": [
+              "agents/oauth"
+            ]
+          },
+          {
             "group": "Managed MCP",
             "icon": "credit-card",
             "pages": [

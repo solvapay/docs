@@ -17,7 +17,7 @@ Use the action button below to connect SolvaPay MCP with the correct endpoint.
 | **Transport** | Streamable HTTP (stateless) |
 | **Authentication** | OAuth 2.0 — sign in with your SolvaPay account |
 
-You don't need an API key. Add the endpoint to your client, and the client opens the SolvaPay sign-in page the first time it connects. Sign in with your SolvaPay provider account (email code, Google, or GitHub) and click **Authorize**. Only existing SolvaPay providers can connect; no new account is created during this flow.
+You don't need an API key. Add the endpoint to your client, and the client opens the SolvaPay sign-in page the first time it connects. Sign in with your SolvaPay provider account (email code or Google) and click **Authorize**. Only existing SolvaPay providers can connect; no new account is created during this flow.
 
 The connection works on the environment your account is in: sandbox for a new account, production once you switch in SolvaPay Console. Switching takes effect on the next tool call, without reconnecting. From a client that can't open a browser, [use an API key](#use-an-api-key-instead) instead.
 
@@ -74,7 +74,7 @@ SolvaPay can be added as a connector directly inside Claude.ai — no local conf
    https://mcp.solvapay.com/mcp
    ```
 3. Click **Add custom connector**. Claude will redirect you to the SolvaPay login page.
-4. Sign in with your SolvaPay provider account (email code, Google, or GitHub).
+4. Sign in with your SolvaPay provider account (email code or Google).
 5. Review the permissions and click **Authorize**.
 6. The connector is now active. Enable it in any conversation via the **+** button > **Connectors**.
 

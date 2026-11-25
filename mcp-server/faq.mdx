@@ -23,7 +23,7 @@ Yes. Every tool call is scoped to the provider account associated with your cred
 
 The MCP server supports two authentication methods:
 
-- **OAuth login** — The default, for Claude.ai, Claude Desktop, Cursor, VS Code, and other clients that support remote MCP servers. You sign in with your SolvaPay Console credentials (email code, Google, or GitHub) and authorize the connection. No API key needed. OAuth sessions use the environment your account is in.
+- **OAuth login** — The default, for Claude.ai, Claude Desktop, Cursor, VS Code, and other clients that support remote MCP servers. You sign in with your SolvaPay Console credentials (email code or Google) and authorize the connection. No API key needed. OAuth sessions use the environment your account is in.
 - **API key** — For clients that can't open a browser (the Claude Messages API, scripts, CI). Pass your secret key in the `Authorization: Bearer <secret key>` header. The MCP server doesn't read `X-API-Key`.
 
 **Can only existing providers connect?**

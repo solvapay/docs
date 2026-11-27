@@ -45,16 +45,16 @@ Pick a template to seed the plan, then compose the options you need:
 
 Templates (Recurring, Usage-based, One-time, Hybrid, Blank) only start the `options[]` list. They are not stored types. See [Plans](/plans/overview) for compositions that derive those labels.
 
-After adding your pricing options, you can either click **Create product** to finish, or continue to the optional integration step.
+After adding your pricing options, continue to the integration step.
 
-## Step 3: Integration (Optional)
+## Step 3: Integration
 
-Choose how customers will access your product:
+This step shows how to connect the product with the SDK. There is no product type to choose: every
+product connects the same way, whether you sell an API, an app, or an MCP server.
 
-- **SDK integration** — use the SolvaPay SDK to protect your endpoints with paywall logic
-- **Managed MCP** — SolvaPay proxies and paywalls your MCP server with zero code changes
-
-If you skip this step, your product defaults to SDK integration mode.
+Copy the `npx solvapay init` command for a TypeScript project, then click **Create product**. For
+Python or Go, see the [Python](/sdks/python/setup/installation) or [Go](/sdks/go/setup/installation)
+installation. For an MCP server, see [Monetize an MCP server with SDK integration](/guides/monetize-mcp-server-with-sdk).
 
 ## Result
 
@@ -62,7 +62,6 @@ After creation, your product is active and visible on the product detail page. F
 
 - Copy the product reference (`prd_...`) and plan references (`pln_...`) for SDK integration
 - View and manage plans
-- Configure or change the integration mode
 - Track purchases and usage
 
 ## What to do next

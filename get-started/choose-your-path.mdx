@@ -1,34 +1,23 @@
 ---
 title: "Choose your path"
-description: "Choose between the SolvaPay SDKs (TypeScript, Python, Go) and Console-based Managed MCP."
+description: "Choose the SolvaPay SDK (TypeScript, Python, or Go) or the agent skill to connect your product."
 ---
 
 Use this page to choose your primary integration path before you build.
 
 Every path uses the same secret API key and base URL. See [Authentication and base URL](/api-reference/authentication).
 
-Each path has a step-by-step page from a new account to a first paid call:
-[Managed MCP](/build/managed-mcp), [TypeScript SDK](/build/typescript-sdk), and
-[agent skill](/build/agent-skill). The Python and Go SDKs start from their quick starts:
-[Python](/sdks/python/setup/quick-start) and [Go](/sdks/go/setup/quick-start).
+Every product connects with an SDK. The TypeScript SDK and the agent skill each have a step-by-step page from a new account to a first paid call:
+[TypeScript SDK](/build/typescript-sdk) and [agent skill](/build/agent-skill). The Python and Go SDKs
+start from their quick starts: [Python](/sdks/python/setup/quick-start) and [Go](/sdks/go/setup/quick-start).
 
 ## Decide in 10 seconds
 
-- Choose an **SDK** (TypeScript, Python, or Go) if you want to add monetization in your own code.
-- Choose **Managed MCP** if you want SolvaPay to host auth, checkout, and paywall enforcement for your MCP server. No code required.
+- Monetizing an API, an app, or a function? Use the **SDK** for your server's language: TypeScript, Python, or Go.
+- Monetizing an MCP server? Use the same SDK's MCP server factory. See [Monetize an MCP server with SDK integration](/guides/monetize-mcp-server-with-sdk).
+- Want your AI coding agent to do the integration? Use the [agent skill](#using-an-ai-coding-agent).
 
-## Quick comparison
-
-| Feature | SDK (TypeScript, Python, Go) | Managed MCP |
-|---|---|---|
-| Code changes required | Yes | None |
-| Fastest setup | `npx solvapay@latest init` (TypeScript), `pip install solvapay`, `go get github.com/solvapay/solvapay-sdk/go` | Console setup |
-| Authentication | Custom or OAuth | OAuth (Google or email code) |
-| Supported platforms | Any API, MCP, or web app | MCP servers only |
-| Hosting | Your infrastructure | Managed by SolvaPay |
-| Customization | Full programmatic control | Configuration-based |
-
-## Path A: SDK (recommended for developers)
+## Pick your SDK
 
 Pick the SDK for your server's language. All three check the same plans, bill the
 same way, and show the same paywall messages: a shared conformance suite checks
@@ -77,28 +66,11 @@ After CLI setup, create or confirm your product and plans in the Console:
 - [Create your account](/get-started/create-account)
 - [Create a product](/get-started/create-product)
 
-## Path B: Managed MCP
+## Already on Managed MCP?
 
-Managed MCP is SolvaPay's managed auth and monetization path for MCP servers. You
-keep ownership and hosting of your MCP server; SolvaPay sits in front of it as a reverse proxy and
-handles OAuth, paywall enforcement, and billing.
-
-### Choose this path if you:
-
-- You want to launch quickly without code changes
-- You are monetizing an MCP server
-- You are comfortable with OAuth sign-in for end users
-
-### Get started
-
-- [Managed MCP overview](/no-code-mcp/overview)
-- [Managed MCP quick start](/no-code-mcp/quick-start)
-- [Create a Managed MCP product](/no-code-mcp/create-no-code-mcp-product)
-
-## Can I use both?
-
-Yes. Some teams use Managed MCP for MCP server access while using the SDK for web apps or APIs.
-Both share the same plans, customers, and billing in your SolvaPay account.
+Managed MCP takes no new MCP servers or products. Existing Managed MCP servers keep working for now.
+Their reference is in the [Managed MCP overview](/no-code-mcp/overview). To monetize a new MCP server,
+use the SDK.
 
 ## Using an AI coding agent?
 

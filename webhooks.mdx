@@ -1012,7 +1012,8 @@ charges are attempted until the card is updated.
 ### Catalog events
 
 `isManagedMcp` is the canonical Managed MCP flag. Payloads also include deprecated
-`isMcpPay` with the same value for wire compatibility.
+`isMcpPay` with the same value for wire compatibility. Managed MCP takes no new products, so both
+flags are always `false` for a new product. They are `true` only for an existing Managed MCP product.
 
 ```json
 // product.created — product.updated / product.archived share this shape
@@ -1025,8 +1026,8 @@ charges are attempted until the card is updated.
       "name": "AI Writing Assistant",
       "status": "active",
       "productType": "mcp",
-      "isManagedMcp": true,
-      "isMcpPay": true,
+      "isManagedMcp": false,
+      "isMcpPay": false,
       "created": 1740000000
     },
     "previous_attributes": null

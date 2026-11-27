@@ -24,7 +24,6 @@
             "pages": [
               "index",
               "api-reference/authentication",
-              "build/managed-mcp",
               "build/typescript-sdk",
               "build/agent-skill",
               "get-started/choose-your-path",
@@ -39,7 +38,6 @@
             "icon": "compass",
             "pages": [
               "guides/use-agent-skill",
-              "guides/monetize-mcp-server-no-code",
               "guides/monetize-mcp-server-with-sdk",
               "guides/add-paywall-to-api-or-app",
               "guides/add-inline-chat-checkout-react",
@@ -57,18 +55,6 @@
               "mcp-hosts/claude-code",
               "mcp-hosts/chatgpt",
               "mcp-hosts/grok-bot"
-            ]
-          },
-          {
-            "group": "Managed MCP",
-            "icon": "credit-card",
-            "pages": [
-              "no-code-mcp/overview",
-              "no-code-mcp/quick-start",
-              "no-code-mcp/create-no-code-mcp-product",
-              "no-code-mcp/authentication",
-              "no-code-mcp/hosted-pages",
-              "no-code-mcp/best-practices"
             ]
           },
           {
@@ -115,6 +101,20 @@
               "changelog/2026-06-15",
               "changelog/2026-06-09",
               "changelog/2026-04-14"
+            ]
+          },
+          {
+            "group": "Managed MCP (retiring)",
+            "icon": "box-archive",
+            "pages": [
+              "no-code-mcp/overview",
+              "no-code-mcp/quick-start",
+              "no-code-mcp/create-no-code-mcp-product",
+              "no-code-mcp/authentication",
+              "no-code-mcp/hosted-pages",
+              "no-code-mcp/best-practices",
+              "guides/monetize-mcp-server-no-code",
+              "build/managed-mcp"
             ]
           }
         ]
@@ -241,7 +241,8 @@
       "- Install the SolvaPay agent skills: `npx skills add https://solvapay.com` (skills CLI older than 1.5.7: `npx skills add solvapay/skills`).",
       "- TypeScript SDK setup: `npx solvapay@latest init`. The SDK reads SOLVAPAY_SECRET_KEY and defaults to https://api.solvapay.com.",
       "- Plans take an options[] array (billingCycle, charge, limit, ...). Retired plan fields price, freeUnits and billingCycle are rejected.",
-      "- Step-by-step from zero to a first paid call: Managed MCP https://docs.solvapay.com/build/managed-mcp.md, TypeScript SDK https://docs.solvapay.com/build/typescript-sdk.md, agent skill https://docs.solvapay.com/build/agent-skill.md.",
+      "- Step-by-step from zero to a first paid call: TypeScript SDK https://docs.solvapay.com/build/typescript-sdk.md, agent skill https://docs.solvapay.com/build/agent-skill.md. To monetize an MCP server, use the SDK: https://docs.solvapay.com/guides/monetize-mcp-server-with-sdk.md.",
+      "- Managed MCP is being retired: it takes no new MCP servers or products, and POST /v1/sdk/products/mcp/bootstrap is refused. Existing Managed MCP servers keep working for now.",
       "- Details: https://docs.solvapay.com/api-reference/authentication.md. OpenAPI spec: https://docs.solvapay.com/api-reference/openapi.json."
     ]
   },

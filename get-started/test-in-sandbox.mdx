@@ -9,11 +9,9 @@ Before testing, make sure you have:
 
 - Created your first product
 - Configured pricing plans during product creation
-- Chosen your integration path (Managed MCP or SDK)
-
-If you are on the SDK path, connect your project before endpoint testing: run
+- Connected your project with the SDK: run
 [`npx solvapay@latest init`](/sdks/typescript/setup/cli) for TypeScript, or set `SOLVAPAY_SECRET_KEY` to a
-sandbox key for [Python](/sdks/python/setup/installation) or [Go](/sdks/go/setup/installation).
+sandbox key for [Python](/sdks/python/setup/installation) or [Go](/sdks/go/setup/installation)
 
 ## What is sandbox mode?
 
@@ -30,26 +28,6 @@ You can switch between **production** and **sandbox** at any time. Many provider
 
 ## Testing your integration
 
-### For Managed MCP
-
-1. **Add your proxy URL to an MCP client**
-
-   Copy the proxy URL from the Managed MCP section and add it to your MCP client (e.g., Cursor, Claude Desktop).
-
-2. **Complete the OAuth flow**
-
-   When you first use a tool, you'll be prompted to sign in. Use Google or an email code.
-
-3. **Test tool access**
-
-   Call a protected tool and verify it succeeds. Check the Console to see the usage recorded.
-
-4. **Test plan restrictions**
-
-   Try calling a tool that requires a paid plan. You should receive an access denied response with upgrade information.
-
-### For SDK integration
-
 1. **Run the CLI setup**
 
    From your project root, run `npx solvapay@latest init` if you have not already.
@@ -64,7 +42,7 @@ You can switch between **production** and **sandbox** at any time. Many provider
 
 4. **Test paywall protection**
 
-   Call a protected endpoint and verify the paywall check runs correctly.
+   Call a protected endpoint or tool and verify the paywall check runs correctly.
 
 5. **Test the checkout flow**
 
@@ -91,7 +69,7 @@ Use any future expiration date and any 3-digit CVC.
 
 Before or after going live, verify:
 
-- [ ] Users can authenticate (OAuth for Managed MCP, your auth for SDK)
+- [ ] Users can sign in
 - [ ] Free plan users can access free tools/endpoints
 - [ ] Paid tools are blocked for free users
 - [ ] Checkout flow completes successfully

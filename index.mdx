@@ -1,7 +1,7 @@
 ---
 title: "SolvaPay documentation"
 sidebarTitle: "Introduction"
-description: "Documentation for adding authentication, identity, payments, and billing with Managed MCP or the TypeScript, Python, and Go SDKs."
+description: "Documentation for adding authentication, identity, payments, and billing with the TypeScript, Python, and Go SDKs."
 mode: "wide"
 ---
 
@@ -44,7 +44,7 @@ mode: "wide"
         color: 'var(--color-text-secondary)',
       }}
     >
-      Choose Managed MCP for hosted flows, or use the TypeScript, Python, or Go SDK for code-level integration.
+      Create a product in the Console, then connect it with the TypeScript, Python, or Go SDK.
     </p>
   </div>
 </div>
@@ -53,11 +53,11 @@ mode: "wide"
 
 <Columns cols={2}>
   <Card
-    title="Managed MCP auth and monetization"
-    icon="credit-card"
-    href="/guides/monetize-mcp-server-no-code"
+    title="Monetize an MCP server"
+    icon="server"
+    href="/guides/monetize-mcp-server-with-sdk"
   >
-    Monetize an existing MCP server with hosted auth, checkout, and account pages.
+    Add paid tools to your MCP server with the TypeScript, Python, or Go SDK.
   </Card>
   <Card title="TypeScript SDK" icon="code" href="/sdks/typescript/setup/cli">
     Run `npx solvapay@latest init` to connect your project and start SDK integration in minutes.
@@ -74,10 +74,7 @@ mode: "wide"
 
 Every step from a new account to a first paid call, in order:
 
-<Columns cols={3}>
-  <Card title="Managed MCP" icon="credit-card" href="/build/managed-mcp">
-    Put a paywall in front of your MCP server with one API call. No code changes.
-  </Card>
+<Columns cols={2}>
   <Card title="TypeScript SDK" icon="code" href="/build/typescript-sdk">
     Protect an Express endpoint and take a sandbox payment.
   </Card>

@@ -8,9 +8,9 @@ description: "Managed MCP includes a full OAuth 2.0 server with PKCE support, en
 Users can authenticate using:
 
 - **Google** - Sign in with Google account
-- **GitHub** - Sign in with GitHub account
+- **Email code** - Sign in with a one-time code sent to their email address
 
-No passwords or API keys to manage—users authenticate with their existing accounts.
+No passwords or API keys to manage.
 
 ## How MCP Client Authentication Works
 
@@ -22,7 +22,7 @@ sequenceDiagram
   participant O as SolvaPay OAuth server
   participant L as Hosted login
   participant C as Consent screen
-  participant I as Google or GitHub
+  participant I as Google or email code
 
   M->>O: 1. Authorize (PKCE, optional resource)
   O->>L: 2. Redirect to login (sid)
@@ -39,7 +39,7 @@ sequenceDiagram
 
 1. **MCP client initiates OAuth** — Client requests authorization with PKCE and optional `resource` (protected resource URL).
 2. **Redirect to hosted login** — User sees a branded login page with your provider branding. SolvaPay creates a short-lived consent session (`sid` in the URL).
-3. **User authenticates** — User signs in with Google, GitHub, or email/password. Login attaches identity to the consent session; it does not issue an authorization code yet.
+3. **User authenticates** — User signs in with Google or an email code. Login attaches identity to the consent session; it does not issue an authorization code yet.
 4. **Consent screen** — User reviews requested scopes, the redirect destination, and SolvaPay Terms/Privacy, then approves or cancels.
 5. **Authorization code returned** — After approval, SolvaPay redirects to the MCP client callback with an authorization code. Cancel returns `access_denied` with no account or token created.
 6. **Token exchange** — Client exchanges the code for an access token (PKCE verifier required).
@@ -75,7 +75,7 @@ When users authenticate, they see a branded login page that includes:
 
 - Your provider logo and name
 - Your brand colors
-- Google and GitHub sign-in buttons
+- Google sign-in and email-code sign-in
 - Automatic account creation for new users
 
 No additional configuration is needed—the login page automatically uses your provider branding configured in **Settings > Hosted pages**.
